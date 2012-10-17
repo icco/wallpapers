@@ -12,3 +12,9 @@
 #box {
   margin: auto 0;
 }
+
+.footer {
+  border-top: #999 dashed 1px;
+  margin: 15px;
+  padding: 10px;
+}
