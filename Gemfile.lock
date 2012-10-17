@@ -55,6 +55,8 @@ GEM
       mime-types (~> 1.16)
       treetop (~> 1.4.8)
     mime-types (1.19)
+    mini_magick (3.4)
+      subexec (~> 0.2.1)
     multi_json (1.3.6)
     net-scp (1.0.4)
       net-ssh (>= 1.99.1)
@@ -119,6 +121,7 @@ GEM
       tilt (~> 1.3, >= 1.3.3)
     sinatra-flash (0.3.0)
       sinatra (>= 1.0.0)
+    subexec (0.2.2)
     therubyracer (0.10.2)
       libv8 (~> 3.3.10)
     thin (1.5.0)
@@ -143,6 +146,7 @@ DEPENDENCIES
   fog
   heroku
   less
+  mini_magick
   padrino (>= 0.10.7)
   rack-less
   rack-test

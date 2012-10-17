@@ -11,10 +11,18 @@ Wallpapers.controllers  do
 
 
   get '/thumbnail/:id' do
-    @image = get_file params[:id]
 
     # TODO: set content-type
-    # TODO: create and cache thumbnail
-    return @image.body
+    begin
+      stream = File.open "tmp/thumb_#{params[:id]}"
+    rescue
+      @image = get_file params[:id]
+      thumbnail = MiniMagick::Image.read(@image.body)
+      thumbnail.resize "300x200"
+      thumbnail.write "tmp/thumb_#{params[:id]}"
+      stream = thumbnail.to_blob
+    end
+
+    return stream
   end
 end
