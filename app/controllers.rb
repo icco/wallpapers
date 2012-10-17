@@ -1,32 +1,22 @@
 Wallpapers.controllers  do
-  # get :index, :map => "/foo/bar" do
-  #   session[:foo] = "bar"
-  #   render 'index'
-  # end
-
-  # get :sample, :map => "/sample/url", :provides => [:any, :js] do
-  #   case content_type
-  #     when :js then ...
-  #     else ...
-  # end
-
-  # get :foo, :with => :id do
-  #   "Maps to url '/foo/#{params[:id]}'"
-  # end
-
-  # get "/example" do
-  #   "Hello world!"
-  # end
-
-  get '/' do
+  get :index do
+    @images = get_files
     erb :index, :locals => {}
   end
 
-  get '/id/:id' do
-    Entry.where(:id => params[:id]).first.to_s
+  get '/image/:id' do
+    @image = get_file params[:id]
+
+    # TODO: set content-type
+    return @image.body
   end
 
-  post '/' do
-    redirect '/'
+
+  get '/thumbnail/:id' do
+    @image = get_file params[:id]
+
+    # TODO: set content-type
+    # TODO: create and cache thumbnail
+    return @image.body
   end
 end
