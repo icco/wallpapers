@@ -4,19 +4,14 @@ source :rubygems
 gem 'activerecord', :require => "active_record"
 gem 'erubis', "~> 2.7.0"
 gem 'less'
+gem 'padrino', '>= 0.10.7'
 gem 'pg'
 gem 'rack-less'
-gem 'rake'
-gem 'sinatra-flash', :require => 'sinatra/flash'
-gem 'sqlite3'
-gem 'therubyracer'
-
-# Test requirements
-gem 'rspec'
 gem 'rack-test', :require => "rack/test", :group => "test"
-
-# Padrino Stable Gem
-gem 'padrino', '>= 0.10.7'
+gem 'rake'
+gem 'rspec'
+gem 'sinatra-flash', :require => 'sinatra/flash'
+gem 'therubyracer'
 
 # For dev
 group :development do
