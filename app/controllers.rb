@@ -25,7 +25,10 @@ Wallpapers.controllers  do
     rescue
       @image = Storage.get_file params[:id]
       thumbnail = MiniMagick::Image.read(@image.body)
-      thumbnail.resize "300x200"
+      thumbnail.combine_options do |c|
+          c.quality "60"
+          c.resize "300x200"
+      end
       thumbnail.write "tmp/thumb_#{params[:id]}"
 
       Storage.thumb_dir.files.create(
