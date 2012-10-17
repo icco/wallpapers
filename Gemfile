@@ -12,6 +12,7 @@ gem 'rake'
 gem 'rspec'
 gem 'sinatra-flash', :require => 'sinatra/flash'
 gem 'therubyracer'
+gem 'thin'
 
 # For dev
 group :development do
