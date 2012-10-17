@@ -1,7 +1,5 @@
 class Storage
   def self.connection force_prod = false
-    directory_name = "iccowalls"
-
     if Padrino.env != :development or force_prod
       credentials = {
         :provider                         => 'Google',
@@ -16,12 +14,14 @@ class Storage
       }
     end
 
-    connection = Fog::Storage.new(credentials)
+    return Fog::Storage.new(credentials)
+  end
 
-    directory = connection.directories.get(directory_name)
+  def self.directory directory_name
+    directory = self.connection.directories.get(directory_name)
 
     if directory.nil?
-      directory = connection.directories.create(
+      directory = self.connection.directories.create(
         :key    => directory_name,
         :public => true
       )
@@ -30,11 +30,23 @@ class Storage
     return directory
   end
 
+  def self.main_dir
+    return self.directory "iccowalls"
+  end
+
+  def self.thumb_dir
+    return self.directory "iccothumbs"
+  end
+
   def self.get_files
-    return self.connection.files
+    return self.main_dir.files
   end
 
   def self.get_file filename
     return self.get_files.get(filename)
+  end
+
+  def self.get_thumb filename
+    return self.thumb_dir.files.get(filename)
   end
 end
