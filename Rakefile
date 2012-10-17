@@ -10,7 +10,7 @@ end
 
 desc "Sync local files with GCS."
 task :push do
-  dir = Storage.connection true
+  dir = Storage.main_dir true
   path = "#{ENV['HOME']}/Dropbox/Photos/Wallpapers/DesktopWallpapers"
   local = Dir.open(path).to_a.delete_if {|f| f.start_with? '.' }
 
@@ -33,5 +33,14 @@ task :push do
 
       puts "updated"
     end
+  end
+end
+
+desc "Erase all thumbnails."
+task :purge do
+  dir = Storage.thumb_dir true
+  dir.files.each do |file|
+    file.destroy
+    puts "#{file.key} - deleted"
   end
 end

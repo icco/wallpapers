@@ -17,8 +17,8 @@ class Storage
     return Fog::Storage.new(credentials)
   end
 
-  def self.directory directory_name
-    directory = self.connection.directories.get(directory_name)
+  def self.directory directory_name, force_prod = false
+    directory = self.connection(force_prod).directories.get(directory_name)
 
     if directory.nil?
       directory = self.connection.directories.create(
@@ -30,12 +30,12 @@ class Storage
     return directory
   end
 
-  def self.main_dir
-    return self.directory "iccowalls"
+  def self.main_dir force_prod = false
+    return self.directory "iccowalls", force_prod
   end
 
-  def self.thumb_dir
-    return self.directory "iccothumbs"
+  def self.thumb_dir force_prod = false
+    return self.directory "iccothumbs", force_prod
   end
 
   def self.get_files
