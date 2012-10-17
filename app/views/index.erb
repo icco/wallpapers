@@ -18,17 +18,16 @@
 
       <h1>Wallpapers</h1>
 
-      <div class="alert alert-info">
-        <button type="button" class="close" data-dismiss="alert">×</button>
-        <strong>FYI</strong> I claim no ownership to these files. They're just cool wallpapers I've found over the years.
-      </div>
-
       <div id="box" class="thumbnails">
         <% Storage.get_files.each do |file| %>
           <div class="item">
             <a href="/image/<%= file.key %>" class="thumbnail"><img src="/thumbnail/<%= file.key %>" alt=""></a>
           </div>
         <% end %>
+      </div>
+
+      <div class="footer">
+        <p class="muted"><a href="https://github.com/icco/wallpapers">code</a> &copy; Nat Welch. Images copyright their original creators.</p>
       </div>
 
     </div> <!-- /container -->
