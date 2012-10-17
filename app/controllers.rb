@@ -6,9 +6,7 @@ Wallpapers.controllers  do
 
   get '/image/:id' do
     @image = get_file params[:id]
-
-    # TODO: set content-type
-    return @image.body
+    redirect @image.public_url
   end
 
 

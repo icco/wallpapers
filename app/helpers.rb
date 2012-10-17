@@ -6,6 +6,7 @@ Wallpapers.helpers do
       credentials = {
         :provider   => "Local",
         :local_root => "/tmp/",
+        :endpoint   => "file:///tmp/",
       }
     else
       credentials = {
