@@ -31,10 +31,10 @@ class Storage
   end
 
   def self.get_files
-    return storage_connection.files
+    return self.connection.files
   end
 
   def self.get_file filename
-    return get_files.get(filename)
+    return self.get_files.get(filename)
   end
 end
