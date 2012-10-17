@@ -5,7 +5,6 @@
     <title>Wallpapers.</title>
 
     <link href="/css/bootstrap.css" rel="stylesheet">
-    <link href="/css/bootstrap-responsive.css" rel="stylesheet">
     <link href="/css/style.css" rel="stylesheet" />
 
     <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
@@ -24,13 +23,13 @@
         <strong>FYI</strong> I claim no ownership to these files. They're just cool wallpapers I've found over the years.
       </div>
 
-      <ul class="thumbnails">
+      <div id="box" class="thumbnails">
         <% Storage.get_files.each do |file| %>
-          <li style="float: left; width: 300px;">
+          <div class="item">
             <a href="/image/<%= file.key %>" class="thumbnail"><img src="/thumbnail/<%= file.key %>" alt=""></a>
-          </li>
+          </div>
         <% end %>
-      </ul>
+      </div>
 
     </div> <!-- /container -->
 
@@ -39,11 +38,10 @@
     <script src="/js/bootstrap.js"></script>
     <script src="https://raw.github.com/desandro/masonry/master/jquery.masonry.min.js"></script>
     <script>
-      var $container = $('#container');
+      var $container = $('#box');
       $container.imagesLoaded(function(){
         $container.masonry({
-          itemSelector : 'ul.thumbnails li',
-          columnWidth : 240
+          itemSelector : '.item',
         });
       });
     </script>

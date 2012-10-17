@@ -1,0 +1,14 @@
+.item {
+  width: 300px;
+  margin: 5px;
+  float: left;
+}
+
+.container {
+  width: 90%;
+  padding: 20px;
+}
+
+#box {
+  margin: auto 0;
+}
