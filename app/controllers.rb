@@ -11,9 +11,9 @@ Wallpapers.controllers  do
 
 
   get '/thumbnail/:id' do
-
-    # TODO: set content-type
     begin
+      raise if !params["reset"].nil?
+
       image = Storage.get_thumb params[:id]
 
       if image.nil?
@@ -37,6 +37,7 @@ Wallpapers.controllers  do
         :public => true,
       )
 
+      # TODO: set content-type
       return thumbnail.to_blob
     end
   end
