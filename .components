@@ -1,6 +1,6 @@
 ---
-:orm: activerecord
-:test: rspec
+:orm: none
+:test: none
 :mock: none
 :script: none
 :renderer: erb
