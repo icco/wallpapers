@@ -21,7 +21,7 @@
       <div id="box" class="thumbnails">
         <% Storage.get_files.each do |file| %>
           <div class="item">
-            <a href="/image/<%= file.key %>" class="thumbnail"><img src="/thumbnail/<%= file.key %>" alt=""></a>
+            <a href="/image/<%= file.key %>"><img src="/thumbnail/<%= file.key %>" class="img-polaroid" alt=""></a>
           </div>
         <% end %>
       </div>
