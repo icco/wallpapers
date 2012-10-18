@@ -10,7 +10,9 @@ Wallpapers.controllers  do
   end
 
 
-  get '/thumbnail/:id' do
+  get '/thumbnail/:id', :cache => true do
+    expires_in 86400 # 1 day
+
     begin
       raise if !params["reset"].nil?
 
@@ -31,14 +33,13 @@ Wallpapers.controllers  do
       end
       thumbnail.write "tmp/thumb_#{params[:id]}"
 
-      Storage.thumb_dir.files.create(
+      file = Storage.thumb_dir.files.create(
         :key    => params[:id],
         :body   => File.open("tmp/thumb_#{params[:id]}"),
         :public => true,
       )
 
-      # TODO: set content-type
-      return thumbnail.to_blob
+      redirect file.public_url
     end
   end
 end
