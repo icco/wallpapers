@@ -21,13 +21,13 @@
       <div id="box" class="thumbnails">
         <% Storage.get_files.each do |file| %>
           <div class="item">
-            <a href="/image/<%= file.key %>"><img src="/thumbnail/<%= file.key %>" class="img-polaroid" alt=""></a>
+            <a href="/image/<%= file.key %>" class="thumbnail"><img src="/thumbnail/<%= file.key %>" alt=""></a>
           </div>
         <% end %>
       </div>
 
       <div class="footer">
-        <p class="muted"><i class="icon-edit"></i><a href="https://github.com/icco/wallpapers">code</a> &copy; 2012 Nat Welch. Images copyright their original creators.</p>
+        <p class="muted"><i class="icon-edit"></i> <a href="https://github.com/icco/wallpapers">code</a> &copy; 2012 Nat Welch. Images copyright their original creators.</p>
       </div>
 
     </div> <!-- /container -->
