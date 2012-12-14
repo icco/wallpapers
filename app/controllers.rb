@@ -23,6 +23,7 @@ Wallpapers.controllers  do
 
   get '/image/:id' do
     @image = Storage.get_file params[:id]
+    logger.warning @image.inspect
     redirect @image.public_url
   end
 
