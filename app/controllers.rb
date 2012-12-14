@@ -1,8 +1,8 @@
 Wallpapers.controllers  do
-  PERPAGE = 10
+  PERPAGE = 12
 
   get :index do
-    @images = Storage.get_range(0..PERPAGE)
+    @images = Storage.get_range(0...PERPAGE)
     next_page = Storage.get_files.count > PERPAGE ? 1 : false
     erb :index, :locals => { :prior_page => false, :next_page => next_page }
   end
@@ -17,7 +17,7 @@ Wallpapers.controllers  do
     next_page = page + 1
     prior_page = page - 1
 
-    @images = Storage.get_range((page*PERPAGE)..(next_page*PERPAGE))
+    @images = Storage.get_range((page*PERPAGE)...(next_page*PERPAGE))
     erb :index, :locals => { :prior_page => prior_page, :next_page => next_page }
   end
 
