@@ -3,8 +3,8 @@ Wallpapers.controllers  do
 
   get :index do
     @images = Storage.get_range(0...PERPAGE)
-    next_page = Storage.get_files.count > PERPAGE ? 1 : false
-    erb :index, :locals => { :prior_page => false, :next_page => next_page }
+    #next_page = Storage.get_files.count > PERPAGE ? 1 : false
+    erb :index, :locals => { :prior_page => false, :next_page => 1 }
   end
 
   get '/page/:id' do
