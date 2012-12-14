@@ -3,19 +3,19 @@ Wallpapers.controllers  do
 
   get :index do
     @images = Storage.get_range(0...PERPAGE)
-    #next_page = Storage.get_files.count > PERPAGE ? 1 : false
-    erb :index, :locals => { :prior_page => false, :next_page => 2 }
+    next_page = Storage.get_files.count > PERPAGE ? 2 : false
+    erb :index, :locals => { :prior_page => false, :next_page => next_page }
   end
 
   get '/page/:id' do
-    page = params[:id].to_i
+    page = params[:id].to_i - 1
 
     if page == 0
       redirect '/'
     end
 
-    next_page = page + 1
-    prior_page = page - 1
+    next_page = page + 2
+    prior_page = page
 
     @images = Storage.get_range((page*PERPAGE)...(next_page*PERPAGE))
     erb :index, :locals => { :prior_page => prior_page, :next_page => next_page }
