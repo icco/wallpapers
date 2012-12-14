@@ -48,6 +48,7 @@ task :push do
       puts "created"
     else
       file.body = File.open("#{PATH}/#{filename}")
+      file.public = true
       file.save
 
       updated += 1
