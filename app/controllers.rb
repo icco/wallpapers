@@ -23,7 +23,16 @@ Wallpapers.controllers  do
 
   get '/image/:id' do
     @image = Storage.get_file params[:id]
-    redirect @image.public_url
+
+    if @image.nil?
+      404
+    else
+      if @image.public_url
+        redirect @image.public_url
+      else
+        403
+      end
+    end
   end
 
   get '/thumbnail/:id', :cache => true do
@@ -57,5 +66,19 @@ Wallpapers.controllers  do
 
       redirect file.public_url
     end
+  end
+
+  get '/403' do
+    403
+  end
+
+  get '/404' do
+    404
+  end
+
+  error 400..510 do
+    logger.warn "There was an error : #{env['sinatra.error'].inspect}"
+    @code = response.status
+    render :error
   end
 end
