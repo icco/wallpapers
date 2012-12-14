@@ -38,15 +38,15 @@ class Storage
     return self.directory "iccothumbs", force_prod
   end
 
-  def self.get_files
-    return self.main_dir.files
+  def self.get_files force_prod = false
+    return self.main_dir(force_prod).files
   end
 
-  def self.get_file filename
-    return self.get_files.get(filename)
+  def self.get_file filename, force_prod = false
+    return self.get_files(force_prod).get(filename)
   end
 
-  def self.get_thumb filename
-    return self.thumb_dir.files.get(filename)
+  def self.get_thumb filename, force_prod = false
+    return self.thumb_dir(force_prod).files.get(filename)
   end
 end
