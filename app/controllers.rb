@@ -24,7 +24,7 @@ Wallpapers.controllers  do
   get '/image/:id' do
     @image = Storage.get_file params[:id]
     logger.warn @image.inspect
-    @image.public_url
+    @image.inspect
   end
 
   get '/thumbnail/:id', :cache => true do
