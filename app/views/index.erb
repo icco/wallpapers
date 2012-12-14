@@ -19,12 +19,26 @@
       <h1>Wallpapers</h1>
 
       <div id="box" class="thumbnails">
-        <% Storage.get_files.each do |file| %>
+        <% @images.each do |file| %>
           <div class="item">
             <a href="/image/<%= file.key %>" class="thumbnail"><img src="/thumbnail/<%= file.key %>" alt=""></a>
           </div>
         <% end %>
       </div>
+
+      <ul class="pager">
+        <% if prior_page %>
+          <li class="previous"><a href="/page/<%= prior_page %>">&larr; Older</a></li>
+        <% else %>
+          <li class="previous disabled"><a href="#">&larr; Older</a></li>
+        <% end %>
+
+        <% if next_page %>
+          <li id="next" class="next"><a href="/page/<%= next_page %>">Newer &rarr;</a></li>
+        <% else %>
+          <li class="next disabled"><a href="#">Newer &rarr;</a></li>
+        <% end %>
+      </ul>
 
       <div class="footer">
         <p class="muted"><i class="icon-edit"></i> <a href="https://github.com/icco/wallpapers">code</a> &copy; 2012 Nat Welch. Images copyright their original creators.</p>
@@ -36,11 +50,38 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript"></script>
     <script src="/js/bootstrap.js"></script>
     <script src="https://raw.github.com/desandro/masonry/master/jquery.masonry.min.js"></script>
+    <script src="https://raw.github.com/paulirish/infinite-scroll/master/jquery.infinitescroll.min.js"></script>
     <script>
-      var $container = $('#box');
-      $container.imagesLoaded(function(){
-        $container.masonry({
-          itemSelector : '.item',
+      // Based off of http://masonry.desandro.com/demos/infinite-scroll.html
+      $(function(){
+        var $container = $('#box');
+
+        // Basic Masonry
+        $container.imagesLoaded(function(){
+          $container.masonry({
+            itemSelector: '.item',
+          });
+        });
+
+        $container.infinitescroll({
+          navSelector  : '#next',    // selector for the paged navigation
+          nextSelector : '#next a',  // selector for the NEXT link (to page 2)
+          itemSelector : '.item',     // selector for all items you'll retrieve
+          loading: {
+            finishedMsg: 'No more pages to load.',
+            img: 'http://i.imgur.com/6RMhx.gif'
+          }
+        },
+        // trigger Masonry as a callback
+        function (newElements) {
+          // hide new items while they are loading
+          var $newElems = $(newElements).css({ opacity: 0 });
+          // ensure that images load before adding to masonry layout
+          $newElems.imagesLoaded(function(){
+            // show elems now they're ready
+            $newElems.animate({ opacity: 1 });
+            $container.masonry('appended', $newElems, true);
+          });
         });
       });
     </script>

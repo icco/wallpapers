@@ -42,6 +42,10 @@ class Storage
     return self.main_dir(force_prod).files
   end
 
+  def self.get_range range, force_prod = false
+    return self.get_files(force_prod).to_a()[range]
+  end
+
   def self.get_file filename, force_prod = false
     return self.get_files(force_prod).get(filename)
   end
