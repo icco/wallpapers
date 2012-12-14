@@ -66,10 +66,11 @@
         });
 
         $container.infinitescroll({
+          debug        : true,     
           navSelector  : '#next',    // selector for the paged navigation
           nextSelector : '#next a',  // selector for the NEXT link (to page 2)
           itemSelector : '.item',     // selector for all items you'll retrieve
-          loading: {
+          loading      : {
             finishedMsg: 'No more images to load.',
             img: 'http://i.imgur.com/6RMhx.gif'
           }
