@@ -16,7 +16,9 @@ end
 desc "Sync local files with GCS."
 task :push do
 
-  deleted, added, updated = 0
+  deleted = 0
+  added = 0
+  updated = 0
 
   dir = Storage.main_dir PROD
 
