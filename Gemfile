@@ -1,4 +1,4 @@
-source :rubygems
+source 'https://rubygems.org'
 
 # Project requirements
 gem 'erubis', '~> 2.7.0'
@@ -12,6 +12,5 @@ gem 'yui-compressor', :require => 'yui/compressor'
 
 # For dev
 group :development do
-  gem 'heroku'
   gem 'shotgun'
 end
