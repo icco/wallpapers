@@ -30,6 +30,7 @@ Wallpapers.controllers  do
       if @image.public_url
         redirect @image.public_url
       else
+        logger.warn "Image does not have a public url: #{@image.inspect}"
         403
       end
     end
@@ -80,7 +81,6 @@ Wallpapers.controllers  do
   end
 
   error 400..510 do
-    logger.warn "There was an error : #{env['sinatra.error'].inspect}"
     @code = response.status
     render :error
   end
