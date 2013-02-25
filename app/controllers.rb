@@ -44,7 +44,9 @@ Wallpapers.controllers  do
       image = Storage.get_thumb params[:id]
 
       if image.nil?
-        stream = File.open "tmp/thumb_#{params[:id]}"
+        if File.exists? "tmp/thumb_#{params[:id]}"
+          stream = File.open "tmp/thumb_#{params[:id]}"
+        end
       end
 
       redirect "http://placehold.it/300x200" if Padrino.env == :development
@@ -56,6 +58,7 @@ Wallpapers.controllers  do
           c.quality "60"
           c.resize "300x200"
       end
+
       thumbnail.write "tmp/thumb_#{params[:id]}"
 
       file = Storage.thumb_dir.files.create(
