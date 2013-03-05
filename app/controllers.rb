@@ -36,7 +36,7 @@ Wallpapers.controllers  do
     end
   end
 
-  get '/thumbnail/:id', :cache => true do
+  get '/thumbnail/:id', :cache => false do
     expires_in 86400 # 1 day
 
     begin
@@ -45,12 +45,16 @@ Wallpapers.controllers  do
       image = Storage.get_thumb params[:id]
 
       if image.nil?
-        if File.exists? "tmp/thumb_#{params[:id]}"
-          stream = File.open "tmp/thumb_#{params[:id]}"
+        thumbnail_file = File.join(__FILE__, "../tmp", "thumb_#{params[:id]}")
+        if File.exists? thumbnail_file
+          stream = File.open thumbnail_file
         end
       end
 
       redirect "http://placehold.it/300x200" if Padrino.env == :development
+
+      logger.push "Redirect #{params[:id} to #{image.public_url.inspect}", :info
+
       redirect image.public_url
     rescue
       @image = Storage.get_file params[:id]
@@ -60,11 +64,13 @@ Wallpapers.controllers  do
           c.resize "300x200"
       end
 
-      thumbnail.write "tmp/thumb_#{params[:id]}"
+      thumbnail_file = File.join(__FILE__, "../tmp", "thumb_#{params[:id]}")
+
+      thumbnail.write thumbnail_file
 
       file = Storage.thumb_dir.files.create(
         :key    => params[:id],
-        :body   => File.open("tmp/thumb_#{params[:id]}"),
+        :body   => File.open(thumbnail_file),
         :public => true,
       )
 
