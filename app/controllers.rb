@@ -1,5 +1,5 @@
 Wallpapers.controllers  do
-  PERPAGE = 30
+  PERPAGE = 60
 
   get :index do
     @images = Storage.get_range(0...PERPAGE)
