@@ -54,7 +54,7 @@ Wallpapers.controllers  do
         c.resize "300x200"
       end
 
-      thumbnail_file = File.join(__FILE__, "../tmp", "thumb_#{params[:id]}")
+      thumbnail_file = File.join(File.dirname(__FILE__), "../tmp", "thumb_#{params[:id]}")
 
       thumbnail.write thumbnail_file
 
