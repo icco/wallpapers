@@ -50,7 +50,6 @@ Wallpapers.controllers  do
         end
       end
 
-      redirect "http://placehold.it/300x200" if Padrino.env == :development
       redirect image.public_url
     rescue
       @image = Storage.get_file params[:id]
