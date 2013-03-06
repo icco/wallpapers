@@ -27,8 +27,8 @@ Wallpapers.controllers  do
     if @image.nil?
       404
     else
-      if @image.public_url
-        redirect @image.public_url
+      if @image.file_url
+        redirect @image.file_url
       else
         logger.warn "Image does not have a public url: #{@image.inspect}"
         403
@@ -44,10 +44,10 @@ Wallpapers.controllers  do
 
       image = Storage.get_thumb params[:id]
 
-      logger.push "Redirect #{params[:id]} to #{image.public_url.inspect}", :info
+      logger.push "Redirect #{params[:id]} to #{image.file_url.inspect}", :info
 
-      if image.public_url
-        redirect image.public_url
+      if image.file_url
+        redirect image.file_url
       else
         logger.warn "Image does not have a public url: #{image.inspect}"
         403
@@ -70,8 +70,8 @@ Wallpapers.controllers  do
         :public => true,
       )
 
-      if file.public_url
-        redirect file.public_url
+      if file.file_url
+        redirect file.file_url
       else
         logger.warn "Image does not have a public url: #{file.inspect}"
         403

@@ -59,7 +59,7 @@ module Fog
   module Storage
     class Google
       class File < Fog::Model
-        def public_url
+        def file_url
           requires :directory, :key
           "https://#{directory.key}.storage.googleapis.com/#{key}"
         end
