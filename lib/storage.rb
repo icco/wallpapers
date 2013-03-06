@@ -54,3 +54,16 @@ class Storage
     return self.thumb_dir(force_prod).files.get(filename)
   end
 end
+
+module Fog
+  module Storage
+    class Google
+      class File < Fog::Model
+        def public_url
+          requires :directory, :key
+          "https://#{directory.key}.storage.googleapis.com/#{key}"
+        end
+      end
+    end
+  end
+end
