@@ -55,7 +55,6 @@ Wallpapers.controllers  do
       end
 
       thumbnail_file = File.join(__FILE__, "../tmp", "thumb_#{params[:id]}")
-      p thumbnail_file
 
       thumbnail.write thumbnail_file
 
