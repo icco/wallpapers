@@ -54,7 +54,6 @@
     <script>
       // Based off of http://masonry.desandro.com/demos/infinite-scroll.html
       $(function(){
-        $('.pager').hide();
 
         var $container = $('#box');
 
@@ -66,6 +65,7 @@
         });
 
         /*
+        $('.pager').hide(); // Needed for inifinite
         $container.infinitescroll({
           navSelector  : '#next',    // selector for the paged navigation
           nextSelector : '#next a',  // selector for the NEXT link (to page 2)
