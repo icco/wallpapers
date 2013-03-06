@@ -44,7 +44,7 @@ Wallpapers.controllers  do
 
       image = Storage.get_thumb params[:id]
 
-      logger.push "Redirect #{params[:id} to #{image.public_url.inspect}", :info
+      logger.push "Redirect #{params[:id]} to #{image.public_url.inspect}", :info
       redirect image.public_url
     rescue
       @image = Storage.get_file params[:id]
