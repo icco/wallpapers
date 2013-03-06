@@ -8,7 +8,6 @@ gem 'padrino', '>= 0.10.7'
 gem 'rake'
 gem 'sinatra-flash', :require => 'sinatra/flash'
 gem 'thin'
-gem 'yui-compressor', :require => 'yui/compressor'
 
 # For dev
 group :development do

@@ -36,8 +36,8 @@ Wallpapers.controllers  do
     end
   end
 
-  get '/thumbnail/:id', :cache => false do
-    #expires_in 86400 # 1 day
+  get '/thumbnail/:id', :cache => true do
+    expires_in 86400 # 1 day
 
     begin
       raise if !params["reset"].nil?
@@ -50,11 +50,12 @@ Wallpapers.controllers  do
       @image = Storage.get_file params[:id]
       thumbnail = MiniMagick::Image.read(@image.body)
       thumbnail.combine_options do |c|
-          c.quality "60"
-          c.resize "300x200"
+        c.quality "60"
+        c.resize "300x200"
       end
 
       thumbnail_file = File.join(__FILE__, "../tmp", "thumb_#{params[:id]}")
+      p thumbnail_file
 
       thumbnail.write thumbnail_file
 
