@@ -45,7 +45,13 @@ Wallpapers.controllers  do
       image = Storage.get_thumb params[:id]
 
       logger.push "Redirect #{params[:id]} to #{image.public_url.inspect}", :info
-      redirect image.public_url
+
+      if image.public_url
+        redirect image.public_url
+      else
+        logger.warn "Image does not have a public url: #{image.inspect}"
+        403
+      end
     rescue
       @image = Storage.get_file params[:id]
       thumbnail = MiniMagick::Image.read(@image.body)
@@ -64,7 +70,12 @@ Wallpapers.controllers  do
         :public => true,
       )
 
-      redirect file.public_url
+      if file.public_url
+        redirect file.public_url
+      else
+        logger.warn "Image does not have a public url: #{file.inspect}"
+        403
+      end
     end
   end
 
