@@ -28,15 +28,15 @@
 
       <ul class="pager">
         <% if prior_page %>
-          <li class="previous"><a href="/page/<%= prior_page %>">&larr; Older</a></li>
+          <li class="previous"><a href="/page/<%= prior_page %>">&larr;</a></li>
         <% else %>
-          <li class="previous disabled"><a href="#">&larr; Older</a></li>
+          <li class="previous disabled"><a href="#">&larr;</a></li>
         <% end %>
 
         <% if next_page %>
-          <li id="next" class="next"><a href="/page/<%= next_page %>">Newer &rarr;</a></li>
+          <li id="next" class="next"><a href="/page/<%= next_page %>">&rarr;</a></li>
         <% else %>
-          <li class="next disabled"><a href="#">Newer &rarr;</a></li>
+          <li class="next disabled"><a href="#">&rarr;</a></li>
         <% end %>
       </ul>
 
