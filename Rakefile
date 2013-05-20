@@ -1,4 +1,3 @@
-require File.expand_path('../config/boot.rb', __FILE__)
 require 'padrino-core/cli/rake'
 
 PROD = true
@@ -6,6 +5,7 @@ PROD = true
 # Local Path to sync
 PATH = "#{ENV['HOME']}/Dropbox/Photos/Wallpapers/DesktopWallpapers"
 
+PadrinoTasks.use(:database)
 PadrinoTasks.init
 
 desc "Run a local server."
