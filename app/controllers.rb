@@ -18,6 +18,8 @@ Wallpapers.controllers  do
     prior_page = page
 
     @images = Storage.get_range((page*PERPAGE)...(next_page*PERPAGE))
+
+    next_page = nil if Storage.get_files.count < (next_page*PERPAGE)
     erb :index, :locals => { :prior_page => prior_page, :next_page => next_page }
   end
 
