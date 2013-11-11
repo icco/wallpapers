@@ -8,6 +8,7 @@ gem 'padrino', '>= 0.10.7'
 gem 'rake'
 gem 'sinatra-flash', :require => 'sinatra/flash'
 gem 'thin'
+gem 'unf'
 
 # For dev
 group :development do
