@@ -8,10 +8,10 @@ GEM
     daemons (1.1.9)
     erubis (2.7.0)
     eventmachine (1.0.3)
-    excon (0.28.0)
-    fog (1.18.0)
+    excon (0.31.0)
+    fog (1.19.0)
       builder
-      excon (~> 0.28.0)
+      excon (~> 0.31.0)
       formatador (~> 0.2.0)
       mime-types
       multi_json (~> 1.0)
@@ -70,7 +70,7 @@ GEM
     rack (1.5.2)
     rack-protection (1.5.1)
       rack
-    rake (10.1.0)
+    rake (10.1.1)
     ruby-hmac (0.4.0)
     shotgun (0.9)
       rack (>= 1.0)
