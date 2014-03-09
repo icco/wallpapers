@@ -13,8 +13,20 @@ task :local do
   Kernel.exec("shotgun -s thin -p 9393")
 end
 
+desc "Clean filenames of all images."
+task :clean do
+  local = Dir.open(PATH).to_a.delete_if {|f| f.start_with? '.' }
+  local.each do |old_filename|
+    ext = File.extname(old_filename)
+    name = File.basename(old_filename, ext)
+    new_filename = name.downcase.gsub(/[^a-z0-9]/, '') + ext
+    change = !old_filename.eql?(new_filename)
+    puts "#{old_filename} => #{new_filename}" if change
+  end
+end
+
 desc "Sync local files with GCS."
-task :push do
+task :push => [:clean] do
   deleted = 0
   created = 0
   updated = 0
