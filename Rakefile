@@ -19,9 +19,16 @@ task :clean do
   local.each do |old_filename|
     ext = File.extname(old_filename)
     name = File.basename(old_filename, ext)
-    new_filename = name.downcase.gsub(/[^a-z0-9]/, '') + ext
+
+    new_filename = "#{PATH}/#{name.downcase.gsub(/[^a-z0-9]/, '')}#{ext}"
+    old_filename = "#{PATH}/#{old_filename}"
+
     change = !old_filename.eql?(new_filename)
-    puts "#{old_filename} => #{new_filename}" if change
+
+    if change
+      puts "#{old_filename} => #{new_filename}"
+      File.rename(old_filename, new_filename)
+    end
   end
 end
 
