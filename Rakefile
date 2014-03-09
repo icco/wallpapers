@@ -33,7 +33,7 @@ task :clean do
 end
 
 desc "Sync local files with GCS."
-task :push => [:clean] do
+task :push => [:environment, :clean] do
   deleted = 0
   created = 0
   updated = 0
