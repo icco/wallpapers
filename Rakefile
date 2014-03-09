@@ -20,7 +20,7 @@ task :clean do
     ext = File.extname(old_filename)
     name = File.basename(old_filename, ext)
 
-    new_filename = "#{PATH}/#{name.downcase.gsub(/[^a-z0-9]/, '')}#{ext}"
+    new_filename = "#{PATH}/#{name.downcase.gsub(/[^a-z0-9]/, '')}#{ext.downcase}"
     old_filename = "#{PATH}/#{old_filename}"
 
     change = !old_filename.eql?(new_filename)
