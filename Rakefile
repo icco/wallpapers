@@ -76,7 +76,7 @@ task :push => [:environment, :clean] do
     end
   end
 
-  total = created + updated - deleted
+  total = (created + updated) - deleted
   puts """
 Stats:
 
