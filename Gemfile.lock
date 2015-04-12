@@ -196,7 +196,7 @@ DEPENDENCIES
   erubis (~> 2.7.0)
   fog
   mini_magick
-  padrino (~> 0.12)
+  padrino
   rake
   shotgun
   thin
