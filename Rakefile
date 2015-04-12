@@ -1,9 +1,9 @@
+require 'bundler/setup'
 require 'padrino-core/cli/rake'
 
-require File.expand_path('../config/boot.rb', __FILE__)
-
 PadrinoTasks.use(:database)
-PadrinoTasks.use(:activerecord)
+PadrinoTasks.use(:none)
+
 PadrinoTasks.init
 
 PROD = true
