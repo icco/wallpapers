@@ -4,7 +4,6 @@
     <meta charset="utf-8">
     <title>Wallpapers.</title>
 
-    <link href="/css/bootstrap.css" rel="stylesheet">
     <link href="/css/style.css" rel="stylesheet" />
 
     <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
@@ -16,29 +15,15 @@
   <body>
     <div class="container">
 
-      <h1>Wallpapers</h1>
+      <h1><a href="/">Wallpapers</a></h1>
 
       <div id="box" class="thumbnails">
         <% @images.each do |file| %>
           <div class="item">
-            <a href="/image/<%= file.key %>" class="thumbnail"><img src="/thumbnail/<%= file.key %>" alt=""></a>
+            <a href="/image/<%= file.key %>" class="thumbnail"><img src="<%= file.thumb_url %>" alt="<%= file.key %>"></a>
           </div>
         <% end %>
       </div>
-
-      <ul class="pager">
-        <% if prior_page %>
-          <li class="previous"><a href="/page/<%= prior_page %>">&larr;</a></li>
-        <% else %>
-          <li class="previous disabled"><a href="#">&larr;</a></li>
-        <% end %>
-
-        <% if next_page %>
-          <li id="next" class="next"><a href="/page/<%= next_page %>">&rarr;</a></li>
-        <% else %>
-          <li class="next disabled"><a href="#">&rarr;</a></li>
-        <% end %>
-      </ul>
 
       <div class="footer">
         <p class="muted"><i class="icon-edit"></i> <a href="https://github.com/icco/wallpapers">code</a> &copy; 2012 &mdash; <%= Time.now.year %> Nat Welch. Images copyright their original creators.</p>
@@ -47,48 +32,16 @@
     </div> <!-- /container -->
 
     <!-- JS. Placed at the end of the document so the pages load faster -->
-    <script src="/js/jquery-1.8.3.min.js"></script>
-    <script src="/js/bootstrap.js"></script>
-    <script src="/js/jquery.masonry.min.js?d=12132012"></script>
-    <script src="/js/jquery.infinitescroll.min.js?d=12132012"></script>
+    <script src="/js/imagesloaded.pkgd.min.js"></script>
+    <script src="/js/masonry.pkgd.min.js"></script>
     <script>
-      // Based off of http://masonry.desandro.com/demos/infinite-scroll.html
-      $(function(){
-
-        var $container = $('#box');
-
-        // Basic Masonry
-        $container.imagesLoaded(function(){
-          $container.masonry({
-            itemSelector: '.item',
-          });
+      var container = document.querySelector('#box');
+      var msnry;
+      // initialize Masonry after all images have loaded
+      imagesLoaded( container, function() {
+        msnry = new Masonry(container, {
+          itemSelector: '.item'
         });
-
-        /*
-        $('.pager').hide(); // Needed for inifinite
-        $container.infinitescroll({
-          navSelector  : '#next',    // selector for the paged navigation
-          nextSelector : '#next a',  // selector for the NEXT link (to page 2)
-          itemSelector : '.item',     // selector for all items you'll retrieve
-          loading      : {
-            finishedMsg: 'No more images to load.',
-            img: 'http://i.imgur.com/6RMhx.gif'
-          }
-        },
-
-        // trigger Masonry as a callback
-        function (newElements) {
-          // hide new items while they are loading
-          var $newElems = $(newElements).css({ opacity: 0 });
-          // ensure that images load before adding to masonry layout
-          $newElems.imagesLoaded(function(){
-            // show elems now they're ready
-            $newElems.animate({ opacity: 1 });
-            $container.masonry('appended', $newElems, true);
-          });
-        });
-        */
-
       });
     </script>
     <script type="text/javascript">
@@ -100,20 +53,6 @@
         var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
         ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
         var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-      })();
-    </script>
-
-    <script type="text/javascript">
-      var _gauges = _gauges || [];
-      (function() {
-        var t   = document.createElement('script');
-        t.type  = 'text/javascript';
-        t.async = true;
-        t.id    = 'gauges-tracker';
-        t.setAttribute('data-site-id', '522936e0f5a1f570c200000b');
-        t.src = '//secure.gaug.es/track.js';
-        var s = document.getElementsByTagName('script')[0];
-        s.parentNode.insertBefore(t, s);
       })();
     </script>
   </body>
