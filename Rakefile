@@ -2,6 +2,7 @@ require 'bundler/setup'
 
 # Local Path to sync
 PATH = "#{ENV['HOME']}/Dropbox/Photos/Wallpapers/DesktopWallpapers"
+PROD = true
 
 desc "Run a local server."
 task :local do
