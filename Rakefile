@@ -1,12 +1,4 @@
 require 'bundler/setup'
-require 'padrino-core/cli/rake'
-
-PadrinoTasks.use(:database)
-PadrinoTasks.use(:none)
-
-PadrinoTasks.init
-
-PROD = true
 
 # Local Path to sync
 PATH = "#{ENV['HOME']}/Dropbox/Photos/Wallpapers/DesktopWallpapers"
@@ -36,7 +28,7 @@ task :clean do
 end
 
 desc "Sync local files with GCS."
-task :push => [:environment, :clean] do
+task :push => [:clean] do
   deleted = 0
   created = 0
   updated = 0
