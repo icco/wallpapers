@@ -1,15 +1,11 @@
-require 'bundler/setup'
-require 'padrino-core/cli/rake'
-
-PadrinoTasks.use(:database)
-PadrinoTasks.use(:none)
-
-PadrinoTasks.init
-
-PROD = true
+require "rubygems"
+require "bundler"
+Bundler.require(:default, ENV["RACK_ENV"] || :development)
+require "./lib/storage.rb"
 
 # Local Path to sync
 PATH = "#{ENV['HOME']}/Dropbox/Photos/Wallpapers/DesktopWallpapers"
+PROD = true
 
 desc "Run a local server."
 task :local do
@@ -36,7 +32,7 @@ task :clean do
 end
 
 desc "Sync local files with GCS."
-task :push => [:environment, :clean] do
+task :push => [:clean] do
   deleted = 0
   created = 0
   updated = 0
@@ -98,5 +94,29 @@ task :purge_thumbnails do
   dir.files.each do |file|
     file.destroy
     puts "#{file.key} - deleted"
+  end
+end
+
+desc "Generate all thumbnails."
+task :generate_thumbs do
+  dir = Storage.thumb_dir PROD
+  images = Storage.get_files PROD
+
+  images.each do |basefile|
+    thumbnail = MiniMagick::Image.read(basefile.body)
+    thumbnail.combine_options do |c|
+      c.quality "60"
+      c.resize "300x200"
+    end
+
+    thumbnail_file = File.join(File.dirname(__FILE__), "tmp", "thumb", basefile.key)
+    thumbnail.write thumbnail_file
+    file = Storage.thumb_dir(PROD).files.create(
+      :key    => basefile.key,
+      :body   => File.open(thumbnail_file),
+      :public => true,
+    )
+
+    puts "#{basefile.file_url} -> #{file.thumb_url}"
   end
 end

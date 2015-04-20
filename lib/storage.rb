@@ -1,6 +1,6 @@
 class Storage
   def self.connection force_prod = false
-    if Padrino.env != :development or force_prod
+    if ENV['RACK_ENV'].eql? "production" or force_prod
       credentials = {
         :provider                         => 'Google',
         :google_storage_access_key_id     => ENV['GOOGLE_KEY'],
@@ -62,6 +62,29 @@ module Fog
         def file_url
           requires :directory, :key
           "https://#{directory.key}.storage.googleapis.com/#{key}"
+        end
+
+        def thumb_url
+          requires :directory, :key
+          "https://iccothumbs.storage.googleapis.com/#{key}"
+        end
+      end
+    end
+  end
+end
+
+module Fog
+  module Storage
+    class Local 
+      class File < Fog::Model
+        def file_url
+          requires :directory, :key
+          "https://#{directory.key}.storage.googleapis.com/#{key}"
+        end
+
+        def thumb_url
+          requires :directory, :key
+          "tmp/thumb/#{key}"
         end
       end
     end
