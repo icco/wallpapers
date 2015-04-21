@@ -4,12 +4,13 @@
     <meta charset="utf-8">
     <title>Wallpapers.</title>
 
-    <link href="/css/style.css" rel="stylesheet" />
-
     <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
+
+  <style>
+  </style>
 
   </head>
   <body>
@@ -33,14 +34,16 @@
 
     <!-- JS. Placed at the end of the document so the pages load faster -->
     <script src="/js/imagesloaded.pkgd.min.js"></script>
-    <script src="/js/masonry.pkgd.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery.isotope/2.2.0/isotope.pkgd.min.js"></script>
     <script>
       var container = document.querySelector('#box');
-      var msnry;
-      // initialize Masonry after all images have loaded
+      var iso;
+      // initialize Isotope after all images have loaded
       imagesLoaded( container, function() {
-        msnry = new Masonry(container, {
-          itemSelector: '.item'
+        iso = new Isotope(container, {
+          animationEngine : 'css',
+          itemSelector : '.item',
+          masonry: { },
         });
       });
     </script>
