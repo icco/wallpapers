@@ -10,12 +10,23 @@
     <![endif]-->
 
   <style>
-    .item {
+    @media (min-width: 1900px) {
+      .item { width: 20%; }
     }
 
-    img {
-      margin: 5px;
+    @media (min-width: 900px) {
+      .item { width: 25%; }
     }
+
+    @media (max-width: 900px) {
+      .item { width: 50%; }
+    }
+
+    @media (max-width: 600px) {
+      .item { width: 100%; }
+    }
+
+    .item img { width: 100%; }
   </style>
 
   </head>
