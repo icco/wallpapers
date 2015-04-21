@@ -10,6 +10,11 @@
     <![endif]-->
 
   <style>
+
+    h1 a {
+      text-decoration: none;
+    }
+
     @media (min-width: 1900px) {
       .item { width: 20%; }
     }
@@ -27,6 +32,7 @@
     }
 
     .item img { width: 100%; }
+    .item { margin: 0; padding: 0; }
   </style>
 
   </head>
@@ -58,18 +64,12 @@
         animationEngine : 'css',
         itemSelector : '.item',
         masonry: { },
+        sortBy: 'random',
       };
-      var iso = new Isotope(container, options);
+      var iso;
       imagesLoaded(container, function() {
-        iso.layout();
+        iso = new Isotope(container, options);
       });
-
-      var iso = new Isotope( container, options);
-
-        // layout Isotope again after all images have loaded
-        imagesLoaded( container, function() {
-            iso.layout();
-          });
     </script>
     <script type="text/javascript">
       var _gaq = _gaq || [];
