@@ -10,6 +10,12 @@
     <![endif]-->
 
   <style>
+    .item {
+    }
+
+    img {
+      margin: 5px;
+    }
   </style>
 
   </head>
@@ -37,15 +43,22 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery.isotope/2.2.0/isotope.pkgd.min.js"></script>
     <script>
       var container = document.querySelector('#box');
-      var iso;
-      // initialize Isotope after all images have loaded
-      imagesLoaded( container, function() {
-        iso = new Isotope(container, {
-          animationEngine : 'css',
-          itemSelector : '.item',
-          masonry: { },
-        });
+      var options = {
+        animationEngine : 'css',
+        itemSelector : '.item',
+        masonry: { },
+      };
+      var iso = new Isotope(container, options);
+      imagesLoaded(container, function() {
+        iso.layout();
       });
+
+      var iso = new Isotope( container, options);
+
+        // layout Isotope again after all images have loaded
+        imagesLoaded( container, function() {
+            iso.layout();
+          });
     </script>
     <script type="text/javascript">
       var _gaq = _gaq || [];
