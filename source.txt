@@ -17,7 +17,7 @@
             visibility : hidden;
             width:90%;
         }
-        
+
         img.photo { cursor: pointer; }
 
         </style>
@@ -28,7 +28,7 @@
         <div class="picrow"></div>
         <div class="picrow"></div>
         <div class="picrow"></div>
-        
+
         <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.2.js"></script>
         <script type="text/javascript" src="photos.js"></script>
     <script id="jsbin-javascript">
