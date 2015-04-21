@@ -106,7 +106,7 @@ task :generate_thumbs do
     thumbnail = MiniMagick::Image.read(basefile.body)
     thumbnail.combine_options do |c|
       c.quality "60"
-      c.resize "300x200"
+      c.resize "600x400"
     end
 
     thumbnail_file = File.join(File.dirname(__FILE__), "tmp", "thumb", basefile.key)
