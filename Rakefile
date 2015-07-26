@@ -46,8 +46,8 @@ task :push => [:clean] do
     filename = file.key.gsub("\+", " ")
     if !local.include? filename
       deleted += 1
-      puts "#{filename} - deleted"
       file.destroy
+      puts "#{filename} - deleted"
     end
   end
 
@@ -66,12 +66,17 @@ task :push => [:clean] do
       created += 1
       puts "created"
     else
-      file.body = File.open("#{PATH}/#{filename}")
-      file.public = true
-      file.save
+      new_body = File.open("#{PATH}/#{filename}")
+      if file.body.size != new_body.size
+        file.body = new_body
+        file.public = true
+        file.save
 
-      updated += 1
-      puts "updated"
+        updated += 1
+        puts "updated"
+      else
+        puts "no change"
+      end
     end
   end
 
