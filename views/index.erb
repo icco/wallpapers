@@ -9,37 +9,51 @@
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 
-  <style>
-    h1 a {
-      text-decoration: none;
-    }
+    <link rel="stylesheet" type="text/css" href="/css/tachyons.min.css">
+    <style>
+      @media (min-width: 900px) {
+        .item { width: 33%; }
+      }
 
-    @media (min-width: 1900px) {
-      .item { width: 20%; }
-    }
+      @media (max-width: 900px) {
+        .item { width: 100%; }
+      }
 
-    @media (min-width: 900px) {
-      .item { width: 25%; }
-    }
+      .item img {
+        width: 100%;
+        display: block;
+      }
 
-    @media (max-width: 900px) {
-      .item { width: 50%; }
-    }
+      .item {
+        padding: 1px;
+        border: 1px solid #CCC;
+        margin: 1px
+      }
 
-    @media (max-width: 600px) {
-      .item { width: 100%; }
-    }
+      .item:hover {
+        border-color: #2BA6CB
+      }
 
-    .item img { width: 100%; }
-    .item { margin: 0; padding: 0; }
-  </style>
+      a, a:link, a:visited {
+        transition: color .4s;
+        color: #265C83;
+      }
 
+      a:hover {
+        color: #7FDBFF;
+      }
+
+      a:active {
+        transition: color .3s;
+        color: #007BE6;
+      }
+    </style>
   </head>
   <body>
-    <div class="container">
+    <div class="pam">
 
-      <h1><a href="/">Wallpapers</a></h1>
-      <h2>A Nat Welch Collection</h2>
+      <h1 class="man pan"><a href="/">Wallpapers</a></h1>
+      <h2 class="f4 mvs">A Nat Welch Collection</h2>
 
       <div id="box" class="thumbnails">
         <!--
@@ -97,7 +111,7 @@
         $(img).one('load', function() {
           $(div).addClass('item');
           $('#box').isotope('insert', $(div));
-          }).each(function() {
+        }).each(function() {
           if(this.complete) $(this).load();
         });
       }
