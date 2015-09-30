@@ -8,8 +8,21 @@ configure do
 end
 
 get "/" do
-  @images = Storage.get_files(FORCE_PROD)
   erb :index
+end
+
+get "/all.json" do
+  @images = Storage.get_files(FORCE_PROD).map do |i|
+    {
+      image: "/image/#{i.key}",
+      key: i.key,
+      thumbnail: i.thumb_url,
+      etag: i.etag,
+    }
+  end
+
+  content_type :json
+  @images.to_json
 end
 
 get "/image/:id" do

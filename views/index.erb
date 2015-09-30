@@ -42,11 +42,11 @@
       <h2>A Nat Welch Collection</h2>
 
       <div id="box" class="thumbnails">
-        <% @images.each do |file| %>
+        <!--
           <div class="item">
-            <a href="/image/<%= file.key %>" class="thumbnail"><img src="<%= file.thumb_url %>" alt="<%= file.key %>"></a>
+            <a href="/image/file.key" class="thumbnail"><img src="file.thumb_url" alt="file.key"></a>
           </div>
-        <% end %>
+          -->
       </div>
 
       <div class="footer">
@@ -56,20 +56,51 @@
     </div> <!-- /container -->
 
     <!-- JS. Placed at the end of the document so the pages load faster -->
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
     <script src="/js/imagesloaded.pkgd.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery.isotope/2.2.0/isotope.pkgd.min.js"></script>
+    <script src="/js/isotope.pkgd.min.js"></script>
     <script>
-      var container = document.querySelector('#box');
-      var options = {
-        animationEngine : 'css',
-        itemSelector : '.item',
-        masonry: { },
-        sortBy: 'random',
-      };
-      var iso;
-      imagesLoaded(container, function() {
-        iso = new Isotope(container, options);
+      $(document).ready(function() {
+        $('#box').isotope({
+          animationEngine : 'css',
+          itemSelector : '.item',
+          masonry: { },
+        });
+        $.get("/all.json", parse_response).fail(function() {
+          console.error("Error getting data.");
+        });
       });
+
+      function parse_response(data) {
+        for (i in data) {
+          build_element(data[i]["thumbnail"], data[i]["image"], data[i]["key"]);
+        }
+      }
+
+      function build_element(image, link, title) {
+        var a = $('<a>');
+        var img = $('<img>');
+        var div = $('<div>');
+
+        a.attr('href', link);
+        a.attr('title', title);
+
+        img.attr('src', image);
+        img.attr('alt', title);
+
+        a.append(img);
+        div.append(a);
+
+        div.addClass('item');
+
+        // Preload
+        $(img).one('load', function() {
+          $(div).addClass('item');
+          $('#box').isotope('insert', $(div));
+          }).each(function() {
+          if(this.complete) $(this).load();
+        });
+      }
     </script>
     <script type="text/javascript">
       var _gaq = _gaq || [];
