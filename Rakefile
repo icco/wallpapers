@@ -16,10 +16,14 @@ desc "Clean filenames of all images."
 task :clean do
   local = Dir.open(PATH).to_a.delete_if {|f| f.start_with? '.' }
   local.each do |old_filename|
-    ext = File.extname(old_filename)
+    ext = File.extname(old_filename).downcase
     name = File.basename(old_filename, ext)
 
-    new_filename = "#{PATH}/#{name.downcase.gsub(/[^a-z0-9]/, '')}#{ext.downcase}"
+    if ext == ".jpeg"
+      ext = ".jpg"
+    end
+
+    new_filename = "#{PATH}/#{name.downcase.gsub(/[^a-z0-9]/, '')}#{ext}"
     old_filename = "#{PATH}/#{old_filename}"
 
     change = !old_filename.eql?(new_filename)
