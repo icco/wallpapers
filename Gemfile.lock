@@ -88,7 +88,7 @@ GEM
       fog-core
       fog-json
       fog-xml
-    fog-sakuracloud (1.5.2)
+    fog-sakuracloud (1.6.0)
       fog-core
       fog-json
     fog-serverlove (0.1.2)
