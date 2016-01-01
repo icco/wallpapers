@@ -130,7 +130,7 @@ GEM
     multi_json (1.11.2)
     nokogiri (1.6.7.1)
       mini_portile2 (~> 2.0.0.rc2)
-    oj (2.14.2)
+    oj (2.14.3)
     rack (1.6.4)
     rack-protection (1.5.3)
       rack
