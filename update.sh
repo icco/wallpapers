@@ -14,5 +14,4 @@ bundle update
 git ci Gemfile* -m 'bundle update'
 git st
 rake push
-rake generate_thumbs
 git push

@@ -96,36 +96,3 @@ Stats:
 
   """
 end
-
-desc "Erase all thumbnails."
-task :purge_thumbnails do
-  dir = Storage.thumb_dir PROD
-  dir.files.each do |file|
-    file.destroy
-    puts "#{file.key} - deleted"
-  end
-end
-
-desc "Generate all thumbnails."
-task :generate_thumbs do
-  dir = Storage.thumb_dir PROD
-  images = Storage.get_files PROD
-
-  images.each do |basefile|
-    thumbnail = MiniMagick::Image.read(basefile.body)
-    thumbnail.combine_options do |c|
-      c.quality "60"
-      c.resize "600x400"
-    end
-
-    thumbnail_file = File.join(File.dirname(__FILE__), "tmp", "thumb", basefile.key)
-    thumbnail.write thumbnail_file
-    file = Storage.thumb_dir(PROD).files.create(
-      :key    => basefile.key,
-      :body   => File.open(thumbnail_file),
-      :public => true,
-    )
-
-    puts "#{basefile.file_url} -> #{file.thumb_url}"
-  end
-end
