@@ -58,7 +58,7 @@ module Fog
 
         def thumb_url
           requires :key
-          "https://iccowalls.imgix.net/#{key}?w=600&h=400&fit=crop&q=5&fm=png"
+          "https://icco-walls.imgix.net/#{key}?w=600&h=400&fit=crop&q=5&fm=png"
         end
       end
     end
@@ -76,7 +76,7 @@ module Fog
 
         def thumb_url
           requires :directory, :key
-          "https://iccowalls.imgix.net/#{key}?w=600&h=400&fit=crop&q=5&fm=png"
+          "https://icco-walls.imgix.net/#{key}?w=600&h=400&fit=crop&q=5&fm=png"
         end
       end
     end
