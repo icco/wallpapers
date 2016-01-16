@@ -5,7 +5,7 @@ GEM
     builder (3.2.2)
     daemons (1.2.3)
     erubis (2.7.0)
-    eventmachine (1.0.8)
+    eventmachine (1.0.9.1)
     excon (0.45.4)
     fission (0.5.0)
       CFPropertyList (~> 2.2)
@@ -112,7 +112,7 @@ GEM
     fog-vsphere (0.4.0)
       fog-core
       rbvmomi (~> 1.8)
-    fog-xenserver (0.2.2)
+    fog-xenserver (0.2.3)
       fog-core
       fog-xml
     fog-xml (0.1.2)
@@ -134,7 +134,7 @@ GEM
     rack (1.6.4)
     rack-protection (1.5.3)
       rack
-    rake (10.4.2)
+    rake (10.5.0)
     rbvmomi (1.8.2)
       builder
       nokogiri (>= 1.4.1)
