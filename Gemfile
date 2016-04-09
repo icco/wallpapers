@@ -4,7 +4,7 @@ ruby '2.3.0'
 
 # Project requirements
 gem 'erubis', '~> 2.7.0'
-gem 'fog'
+gem 'fog-google'
 gem 'json'
 gem 'mime-types'
 gem 'mini_magick'
