@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/icco/fog-google.git
-  revision: 4ded4cc2948223128c513a98858e62c0111e93be
+  revision: 6b5f518ac94473bd7bb2d24bc08ae3acc2df8d22
   branch: broken-signing
   specs:
     fog-google (0.3.1)
