@@ -6,11 +6,11 @@ GEM
     erubis (2.7.0)
     eventmachine (1.2.0.1)
     excon (0.49.0)
-    fog-core (1.37.0)
+    fog-core (1.38.0)
       builder
-      excon (~> 0.45)
+      excon (~> 0.49)
       formatador (~> 0.2)
-    fog-google (0.2.0)
+    fog-google (0.3.0)
       fog-core
       fog-json
       fog-xml
