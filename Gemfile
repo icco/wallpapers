@@ -4,7 +4,7 @@ ruby '2.3.0'
 
 # Project requirements
 gem 'erubis', '~> 2.7.0'
-gem 'fog-google', '~> 0.3.1'
+gem 'fog-google', github: "icco/fog-google", branch: "broken-signing"
 gem 'google-api-client', '~> 0.8.6'
 gem 'json'
 gem 'mime-types'
