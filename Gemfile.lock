@@ -24,7 +24,7 @@ GEM
       builder
       excon (~> 0.49)
       formatador (~> 0.2)
-    fog-google (0.3.0)
+    fog-google (0.3.1)
       fog-core
       fog-json
       fog-xml
@@ -109,7 +109,7 @@ PLATFORMS
 
 DEPENDENCIES
   erubis (~> 2.7.0)
-  fog-google
+  fog-google (~> 0.3.1)
   google-api-client (~> 0.8.6)
   json
   mime-types
