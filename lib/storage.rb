@@ -49,7 +49,7 @@ end
 
 module Fog
   module Storage
-    class Google
+    class GoogleXML
       class File < Fog::Model
         def file_url
           requires :directory, :key
