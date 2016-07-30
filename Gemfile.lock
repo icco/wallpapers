@@ -55,7 +55,7 @@ GEM
       os (~> 0.9)
       signet (~> 0.7)
     i18n (0.7.0)
-    json (2.0.1)
+    json (2.0.2)
     jwt (1.5.4)
     launchy (2.4.3)
       addressable (~> 2.3)
