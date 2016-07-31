@@ -9,6 +9,8 @@ fi
 
 source $RUBY
 
+export DROPBOX=/Volumes/Clouds/Dropbox/
+
 git pull
 bundle update
 git ci Gemfile* -m 'bundle update'

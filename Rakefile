@@ -4,7 +4,7 @@ Bundler.require(:default, ENV["RACK_ENV"] || :development)
 require "./lib/storage.rb"
 
 # Local Path to sync
-PATH = "#{ENV['HOME']}/Dropbox/Photos/Wallpapers/DesktopWallpapers"
+PATH = "#{ENV['DROPBOX']}/Photos/Wallpapers/DesktopWallpapers"
 PROD = true
 
 desc "Run a local server."
