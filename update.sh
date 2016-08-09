@@ -9,7 +9,7 @@ fi
 
 source $RUBY
 
-export DROPBOX=/Volumes/Clouds/Dropbox/
+export DROPBOX=~/Dropbox/
 
 git pull
 bundle update
