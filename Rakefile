@@ -23,8 +23,8 @@ task :clean do
       ext = ".jpg"
     end
 
-    new_filename = "#{PATH}/#{name.downcase.gsub(/[^a-z0-9]/, '')}#{ext}"
-    old_filename = "#{PATH}/#{old_filename}"
+    new_filename = File.join(PATH, "#{name.downcase.gsub(/[^a-z0-9]/, '')}#{ext}")
+    old_filename = File.join(PATH, old_filename)
 
     change = !old_filename.eql?(new_filename)
 
