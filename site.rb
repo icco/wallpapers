@@ -14,29 +14,16 @@ end
 get "/all.json" do
   @images = Storage.get_files(FORCE_PROD).map do |i|
     {
-      image: "/image/#{i.key}",
+      image: i.file_url,
       key: i.key,
       thumbnail: i.thumb_url,
+      cdn: i.cdn_url,
       etag: i.etag,
     }
   end
 
   content_type :json
   @images.to_json
-end
-
-get "/image/:id" do
-  @image = Storage.get_file(params[:id], FORCE_PROD)
-
-  if @image.nil?
-    404
-  else
-    if @image.file_url
-      redirect @image.file_url
-    else
-      403
-    end
-  end
 end
 
 get "/403" do

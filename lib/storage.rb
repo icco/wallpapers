@@ -74,6 +74,11 @@ module Fog
           "https://#{directory.key}.storage.googleapis.com/#{key}"
         end
 
+        def cdn_url
+          requires :directory, :key
+          "https://icco-walls.imgix.net/#{key}?q=auto"
+        end
+
         def thumb_url
           requires :directory, :key
           "https://icco-walls.imgix.net/#{key}?w=600&h=400&fit=crop&q=5&fm=png"
