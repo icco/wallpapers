@@ -35,7 +35,7 @@ class Storage
   end
 
   def self.get_files force_prod = false
-    return self.main_dir(force_prod).files
+    return self.main_dir(force_prod).files.shuffle
   end
 
   def self.get_range range, force_prod = false
