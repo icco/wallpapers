@@ -1,49 +1,49 @@
 class Storage
-  def self.connection force_prod = false
-    if ENV['RACK_ENV'].eql? "production" or force_prod
-      credentials = {
-        :provider                         => 'Google',
-        :google_storage_access_key_id     => ENV['GOOGLE_KEY'],
-        :google_storage_secret_access_key => ENV['GOOGLE_SECRET'],
-      }
-    else
-      credentials = {
-        :provider   => "Local",
-        :local_root => "/tmp/",
-        :endpoint   => "file:///tmp/",
-      }
-    end
+  def self.connection(force_prod = false)
+    credentials = if ENV["RACK_ENV"].eql?("production") || force_prod
+                    {
+                      provider: "Google",
+                      google_storage_access_key_id: ENV["GOOGLE_KEY"],
+                      google_storage_secret_access_key: ENV["GOOGLE_SECRET"],
+                    }
+                  else
+                    {
+                      provider: "Local",
+                      local_root: "/tmp/",
+                      endpoint: "file:///tmp/",
+                    }
+                  end
 
-    return Fog::Storage.new(credentials)
+    Fog::Storage.new(credentials)
   end
 
-  def self.directory directory_name, force_prod = false
-    directory = self.connection(force_prod).directories.get(directory_name)
+  def self.directory(directory_name, force_prod = false)
+    directory = connection(force_prod).directories.get(directory_name)
 
     if directory.nil?
-      directory = self.connection.directories.create(
-        :key    => directory_name,
-        :public => true
+      directory = connection.directories.create(
+        key: directory_name,
+        public: true
       )
     end
 
-    return directory
+    directory
   end
 
-  def self.main_dir force_prod = false
-    return self.directory "iccowalls", force_prod
+  def self.main_dir(force_prod = false)
+    directory "iccowalls", force_prod
   end
 
-  def self.get_files force_prod = false
-    return self.main_dir(force_prod).files.shuffle
+  def self.get_files(force_prod = false)
+    main_dir(force_prod).files.shuffle
   end
 
-  def self.get_range range, force_prod = false
-    return self.get_files(force_prod).to_a()[range]
+  def self.get_range(range, force_prod = false)
+    get_files(force_prod).to_a[range]
   end
 
-  def self.get_file filename, force_prod = false
-    return self.get_files(force_prod).get(filename)
+  def self.get_file(filename, force_prod = false)
+    get_files(force_prod).get(filename)
   end
 end
 
@@ -72,7 +72,7 @@ end
 
 module Fog
   module Storage
-    class Local 
+    class Local
       class File < Fog::Model
         def file_url
           requires :directory, :key
