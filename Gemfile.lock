@@ -18,12 +18,13 @@ GEM
     eventmachine (1.2.3)
     excon (0.55.0)
     extlib (0.9.16)
-    faraday (0.12.0.1)
+    faraday (0.12.1)
       multipart-post (>= 1.2, < 3)
-    fog-core (1.43.0)
+    fog-core (1.44.0)
       builder
       excon (~> 0.49)
       formatador (~> 0.2)
+      xmlrpc
     fog-google (0.5.2)
       fog-core
       fog-json
@@ -73,7 +74,7 @@ GEM
     multipart-post (2.0.0)
     nokogiri (1.7.1)
       mini_portile2 (~> 2.1.0)
-    oj (2.18.5)
+    oj (3.0.3)
     oj_mimic_json (1.0.1)
     os (0.9.6)
     public_suffix (2.0.5)
@@ -103,7 +104,8 @@ GEM
       thread_safe (~> 0.1)
     unf (0.1.4)
       unf_ext
-    unf_ext (0.0.7.3)
+    unf_ext (0.0.7.4)
+    xmlrpc (0.3.0)
 
 PLATFORMS
   ruby
