@@ -20,11 +20,10 @@ GEM
     extlib (0.9.16)
     faraday (0.12.1)
       multipart-post (>= 1.2, < 3)
-    fog-core (1.44.0)
+    fog-core (1.44.3)
       builder
       excon (~> 0.49)
       formatador (~> 0.2)
-      xmlrpc
     fog-google (0.5.2)
       fog-core
       fog-json
@@ -69,17 +68,18 @@ GEM
     mime-types-data (3.2016.0521)
     mini_magick (4.7.0)
     mini_portile2 (2.1.0)
-    minitest (5.10.1)
+    minitest (5.10.2)
     multi_json (1.12.1)
     multipart-post (2.0.0)
-    nokogiri (1.7.1)
+    mustermann (1.0.0)
+    nokogiri (1.7.2)
       mini_portile2 (~> 2.1.0)
-    oj (3.0.3)
+    oj (3.0.10)
     oj_mimic_json (1.0.1)
     os (0.9.6)
     public_suffix (2.0.5)
-    rack (1.6.5)
-    rack-protection (1.5.3)
+    rack (2.0.3)
+    rack-protection (2.0.0)
       rack
     rake (12.0.0)
     retriable (1.4.1)
@@ -90,10 +90,11 @@ GEM
       faraday (~> 0.9)
       jwt (~> 1.5)
       multi_json (~> 1.10)
-    sinatra (1.4.8)
-      rack (~> 1.5)
-      rack-protection (~> 1.4)
-      tilt (>= 1.3, < 3)
+    sinatra (2.0.0)
+      mustermann (~> 1.0)
+      rack (~> 2.0)
+      rack-protection (= 2.0.0)
+      tilt (~> 2.0)
     thin (1.7.0)
       daemons (~> 1.0, >= 1.0.9)
       eventmachine (~> 1.0, >= 1.0.4)
@@ -105,7 +106,6 @@ GEM
     unf (0.1.4)
       unf_ext
     unf_ext (0.0.7.4)
-    xmlrpc (0.3.0)
 
 PLATFORMS
   ruby
