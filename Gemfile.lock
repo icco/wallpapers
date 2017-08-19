@@ -18,7 +18,7 @@ GEM
     eventmachine (1.2.5)
     excon (0.58.0)
     extlib (0.9.16)
-    faraday (0.12.2)
+    faraday (0.13.1)
       multipart-post (>= 1.2, < 3)
     fog-core (1.45.0)
       builder
@@ -74,7 +74,7 @@ GEM
     mustermann (1.0.0)
     nokogiri (1.8.0)
       mini_portile2 (~> 2.2.0)
-    oj (3.3.4)
+    oj (3.3.5)
     oj_mimic_json (1.0.1)
     os (0.9.6)
     public_suffix (2.0.5)
@@ -128,4 +128,4 @@ RUBY VERSION
    ruby 2.4.0p0
 
 BUNDLED WITH
-   1.14.6
+   1.15.3
