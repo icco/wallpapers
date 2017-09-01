@@ -6,8 +6,8 @@ GEM
       minitest (~> 5.1)
       thread_safe (~> 0.3, >= 0.3.4)
       tzinfo (~> 1.1)
-    addressable (2.5.1)
-      public_suffix (~> 2.0, >= 2.0.2)
+    addressable (2.5.2)
+      public_suffix (>= 2.0.2, < 4.0)
     autoparse (0.3.3)
       addressable (>= 2.3.1)
       extlib (>= 0.9.15)
@@ -24,7 +24,7 @@ GEM
       builder
       excon (~> 0.58)
       formatador (~> 0.2)
-    fog-google (0.5.3)
+    fog-google (0.5.5)
       fog-core
       fog-json
       fog-xml
@@ -71,13 +71,13 @@ GEM
     minitest (5.10.3)
     multi_json (1.12.1)
     multipart-post (2.0.0)
-    mustermann (1.0.0)
+    mustermann (1.0.1)
     nokogiri (1.8.0)
       mini_portile2 (~> 2.2.0)
     oj (3.3.5)
     oj_mimic_json (1.0.1)
     os (0.9.6)
-    public_suffix (2.0.5)
+    public_suffix (3.0.0)
     rack (2.0.3)
     rack-protection (2.0.0)
       rack
@@ -128,4 +128,4 @@ RUBY VERSION
    ruby 2.4.0p0
 
 BUNDLED WITH
-   1.15.3
+   1.15.4
