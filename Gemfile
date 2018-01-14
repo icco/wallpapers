@@ -5,7 +5,6 @@ ruby "2.4.2"
 # Project requirements
 gem "erubis", "~> 2.7.0"
 gem "fog-google"
-gem "google-api-client", "~> 0.8.6"
 gem "mime-types"
 gem "mini_magick"
 gem "oj"
