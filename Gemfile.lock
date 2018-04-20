@@ -10,7 +10,7 @@ GEM
     erubis (2.7.0)
     eventmachine (1.2.5)
     excon (0.62.0)
-    faraday (0.14.0)
+    faraday (0.15.0)
       multipart-post (>= 1.2, < 3)
     fog-core (2.1.0)
       builder
