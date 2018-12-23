@@ -26,6 +26,10 @@ get "/all.json" do
   @images.to_json
 end
 
+get "/healthz" do
+  "ok"
+end
+
 get "/403" do
   403
 end
