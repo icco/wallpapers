@@ -1,6 +1,6 @@
 source "https://rubygems.org"
 
-ruby "2.6.0"
+ruby "2.6.3"
 
 # Project requirements
 gem "erubis", "~> 2.7.0"
