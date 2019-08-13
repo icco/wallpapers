@@ -9,7 +9,7 @@ GEM
     declarative-option (0.1.0)
     erubis (2.7.0)
     eventmachine (1.2.7)
-    excon (0.64.0)
+    excon (0.66.0)
     faraday (0.15.4)
       multipart-post (>= 1.2, < 3)
     fog-core (2.1.0)
@@ -55,12 +55,12 @@ GEM
     multi_json (1.13.1)
     multipart-post (2.1.1)
     mustermann (1.0.3)
-    nokogiri (1.10.3)
+    nokogiri (1.10.4)
       mini_portile2 (~> 2.4.0)
     oj (3.7.12)
     oj_mimic_json (1.0.1)
     os (1.0.1)
-    public_suffix (3.1.0)
+    public_suffix (3.1.1)
     rack (2.0.7)
     rack-protection (2.0.5)
       rack
@@ -97,7 +97,7 @@ PLATFORMS
 
 DEPENDENCIES
   erubis (~> 2.7.0)
-  fog-google
+  fog-google (>= 1.9.1)
   mime-types
   mini_magick
   oj
@@ -112,4 +112,4 @@ RUBY VERSION
    ruby 2.6.3p62
 
 BUNDLED WITH
-   1.17.2
+   1.17.3
