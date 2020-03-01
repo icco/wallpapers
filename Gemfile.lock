@@ -99,7 +99,7 @@ PLATFORMS
 
 DEPENDENCIES
   erubis (~> 2.7.0)
-  fog-google
+  fog-google (>= 1.9.1)
   mime-types
   mini_magick
   oj
