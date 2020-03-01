@@ -58,7 +58,7 @@ module Fog
 
         def cdn_url
           requires :directory, :key
-          "https://icco-walls.imgix.net/#{key}?auto=compress&w=1920&h=1200&crop=entropy"
+          "https://icco-walls.imgix.net/#{key}?auto=compress&w=2560&h=1440&crop=entropy&fm=png"
         end
 
         def thumb_url
@@ -81,7 +81,7 @@ module Fog
 
         def cdn_url
           requires :directory, :key
-          "https://icco-walls.imgix.net/#{key}?auto=compress&w=1920&h=1200&crop=entropy"
+          "https://icco-walls.imgix.net/#{key}?auto=compress&w=2560&h=1440&crop=entropy&fm=png"
         end
 
         def thumb_url
