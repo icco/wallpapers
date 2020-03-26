@@ -33,6 +33,68 @@ task :clean do
   end
 end
 
+desc "Grab files from GCS."
+task :pull do
+  deleted = 0
+  created = 0
+  updated = 0
+
+  dir = Storage.main_dir PROD
+
+  local = Dir.open(PATH).to_a.delete_if { |f| f.start_with? "." }
+  remote = Storage.get_files PROD
+
+  remote.each do |file|
+    filename = file.key.tr("\+", " ")
+    next if local.include? filename
+    deleted += 1
+    file.destroy
+    puts "#{filename} - deleted"
+  end
+
+  local.each do |filename|
+    print "#{filename} - "
+
+    file = dir.files.get filename
+
+    if file.nil?
+      file = dir.files.create(
+        key: filename,
+        body: File.open("#{PATH}/#{filename}"),
+        public: true
+      )
+
+      created += 1
+      puts "created"
+    else
+      new_body = File.open("#{PATH}/#{filename}")
+      if file.body.size != new_body.size
+        file.body = new_body
+        file.public = true
+        file.save
+
+        updated += 1
+        puts "updated"
+      else
+        puts "no change"
+      end
+    end
+  end
+
+  total = (created + updated) - deleted
+  puts """
+Stats:
+
+  Created: #{created}
+  Updated: #{updated}
+  Deleted: #{deleted}
+  -------------------
+  Total:   #{total}
+
+  """
+
+end
+
 desc "Sync local files with GCS."
 task push: [:clean] do
   deleted = 0
