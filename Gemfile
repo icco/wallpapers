@@ -10,7 +10,7 @@ gem "mini_magick", ">= 4.9.4"
 gem "oj"
 gem "oj_mimic_json"
 gem "rake", ">= 12.3.3"
-gem "sinatra", ">= 2.0.5"
+gem "sinatra", ">= 2.0.8.1"
 gem "thin", ">= 1.7.2"
 gem "unf"
 
