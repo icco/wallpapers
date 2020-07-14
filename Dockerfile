@@ -1,4 +1,4 @@
-From ruby:2.6.3
+From ruby:2.7.1
 
 WORKDIR /opt
 COPY . .
