@@ -4,7 +4,7 @@ ruby "2.7.2"
 
 # Project requirements
 gem "erubis", "~> 2.7.0"
-gem "fog-google", ">= 1.9.1"
+gem "fog-google", ">= 1.12.1"
 gem "mime-types"
 gem "mini_magick", ">= 4.9.4"
 gem "oj"
