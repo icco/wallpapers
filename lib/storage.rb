@@ -3,8 +3,7 @@ class Storage
     credentials = if ENV["RACK_ENV"].eql?("production") || force_prod
                     {
                       provider: "Google",
-                      google_storage_access_key_id: ENV["GOOGLE_KEY"],
-                      google_storage_secret_access_key: ENV["GOOGLE_SECRET"],
+                      google_project: "icco-natwelch",
                     }
                   else
                     {
