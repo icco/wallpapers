@@ -67,10 +67,10 @@ GEM
     multipart-post (2.1.1)
     mustermann (1.1.1)
       ruby2_keywords (~> 0.0.1)
-    nokogiri (1.11.3)
+    nokogiri (1.11.4)
       mini_portile2 (~> 2.5.0)
       racc (~> 1.4)
-    nokogiri (1.11.3-x86_64-darwin)
+    nokogiri (1.11.4-x86_64-darwin)
       racc (~> 1.4)
     oj (3.11.5)
     oj_mimic_json (1.0.1)
@@ -118,7 +118,7 @@ PLATFORMS
 
 DEPENDENCIES
   erubis (~> 2.7.0)
-  fog-google (>= 1.9.1)
+  fog-google (>= 1.13.0)
   mime-types
   mini_magick (>= 4.9.4)
   oj
