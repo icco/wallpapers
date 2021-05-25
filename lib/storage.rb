@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Storage
   def self.connection(force_prod = false)
     credentials = if ENV["RACK_ENV"].eql?("production") || force_prod

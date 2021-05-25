@@ -1,5 +1,5 @@
 #!/usr/bin/env rackup
-# encoding: utf-8
+# frozen_string_literal: true
 
 require "./site"
 run Sinatra::Application

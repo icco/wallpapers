@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 source "https://rubygems.org"
 
 ruby "2.7.2"
@@ -16,5 +18,6 @@ gem "unf"
 
 # For dev
 group :development do
+  gem "rubocop"
   gem "shotgun", ">= 0.9.2"
 end

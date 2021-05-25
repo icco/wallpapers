@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 require "rubygems"
 require "bundler"
 Bundler.require(:default, ENV["RACK_ENV"] || :development)
-require "./lib/storage.rb"
+require "./lib/storage"
 
 # Local Path to sync
 PATH = File.join(ENV["DROPBOX"], "/Photos/Wallpapers/DesktopWallpapers")
@@ -47,6 +49,7 @@ task push: [:clean] do
   remote.each do |file|
     filename = file.key.tr("\+", " ")
     next if local.include? filename
+
     deleted += 1
     file.destroy
     puts "#{filename} - deleted"

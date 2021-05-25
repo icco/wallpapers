@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 require "rubygems"
 require "bundler"
 Bundler.require(:default, ENV["RACK_ENV"] || :development)
-require "./lib/storage.rb"
+require "./lib/storage"
 
 configure do
   FORCE_PROD = true

@@ -6,5 +6,7 @@ Metrics/LineLength:
   Max: 120
 Metrics/BlockLength:
   Max: 100
-Style/TrailingCommaInLiteral:
+Style/TrailingCommaInArrayLiteral:
+  EnforcedStyleForMultiline: comma
+Style/TrailingCommaInHashLiteral:
   EnforcedStyleForMultiline: comma
