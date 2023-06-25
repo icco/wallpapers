@@ -16,7 +16,6 @@ import (
 	"github.com/icco/gutil/etag"
 	"github.com/icco/gutil/logging"
 	"github.com/icco/gutil/otel"
-	"github.com/icco/wallpapers/cmd/server/public"
 	"github.com/icco/wallpapers/cmd/server/static"
 )
 
