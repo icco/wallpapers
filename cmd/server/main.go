@@ -26,6 +26,20 @@ const (
 
 var (
 	log = logging.Must(logging.NewLogger(service))
+
+	// Renderer is a renderer for all occasions. These are our preferred default options.
+	// See:
+	//  - https://github.com/unrolled/render/blob/v1/README.md
+	//  - https://godoc.org/gopkg.in/unrolled/render.v1
+	Renderer = render.New(render.Options{
+		Charset:                   "UTF-8",
+		DisableHTTPErrorRendering: false,
+		Extensions:                []string{".tmpl", ".html"},
+		IndentJSON:                false,
+		IndentXML:                 true,
+		RequirePartials:           false,
+		Funcs:                     []template.FuncMap{template.FuncMap{}},
+	})
 )
 
 func main() {
@@ -62,6 +76,18 @@ func main() {
 	})
 
 	r.Mount("/", http.FileServer(http.FS(static.Assets)))
+
+	r.Get("/all.json", func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		images, err := wallpapers.GetAll(ctx)
+		if err != nil {
+			log.Errorw("error during get all", zap.Error(err))
+			Renderer.JSON(w, 500, map[string]string{"error": "retrieval error"})
+			return
+		}
+
+		Renderer.JSON(w, http.StatusOK, images)
+	})
 
 	log.Fatal(http.ListenAndServe(":"+port, r))
 }

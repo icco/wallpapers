@@ -58,11 +58,6 @@ func UploadFile(ctx context.Context, filename string, content []byte) error {
 	return nil
 }
 
-// FileUrl returns the URL to the raw file on GCS.
-func FileURL(key string) string {
-	return fmt.Sprintf("https://%s.storage.googleapis.com/%s", Bucket, key)
-}
-
 // FullRezUrl returns the URL a cropped version hosted by imgix.
 func FullRezUrl(key string) string {
 	return fmt.Sprintf("https://icco-walls.imgix.net/%s?auto=compress&w=2560&h=1440&crop=entropy&fm=png", key)
@@ -75,11 +70,14 @@ func ThumpURL(key string) string {
 
 // File is a subset of storage.ObjectAttrs that we need.
 type File struct {
-	Name    string
-	Size    int64
-	CRC32C  uint32
-	Etag    string
-	Updated time.Time
+	CRC32C       uint32    `json:"crc"`
+	Etag         string    `json:"etag"`
+	FileURL      string    `json:"image"`
+	FullRezURL   string    `json:"cdn"`
+	Name         string    `json:"key"`
+	Size         int64     `json:"size"`
+	ThumbnailURL string    `json:"thumbnail"`
+	Updated      time.Time `json:"updatedAt"`
 }
 
 // GetAll returns all of the attributes for files in GCS.
@@ -102,11 +100,14 @@ func GetAll(ctx context.Context) ([]*File, error) {
 		}
 
 		ret = append(ret, &File{
-			CRC32C:  objAttrs.CRC32C,
-			Etag:    objAttrs.Etag,
-			Name:    objAttrs.Name,
-			Size:    objAttrs.Size,
-			Updated: objAttrs.Updated,
+			CRC32C:       objAttrs.CRC32C,
+			Etag:         objAttrs.Etag,
+			Name:         objAttrs.Name,
+			Size:         objAttrs.Size,
+			Updated:      objAttrs.Updated,
+			ThumbnailURL: ThumbURL(objAttrs.Name),
+			FileURL:      objAttrs.MediaLink,
+			FullRezURL:   FullRezURL(objAttrs.Name),
 		})
 	}
 
