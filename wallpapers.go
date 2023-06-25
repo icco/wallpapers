@@ -70,3 +70,43 @@ func FullRezUrl(key string) string {
 func ThumpURL(key string) string {
 	return fmt.Sprintf("https://icco-walls.imgix.net/%s?w=600&h=400&fit=crop&auto=compress&fm=png", key)
 }
+
+// File is a subset of storage.ObjectAttrs that we need.
+type File struct {
+	Name    string
+	Size    int64
+	CRC32C  uint32
+	Etag    string
+	Updated time.Time
+}
+
+// GetAll returns all of the attributes for files in GCS.
+func GetAll(ctx context.Context) ([]*File, error) {
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var ret []*File
+
+	it := client.Bucket(Bucket).Objects(ctx, nil)
+	for {
+		objAttrs, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return nil, fmt.Errorf("error on iterating: %w", err)
+		}
+
+		ret = append(ret, &File{
+			CRC32C:  objAttrs.CRC32C,
+			Etag:    objAttrs.Etag,
+			Name:    objAttrs.Name,
+			Size:    objAttrs.Size,
+			Updated: objAttrs.Updated,
+		})
+	}
+
+	return ret
+}
