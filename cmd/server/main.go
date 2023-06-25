@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"html/template"
+	"math/rand"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -85,6 +87,9 @@ func main() {
 			Renderer.JSON(w, 500, map[string]string{"error": "retrieval error"})
 			return
 		}
+
+		rand.Seed(time.Now().UnixNano())
+		rand.Shuffle(len(images), func(i, j int) { images[i], images[j] = images[j], images[i] })
 
 		Renderer.JSON(w, http.StatusOK, images)
 	})
