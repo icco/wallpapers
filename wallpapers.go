@@ -52,3 +52,18 @@ func UploadFile(ctx context.Context, filename string, content []byte) error {
 
 	return nil
 }
+
+// FileUrl returns the URL to the raw file on GCS.
+func FileURL(key string) string {
+	return fmt.Sprintf("https://%s.storage.googleapis.com/%s", Bucket, key)
+}
+
+// FullRezUrl returns the URL a cropped version hosted by imgix.
+func FullRezUrl(key string) string {
+	return fmt.Sprintf("https://icco-walls.imgix.net/%s?auto=compress&w=2560&h=1440&crop=entropy&fm=png", key)
+}
+
+// ThumbUrl returns the URL a small cropped version hosted by imgix.
+func ThumpURL(key string) string {
+	return fmt.Sprintf("https://icco-walls.imgix.net/%s?w=600&h=400&fit=crop&auto=compress&fm=png", key)
+}
