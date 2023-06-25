@@ -58,13 +58,13 @@ func UploadFile(ctx context.Context, filename string, content []byte) error {
 	return nil
 }
 
-// FullRezUrl returns the URL a cropped version hosted by imgix.
-func FullRezUrl(key string) string {
+// FullRezURL returns the URL a cropped version hosted by imgix.
+func FullRezURL(key string) string {
 	return fmt.Sprintf("https://icco-walls.imgix.net/%s?auto=compress&w=2560&h=1440&crop=entropy&fm=png", key)
 }
 
 // ThumbUrl returns the URL a small cropped version hosted by imgix.
-func ThumpURL(key string) string {
+func ThumbURL(key string) string {
 	return fmt.Sprintf("https://icco-walls.imgix.net/%s?w=600&h=400&fit=crop&auto=compress&fm=png", key)
 }
 
