@@ -2,13 +2,10 @@ package main
 
 import (
 	"context"
-	"encoding/csv"
-	"encoding/json"
 	"fmt"
+	"html/template"
 	"net/http"
 	"os"
-	"sort"
-	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -16,7 +13,10 @@ import (
 	"github.com/icco/gutil/etag"
 	"github.com/icco/gutil/logging"
 	"github.com/icco/gutil/otel"
+	"github.com/icco/wallpapers"
 	"github.com/icco/wallpapers/cmd/server/static"
+	"github.com/unrolled/render"
+	"go.uber.org/zap"
 )
 
 const (
