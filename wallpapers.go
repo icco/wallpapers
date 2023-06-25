@@ -110,5 +110,5 @@ func GetAll(ctx context.Context) ([]*File, error) {
 		})
 	}
 
-	return ret
+	return ret, nil
 }
