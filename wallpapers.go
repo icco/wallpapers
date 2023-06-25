@@ -13,7 +13,10 @@ import (
 )
 
 const (
-	Bucket    = "iccowalls"
+	Bucket = "iccowalls"
+)
+
+var (
 	NameRegex = regexp.MustCompile("[^a-z0-9]")
 )
 
