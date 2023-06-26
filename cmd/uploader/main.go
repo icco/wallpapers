@@ -13,10 +13,30 @@ import (
 
 const LocalFiles = "/Users/nat/Dropbox/Photos/Wallpapers/DesktopWallpapers"
 
+var (
+	knownLocalFiles map[string]bool
+)
+
 func main() {
 	if err := filepath.Walk(LocalFiles, walkFn); err != nil {
 		log.Printf("error walking: %+v", err)
 		os.Exit(1)
+	}
+
+	ctx := context.Background()
+	knownRemoteFiles, err := wallpapers.GetAll(ctx)
+	if err != nil {
+		log.Printf("error walking: %+v", err)
+		os.Exit(1)
+	}
+	for _, filename := range knownRemoteFiles {
+		if !knownLocalFiles[filename] {
+			if err := wallpapers.Delete(ctx, filename); err != nil {
+				log.Printf("could not delete %q: %w", filename, err)
+				os.Exit(1)
+			}
+			log.Printf("deleted %q", filename)
+		}
 	}
 }
 
@@ -45,6 +65,9 @@ func walkFn(path string, info fs.FileInfo, err error) error {
 		log.Printf("renamed %q => %q", oldName, newName)
 	}
 
+	// log existence
+	knownLocalFiles[newName] = true
+
 	// Upload
 	dat, err := os.ReadFile(newPath)
 	if err != nil {
@@ -65,6 +88,6 @@ func walkFn(path string, info fs.FileInfo, err error) error {
 		return fmt.Errorf("cloud not upload file: %w", err)
 	}
 
-	log.Printf("uploaded file: %q", info.Name())
+	log.Printf("uploaded file: %q", newName)
 	return nil
 }

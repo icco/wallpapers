@@ -57,6 +57,15 @@ func GetFileCRC(content []byte) uint32 {
 	return crc32.Checksum(content, crc32.MakeTable(crc32.Castagnoli))
 }
 
+func DeleteFile(ctx context.Context, filename string) error {
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+
+	return client.Bucket(Bucket).Object(filename).Delete(ctx)
+}
+
 // UploadFile takes a file name and content and uploads it to GoogleCloud.
 func UploadFile(ctx context.Context, filename string, content []byte) error {
 	client, err := storage.NewClient(ctx)
