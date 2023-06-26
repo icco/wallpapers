@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/icco/wallpapers"
 )
@@ -18,20 +19,23 @@ var (
 )
 
 func main() {
-	if err := filepath.Walk(LocalFiles, walkFn); err != nil {
-		log.Printf("error walking: %+v", err)
-		os.Exit(1)
-	}
-
 	ctx := context.Background()
 	knownRemoteFiles, err := wallpapers.GetAll(ctx)
 	if err != nil {
 		log.Printf("error walking: %+v", err)
 		os.Exit(1)
 	}
-	for _, filename := range knownRemoteFiles {
+	knownLocalFiles = map[string]bool{}
+
+	if err := filepath.Walk(LocalFiles, walkFn); err != nil {
+		log.Printf("error walking: %+v", err)
+		os.Exit(1)
+	}
+
+	for _, file := range knownRemoteFiles {
+		filename := file.Name
 		if !knownLocalFiles[filename] {
-			if err := wallpapers.Delete(ctx, filename); err != nil {
+			if err := wallpapers.DeleteFile(ctx, filename); err != nil {
 				log.Printf("could not delete %q: %w", filename, err)
 				os.Exit(1)
 			}
@@ -47,6 +51,11 @@ func walkFn(path string, info fs.FileInfo, err error) error {
 
 	if info.IsDir() {
 		log.Printf("found a dir: %q", info.Name())
+		return nil
+	}
+
+	// Skip hidden files
+	if strings.HasPrefix(info.Name(), ".") {
 		return nil
 	}
 
