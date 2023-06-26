@@ -35,6 +35,24 @@ func FormatName(in string) string {
 	return name + ext
 }
 
+func GetGoogleCRC(ctx context.Context, filename string) (uint32, error) {
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+
+	attr, err := client.Bucket(Bucket).Object(filename).Attrs(ctx)
+	if err != nil {
+		return 0, fmt.Errorf("could not get attrs: %w", err)
+	}
+
+	return attr.CRC32C, nil
+}
+
+func GetFileCRC(content []byte) uint32 {
+	return crc32.Checksum(content, crc32.MakeTable(crc32.Castagnoli))
+}
+
 // UploadFile takes a file name and content and uploads it to GoogleCloud.
 func UploadFile(ctx context.Context, filename string, content []byte) error {
 	client, err := storage.NewClient(ctx)
@@ -43,7 +61,7 @@ func UploadFile(ctx context.Context, filename string, content []byte) error {
 	}
 
 	wc := client.Bucket(Bucket).Object(filename).NewWriter(ctx)
-	wc.CRC32C = crc32.Checksum(content, crc32.MakeTable(crc32.Castagnoli))
+	wc.CRC32C = GetFileCRC(content)
 	wc.SendCRC32C = true
 	wc.ACL = []storage.ACLRule{{Entity: storage.AllUsers, Role: storage.RoleReader}}
 
