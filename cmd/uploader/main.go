@@ -1,0 +1,58 @@
+package main
+
+import (
+	"context"
+	"fmt"
+	"io/fs"
+	"log"
+	"os"
+	"path/filepath"
+
+	"github.com/icco/wallpapers"
+)
+
+const LocalFiles = "/Users/nat/Dropbox/Photos/Wallpapers/DesktopWallpapers"
+
+func main() {
+	if err := filepath.Walk(LocalFiles, walkFn); err != nil {
+		log.Printf("error walking: %+v", err)
+		os.Exit(1)
+	}
+}
+
+func walkFn(path string, info fs.FileInfo, err error) error {
+	if err != nil {
+		return fmt.Errorf("prevent panic by handling failure accessing a path %q: %w", path, err)
+	}
+
+	if info.IsDir() {
+		log.Printf("found a dir: %q", info.Name())
+		return nil
+	}
+
+	// Rename
+	folder := filepath.Dir(path)
+	oldName := info.Name()
+
+	newName := wallpapers.FormatName(info.Name())
+	newPath := filepath.Join(folder, newName)
+	if newName != info.Name() {
+		if err := os.Rename(path, newPath); err != nil {
+			return fmt.Errorf("could not rename: %w", err)
+		}
+		log.Printf("renamed %q => %q", oldName, newName)
+	}
+
+	// Upload
+	dat, err := os.ReadFile(newPath)
+	if err != nil {
+		return fmt.Errorf("could not read file: %w", err)
+	}
+
+	if err := wallpapers.UploadFile(context.Background(), newName, dat); err != nil {
+		return fmt.Errorf("cloud not upload file: %w", err)
+	}
+
+	log.Printf("uploaded file: %q", info.Name())
+	return nil
+}
