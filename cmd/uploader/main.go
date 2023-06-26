@@ -30,6 +30,8 @@ func walkFn(path string, info fs.FileInfo, err error) error {
 		return nil
 	}
 
+	ctx := context.Background()
+
 	// Rename
 	folder := filepath.Dir(path)
 	oldName := info.Name()
@@ -49,7 +51,17 @@ func walkFn(path string, info fs.FileInfo, err error) error {
 		return fmt.Errorf("could not read file: %w", err)
 	}
 
-	if err := wallpapers.UploadFile(context.Background(), newName, dat); err != nil {
+	gc, err := wallpapers.GetGoogleCRC(ctx, newName)
+	if err != nil {
+		return fmt.Errorf("could not get crc: %w", err)
+	}
+	lc := wallpapers.GetFileCRC(dat)
+	if gc == lc {
+		log.Printf("%q unchanged, skipping", newName)
+		return nil
+	}
+
+	if err := wallpapers.UploadFile(ctx, newName, dat); err != nil {
 		return fmt.Errorf("cloud not upload file: %w", err)
 	}
 
