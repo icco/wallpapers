@@ -46,6 +46,7 @@ func UploadFile(ctx context.Context, filename string, content []byte) error {
 	wc := client.Bucket(Bucket).Object(filename).NewWriter(ctx)
 	wc.CRC32C = crc32.Checksum(content, crc32.MakeTable(crc32.Castagnoli))
 	wc.SendCRC32C = true
+	wc.ACL = []storage.ACLRule{{Entity: storage.AllUsers, Role: storage.RoleReader}}
 
 	if _, err := wc.Write(content); err != nil {
 		return fmt.Errorf("failed write: %w", err)
@@ -53,7 +54,6 @@ func UploadFile(ctx context.Context, filename string, content []byte) error {
 	if err := wc.Close(); err != nil {
 		return fmt.Errorf("failed close: %w", err)
 	}
-	log.Printf("updated object: %+v", wc.Attrs())
 
 	return nil
 }
