@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"hash/crc32"
-	"log"
 	"path/filepath"
 	"regexp"
 	"strings"
