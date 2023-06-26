@@ -100,14 +100,14 @@ func ThumbURL(key string) string {
 
 // File is a subset of storage.ObjectAttrs that we need.
 type File struct {
-	CRC32C       uint32    `json:"crc"`
-	Etag         string    `json:"etag"`
-	FileURL      string    `json:"image"`
+	CRC32C       uint32    `json:"-"`
+	Etag         string    `json:"-"`
+	FileURL      string    `json:"-"`
 	FullRezURL   string    `json:"cdn"`
 	Name         string    `json:"key"`
-	Size         int64     `json:"size"`
+	Size         int64     `json:"-"`
 	ThumbnailURL string    `json:"thumbnail"`
-	Updated      time.Time `json:"updatedAt"`
+	Updated      time.Time `json:"-"`
 }
 
 // GetAll returns all of the attributes for files in GCS.
