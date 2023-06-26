@@ -38,7 +38,7 @@ func FormatName(in string) string {
 func GetGoogleCRC(ctx context.Context, filename string) (uint32, error) {
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	attr, err := client.Bucket(Bucket).Object(filename).Attrs(ctx)
