@@ -44,7 +44,7 @@ func main() {
 		filename := file.Name
 		if !knownLocalFiles[filename] {
 			if err := wallpapers.DeleteFile(ctx, filename); err != nil {
-				log.Printf("could not delete %q: %w", filename, err)
+				log.Printf("could not delete %q: %+v", filename, err)
 				os.Exit(1)
 			}
 			log.Printf("deleted %q", filename)
