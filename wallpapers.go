@@ -97,7 +97,9 @@ func FullRezURL(key string) string {
 
 // ThumbUrl returns the URL a small cropped version hosted by imgix.
 func ThumbURL(key string) string {
-	return fmt.Sprintf("https://icco-walls.imgix.net/%s?w=600&h=400&fit=crop&auto=compress&fm=png", key)
+	w := 800
+	h := 450
+	return fmt.Sprintf("https://icco-walls.imgix.net/%s?w=%d&h=%d&fit=crop&auto=compress&fm=png", key, w, h)
 }
 
 // File is a subset of storage.ObjectAttrs that we need.
