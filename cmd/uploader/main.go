@@ -6,13 +6,14 @@ import (
 	"io/fs"
 	"log"
 	"os"
+	"os/user"
 	"path/filepath"
 	"strings"
 
 	"github.com/icco/wallpapers"
 )
 
-const LocalFiles = "/Users/nat/Dropbox/Photos/Wallpapers/DesktopWallpapers"
+const DropboxPath = "/Photos/Wallpapers/DesktopWallpapers"
 
 var (
 	knownLocalFiles map[string]bool
@@ -27,7 +28,14 @@ func main() {
 	}
 	knownLocalFiles = map[string]bool{}
 
-	if err := filepath.Walk(LocalFiles, walkFn); err != nil {
+	u, err := user.Lookup("nat")
+	if err != nil {
+		log.Printf("error getting nat: %+v", err)
+		os.Exit(1)
+	}
+	localFiles := filepath.Join(u.HomeDir, "Dropbox", DropboxPath)
+
+	if err := filepath.Walk(localFiles, walkFn); err != nil {
 		log.Printf("error walking: %+v", err)
 		os.Exit(1)
 	}
