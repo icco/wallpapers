@@ -90,7 +90,9 @@ func UploadFile(ctx context.Context, filename string, content []byte) error {
 
 // FullRezURL returns the URL a cropped version hosted by imgix.
 func FullRezURL(key string) string {
-	return fmt.Sprintf("https://icco-walls.imgix.net/%s?auto=compress&w=2560&h=1440&crop=entropy&fm=png", key)
+	w := 3840
+	h := 2160
+	return fmt.Sprintf("https://icco-walls.imgix.net/%s?auto=compress&w=%d&h=%d&crop=entropy&fm=png", key, w, h)
 }
 
 // ThumbUrl returns the URL a small cropped version hosted by imgix.
