@@ -23,11 +23,18 @@ cloud.google.com/go/trace v1.10.1/go.mod h1:gbtL94KE5AJLH3y+WVpfWILmqgc6dXcqgNXd
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.39.2 h1:Z99Gh6RPaaDVKb0NqqvDd63WPBj3Ua1xpzo0Xt7i3Ng=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.39.2/go.mod h1:+2cosZ+V7giVe+D9UaZfDevw58/6KVx7hkkX3LZw8o0=
+github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.41.0 h1:VahL5SjDdCas8mMKARolw2vvBsuLc5oV7XNSbxeMQP8=
+github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.41.0/go.mod h1:T8qLlq6KznHWwp8FEbfw+p7mX/+dezSvUy3PXfTnp4c=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.15.2 h1:L8Rzas9w4DGt1bMOhT3DI7DD0jJUX1StWGZJEQ+JoJY=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.15.2/go.mod h1:9sKVjE4anClH/s9HTxPfCUA/LvKjCSXQT43KV+3GETg=
+github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.17.0 h1:DwGeS/9k9xdpnvVQuJF+L9bYNFvBCmCWlDA8d8opoZY=
+github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.17.0/go.mod h1:SUVNJAkkyRKeM3L46/NhFGIz+Kx1zetN09qUs1XbMx8=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock v0.39.2 h1:Wrmrz5DzrFUug42f/bmHtZ5jZoAVzIYj8bIGJdebLQM=
+github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock v0.41.0 h1:ZJwvlTjB8GycSRpysdcRv3FztommLDUfgii0VUUp5ys=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.39.2 h1:XIERWzKobhRJHSzZwhPKCY7TCPiYJp/mEbSSKEgYCzU=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.39.2/go.mod h1:lz6DEePTxmjvYMtusOoS3qDAErC0STi/wmvqJucKY28=
+github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.41.0 h1:MWQ81b2TkSLbDpLINiKdZdoht1VMEHCKr4BSZpb/KQ8=
+github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.41.0/go.mod h1:lz6DEePTxmjvYMtusOoS3qDAErC0STi/wmvqJucKY28=
 github.com/XSAM/otelsql v0.23.0 h1:NsJQS9YhI1+RDsFqE9mW5XIQmPmdF/qa8qQOLZN8XEA=
 github.com/XSAM/otelsql v0.23.0/go.mod h1:oX4LXMsb+9lAZhvHjUS61oQP/hbcJRadWHnBKNL+LuM=
 github.com/antihax/optional v1.0.0/go.mod h1:uupD/76wgC+ih3iEmQUL+0Ugr19nfwCT1kdvxnR2qWY=
@@ -57,6 +64,8 @@ github.com/fsnotify/fsnotify v1.6.0/go.mod h1:sl3t1tCWJFWoRz9R8WJCbQihKKwmorjAbS
 github.com/ghodss/yaml v1.0.0/go.mod h1:4dBDuWmgqj2HViK6kFavaiC9ZROes6MMH2rRYeMEF04=
 github.com/go-chi/chi/v5 v5.0.8 h1:lD+NLqFcAi1ovnVZpsnObHGW4xb4J8lNmoYVfECH1Y0=
 github.com/go-chi/chi/v5 v5.0.8/go.mod h1:DslCQbL2OYiznFReuXYUmQ2hGd1aDpCnlMNITLSKoi8=
+github.com/go-chi/chi/v5 v5.0.10 h1:rLz5avzKpjqxrYwXNfmjkrYYXOyLJd37pz53UFHC6vk=
+github.com/go-chi/chi/v5 v5.0.10/go.mod h1:DslCQbL2OYiznFReuXYUmQ2hGd1aDpCnlMNITLSKoi8=
 github.com/go-chi/cors v1.2.1 h1:xEC8UT3Rlp2QuWNEr4Fs/c2EAGVKBwy/1vHx3bppil4=
 github.com/go-chi/cors v1.2.1/go.mod h1:sSbTewc+6wYHBBCW7ytsFSn836hqM7JxpglAy2Vzc58=
 github.com/go-http-utils/fresh v0.0.0-20161124030543-7231e26a4b27 h1:O6yi4xa9b2DMosGsXzlMe2E9qXgXCVkRLCoRX+5amxI=
