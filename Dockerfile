@@ -1,4 +1,4 @@
-From golang:1.20-alpine
+From golang:1.21-alpine
 
 ENV PORT 8080
 EXPOSE 8080
