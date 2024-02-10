@@ -1,11 +1,13 @@
 package wallpapers
 
 import (
+	"cmp"
 	"context"
 	"fmt"
 	"hash/crc32"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 	"time"
 
@@ -111,7 +113,8 @@ type File struct {
 	Name         string    `json:"key"`
 	Size         int64     `json:"-"`
 	ThumbnailURL string    `json:"thumbnail"`
-	Updated      time.Time `json:"-"`
+	Created      time.Time `json:"created_at"`
+	Updated      time.Time `json:"updated_at"`
 }
 
 // GetAll returns all of the attributes for files in GCS.
@@ -123,7 +126,11 @@ func GetAll(ctx context.Context) ([]*File, error) {
 
 	var ret []*File
 
-	it := client.Bucket(Bucket).Objects(ctx, nil)
+	query := &storage.Query{
+		Projection: storage.ProjectionNoACL,
+	}
+
+	it := client.Bucket(Bucket).Objects(ctx, query)
 	for {
 		objAttrs, err := it.Next()
 		if err == iterator.Done {
@@ -138,6 +145,7 @@ func GetAll(ctx context.Context) ([]*File, error) {
 			Etag:         objAttrs.Etag,
 			Name:         objAttrs.Name,
 			Size:         objAttrs.Size,
+			Created:      objAttrs.Created,
 			Updated:      objAttrs.Updated,
 			ThumbnailURL: ThumbURL(objAttrs.Name),
 			FileURL:      objAttrs.MediaLink,
@@ -145,5 +153,9 @@ func GetAll(ctx context.Context) ([]*File, error) {
 		})
 	}
 
+	// Sort by created date
+	slices.SortStableFunc(ret, func(a, b *File) int {
+		return cmp.Compare(a.Created.String(), b.Created.String())
+	})
 	return ret, nil
 }
