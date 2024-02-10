@@ -154,7 +154,7 @@ func GetAll(ctx context.Context) ([]*File, error) {
 	}
 
 	// Sort by created date
-	slices.SortStableFunc(ret, func(a, b *File) int {
+	slices.SortStableFunc(ret, func(b, a *File) int {
 		return cmp.Compare(a.Created.String(), b.Created.String())
 	})
 	return ret, nil
