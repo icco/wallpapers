@@ -105,7 +105,7 @@ func ThumbURL(key string) string {
 // File is a subset of storage.ObjectAttrs that we need.
 type File struct {
 	CRC32C       uint32    `json:"-"`
-	Etag         string    `json:"-"`
+	Etag         string    `json:"etag"`
 	FileURL      string    `json:"-"`
 	FullRezURL   string    `json:"cdn"`
 	Name         string    `json:"key"`
