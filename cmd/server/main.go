@@ -76,6 +76,15 @@ func main() {
 	})
 	r.Use(crs.Handler)
 
+	r.Use(func(h http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("report-to", `{"group":"default","max_age":10886400,"endpoints":[{"url":"https://reportd.natwelch.com/report/wallpapers"}]}`)
+			w.Header().Set("reporting-endpoints", `default="https://reportd.natwelch.com/reporting/wallpapers"`)
+
+			h.ServeHTTP(w, r)
+		})
+	})
+
 	r.Get("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("hi."))
 	})
@@ -90,9 +99,6 @@ func main() {
 			Renderer.JSON(w, 500, map[string]string{"error": "retrieval error"})
 			return
 		}
-
-		w.Header().Set("report-to", `{"group":"default","max_age":10886400,"endpoints":[{"url":"https://reportd.natwelch.com/report/wallpapers"}]}`)
-		w.Header().Set("reporting-endpoints", `default="https://reportd.natwelch.com/reporting/wallpapers"`)
 
 		Renderer.JSON(w, http.StatusOK, images)
 	})
