@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/go-chi/chi/v5"
+	chi "github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/icco/gutil/etag"
@@ -14,6 +14,7 @@ import (
 	"github.com/icco/wallpapers"
 	"github.com/icco/wallpapers/cmd/server/static"
 	"github.com/unrolled/render"
+	"github.com/unrolled/secure"
 	"go.uber.org/zap"
 )
 
@@ -47,10 +48,22 @@ func main() {
 	}
 	log.Infow("Starting up", "host", fmt.Sprintf("http://localhost:%s", port))
 
+	secureMiddleware := secure.New(secure.Options{
+		SSLRedirect:           false,
+		SSLProxyHeaders:       map[string]string{"X-Forwarded-Proto": "https"},
+		FrameDeny:             true,
+		ContentTypeNosniff:    true,
+		BrowserXssFilter:      true,
+		ContentSecurityPolicy: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com; connect-src 'self' https://reportd.natwelch.com; report-uri https://reportd.natwelch.com/report/wallpapers; report-to default",
+		ReferrerPolicy:        "no-referrer",
+		FeaturePolicy:         "geolocation 'none'; midi 'none'; sync-xhr 'none'; microphone 'none'; camera 'none'; magnetometer 'none'; gyroscope 'none'; speaker 'none'; fullscreen 'none'; payment 'none'; usb 'none'",
+	})
+
 	r := chi.NewRouter()
 	r.Use(etag.Handler(false))
 	r.Use(middleware.RealIP)
 	r.Use(logging.Middleware(log.Desugar(), project))
+	r.Use(secureMiddleware.Handler)
 
 	crs := cors.New(cors.Options{
 		AllowCredentials:   true,
@@ -77,6 +90,9 @@ func main() {
 			Renderer.JSON(w, 500, map[string]string{"error": "retrieval error"})
 			return
 		}
+
+		w.Header().Set("report-to", `{"group":"default","max_age":10886400,"endpoints":[{"url":"https://reportd.natwelch.com/report/wallpapers"}]}`)
+		w.Header().Set("reporting-endpoints", `default="https://reportd.natwelch.com/reporting/wallpapers"`)
 
 		Renderer.JSON(w, http.StatusOK, images)
 	})
