@@ -49,14 +49,13 @@ func main() {
 	log.Infow("Starting up", "host", fmt.Sprintf("http://localhost:%s", port))
 
 	secureMiddleware := secure.New(secure.Options{
-		SSLRedirect:           false,
-		SSLProxyHeaders:       map[string]string{"X-Forwarded-Proto": "https"},
-		FrameDeny:             true,
-		ContentTypeNosniff:    true,
-		BrowserXssFilter:      true,
-		ContentSecurityPolicy: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com; connect-src 'self' https://reportd.natwelch.com; report-uri https://reportd.natwelch.com/report/wallpapers; report-to default",
-		ReferrerPolicy:        "no-referrer",
-		FeaturePolicy:         "geolocation 'none'; midi 'none'; sync-xhr 'none'; microphone 'none'; camera 'none'; magnetometer 'none'; gyroscope 'none'; speaker 'none'; fullscreen 'none'; payment 'none'; usb 'none'",
+		SSLRedirect:        false,
+		SSLProxyHeaders:    map[string]string{"X-Forwarded-Proto": "https"},
+		FrameDeny:          true,
+		ContentTypeNosniff: true,
+		BrowserXssFilter:   true,
+		ReferrerPolicy:     "no-referrer",
+		FeaturePolicy:      "geolocation 'none'; midi 'none'; sync-xhr 'none'; microphone 'none'; camera 'none'; magnetometer 'none'; gyroscope 'none'; fullscreen 'none'; payment 'none'; usb 'none'",
 	})
 
 	r := chi.NewRouter()
