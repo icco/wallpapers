@@ -48,6 +48,23 @@
         color: #007BE6;
       }
     </style>
+
+    <script type="module">
+      import { onCLS, onINP, onLCP, onFCP, onFID, onTTFB } from 'https://unpkg.com/web-vitals@4?module';
+
+      function sendToAnalytics(metric) {
+        const body = JSON.stringify(metric);
+        (navigator.sendBeacon && navigator.sendBeacon('https://reportd.natwelch.com/analytics/wallpapers', body)) ||
+          fetch('https://reportd.natwelch.com/analytics/wallpapers', { body, method: 'POST', keepalive: true });
+      }
+
+      onCLS(sendToAnalytics);
+      onFCP(sendToAnalytics);
+      onFID(sendToAnalytics);
+      onINP(sendToAnalytics);
+      onLCP(sendToAnalytics);
+      onTTFB(sendToAnalytics);
+    </script>
   </head>
   <body>
     <div class="pam">
