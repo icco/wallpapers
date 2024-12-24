@@ -85,7 +85,9 @@ func main() {
 	})
 
 	r.Get("/healthz", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("hi."))
+		if _, err := w.Write([]byte("hi.")); err != nil {
+			log.Errorw("error writing healthz", zap.Error(err))
+		}
 	})
 
 	r.Mount("/", http.FileServer(http.FS(static.Assets)))
@@ -95,11 +97,15 @@ func main() {
 		images, err := wallpapers.GetAll(ctx)
 		if err != nil {
 			log.Errorw("error during get all", zap.Error(err))
-			Renderer.JSON(w, 500, map[string]string{"error": "retrieval error"})
+			if err := Renderer.JSON(w, 500, map[string]string{"error": "retrieval error"}); err != nil {
+				log.Errorw("error during get all render", zap.Error(err))
+			}
 			return
 		}
 
-		Renderer.JSON(w, http.StatusOK, images)
+		if err := Renderer.JSON(w, http.StatusOK, images); err != nil {
+			log.Errorw("error during get all success render", zap.Error(err))
+		}
 	})
 
 	log.Fatal(http.ListenAndServe(":"+port, r))
