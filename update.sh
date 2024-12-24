@@ -1,6 +1,6 @@
 #! /bin/zsh
 
-go get -v -u -d ./...
+go get -v -u ./...
 git add go.mod go.sum
 git ci -m 'update go deps'
 git push
