@@ -3,6 +3,7 @@ package wallpapers
 import (
 	"cmp"
 	"context"
+	"errors"
 	"fmt"
 	"hash/crc32"
 	"path/filepath"
@@ -44,12 +45,14 @@ func GetGoogleCRC(ctx context.Context, filename string) (uint32, error) {
 	}
 
 	attr, err := client.Bucket(Bucket).Object(filename).Attrs(ctx)
-	if err != nil && err != storage.ErrObjectNotExist {
-		return 0, fmt.Errorf("could not get attrs: %w", err)
-	}
+	if err != nil {
+		if !errors.Is(err, storage.ErrObjectNotExist) {
+			return 0, fmt.Errorf("could not get attrs: %w", err)
+		}
 
-	if err == storage.ErrObjectNotExist {
-		return 0, nil
+		if errors.Is(err, storage.ErrObjectNotExist) {
+			return 0, nil
+		}
 	}
 
 	return attr.CRC32C, nil
@@ -133,7 +136,7 @@ func GetAll(ctx context.Context) ([]*File, error) {
 	it := client.Bucket(Bucket).Objects(ctx, query)
 	for {
 		objAttrs, err := it.Next()
-		if err == iterator.Done {
+		if errors.Is(err, iterator.Done) {
 			break
 		}
 		if err != nil {

@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"net/http"
 	"os"
+	"time"
 
 	chi "github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -85,7 +86,9 @@ func main() {
 	})
 
 	r.Get("/healthz", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("hi."))
+		if _, err := w.Write([]byte("hi.")); err != nil {
+			log.Errorw("error writing healthz", zap.Error(err))
+		}
 	})
 
 	r.Mount("/", http.FileServer(http.FS(static.Assets)))
@@ -95,12 +98,24 @@ func main() {
 		images, err := wallpapers.GetAll(ctx)
 		if err != nil {
 			log.Errorw("error during get all", zap.Error(err))
-			Renderer.JSON(w, 500, map[string]string{"error": "retrieval error"})
+			if err := Renderer.JSON(w, 500, map[string]string{"error": "retrieval error"}); err != nil {
+				log.Errorw("error during get all render", zap.Error(err))
+			}
 			return
 		}
 
-		Renderer.JSON(w, http.StatusOK, images)
+		if err := Renderer.JSON(w, http.StatusOK, images); err != nil {
+			log.Errorw("error during get all success render", zap.Error(err))
+		}
 	})
 
-	log.Fatal(http.ListenAndServe(":"+port, r))
+	srv := &http.Server{
+		Addr:         ":" + port,
+		Handler:      r,
+		ReadTimeout:  1 * time.Second,
+		WriteTimeout: 1 * time.Second,
+		IdleTimeout:  1 * time.Second,
+	}
+
+	log.Fatal(srv.ListenAndServe())
 }
