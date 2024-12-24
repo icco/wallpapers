@@ -136,7 +136,7 @@ func GetAll(ctx context.Context) ([]*File, error) {
 	it := client.Bucket(Bucket).Objects(ctx, query)
 	for {
 		objAttrs, err := it.Next()
-		if err == iterator.Done {
+		if errors.Is(err, iterator.Done) {
 			break
 		}
 		if err != nil {
