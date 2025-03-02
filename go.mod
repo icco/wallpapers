@@ -9,6 +9,7 @@ require (
 	github.com/go-chi/chi/v5 v5.2.1
 	github.com/go-chi/cors v1.2.1
 	github.com/icco/gutil v0.0.0-20250215014032-7b1b73930901
+	github.com/tjarratt/babble v0.0.0-20210505082055-cbca2a4833c1
 	github.com/unrolled/render v1.7.0
 	github.com/unrolled/secure v1.17.0
 	go.uber.org/zap v1.27.0
