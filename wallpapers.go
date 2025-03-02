@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/storage"
+	"github.com/tjarratt/babble"
 	"google.golang.org/api/iterator"
 )
 
@@ -34,6 +35,18 @@ func FormatName(in string) string {
 	name, _ := strings.CutSuffix(in, filepath.Ext(in))
 	name = strings.ToLower(filepath.Base(name))
 	name = NameRegex.ReplaceAllString(name, "")
+
+	if len(name) > 100 {
+		name = name[:100]
+	}
+
+	for len(name) < 15 {
+		babbler := babble.NewBabbler()
+		babbler.Separator = ""
+		babbler.Count = 1
+
+		name = name + babbler.Babble()
+	}
 
 	return name + ext
 }
