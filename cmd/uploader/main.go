@@ -86,6 +86,7 @@ func walkFn(path string, info fs.FileInfo, err error) error {
 	knownLocalFiles[newName] = true
 
 	// Upload
+	//gosec:disable G304 We are uploading a file, so we need to read it
 	dat, err := os.ReadFile(newPath)
 	if err != nil {
 		return fmt.Errorf("could not read file: %w", err)
