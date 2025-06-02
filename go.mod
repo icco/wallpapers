@@ -5,7 +5,7 @@ go 1.24
 toolchain go1.24.2
 
 require (
-	cloud.google.com/go/storage v1.54.0
+	cloud.google.com/go/storage v1.55.0
 	github.com/go-chi/chi/v5 v5.2.1
 	github.com/go-chi/cors v1.2.1
 	github.com/icco/gutil v0.0.0-20250523221334-351f1696528b
@@ -13,7 +13,7 @@ require (
 	github.com/unrolled/render v1.7.0
 	github.com/unrolled/secure v1.17.0
 	go.uber.org/zap v1.27.0
-	google.golang.org/api v0.234.0
+	google.golang.org/api v0.235.0
 )
 
 require (
