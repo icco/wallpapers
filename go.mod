@@ -6,7 +6,7 @@ toolchain go1.24.2
 
 require (
 	cloud.google.com/go/storage v1.55.0
-	github.com/go-chi/chi/v5 v5.2.1
+	github.com/go-chi/chi/v5 v5.2.2
 	github.com/go-chi/cors v1.2.1
 	github.com/icco/gutil v0.0.0-20250523221334-351f1696528b
 	github.com/tjarratt/babble v0.0.0-20210505082055-cbca2a4833c1
