@@ -13,7 +13,7 @@ RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o /server ./cmd/server
 RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o /uploader ./cmd/uploader
 
 # Runtime stage
-FROM alpine:3.21
+FROM alpine:3.23
 
 RUN apk add --no-cache ca-certificates
 
