@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/icco/wallpapers"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -78,8 +79,8 @@ func (Image) TableName() string {
 
 // WithURLs populates the computed URL fields based on the filename.
 func (img *Image) WithURLs() *Image {
-	img.ThumbnailURL = thumbURL(img.Filename)
-	img.FullRezURL = fullRezURL(img.Filename)
+	img.ThumbnailURL = wallpapers.ThumbURL(img.Filename)
+	img.FullRezURL = wallpapers.FullRezURL(img.Filename)
 	return img
 }
 
@@ -94,20 +95,6 @@ func (img *Image) MergeMetadata(other *Image) {
 	img.FileFormat = other.FileFormat
 	img.Colors = other.Colors
 	img.Words = other.Words
-}
-
-// fullRezURL returns the URL for a cropped version hosted by imgix.
-func fullRezURL(key string) string {
-	w := 3840
-	h := 2160
-	return fmt.Sprintf("https://icco-walls.imgix.net/%s?auto=compress&w=%d&h=%d&crop=entropy&fm=png", key, w, h)
-}
-
-// thumbURL returns the URL for a small cropped version hosted by imgix.
-func thumbURL(key string) string {
-	w := 800
-	h := 450
-	return fmt.Sprintf("https://icco-walls.imgix.net/%s?w=%d&h=%d&fit=crop&auto=compress&auto=format", key, w, h)
 }
 
 // DB wraps the GORM database connection.
