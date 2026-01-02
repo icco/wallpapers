@@ -16,9 +16,8 @@ import (
 	"strings"
 
 	"github.com/EdlinOrg/prominentcolor"
-	"github.com/google/generative-ai-go/genai"
 	_ "golang.org/x/image/webp"
-	"google.golang.org/api/option"
+	"google.golang.org/genai"
 )
 
 // ImageInfo contains analyzed information about an image.
@@ -124,17 +123,13 @@ func extractWords(ctx context.Context, data []byte, format string) ([]string, er
 		return nil, fmt.Errorf("GEMINI_API_KEY environment variable not set")
 	}
 
-	client, err := genai.NewClient(ctx, option.WithAPIKey(apiKey))
+	client, err := genai.NewClient(ctx, &genai.ClientConfig{
+		APIKey:  apiKey,
+		Backend: genai.BackendGeminiAPI,
+	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create Gemini client: %w", err)
 	}
-	defer func() {
-		if cerr := client.Close(); cerr != nil {
-			fmt.Fprintf(os.Stderr, "warning: failed to close Gemini client: %v\n", cerr)
-		}
-	}()
-
-	model := client.GenerativeModel("gemini-2.0-flash")
 
 	// Set up the prompt for extracting words
 	prompt := `Analyze this image and provide:
@@ -158,23 +153,26 @@ Words:`
 		mimeType = "image/webp"
 	}
 
-	resp, err := model.GenerateContent(ctx,
-		genai.Blob{MIMEType: mimeType, Data: data},
-		genai.Text(prompt),
-	)
+	parts := []*genai.Part{
+		{Text: prompt},
+		{InlineData: &genai.Blob{Data: data, MIMEType: mimeType}},
+	}
+
+	resp, err := client.Models.GenerateContent(ctx, "gemini-2.0-flash",
+		[]*genai.Content{{Parts: parts}}, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate content: %w", err)
 	}
 
-	if len(resp.Candidates) == 0 || len(resp.Candidates[0].Content.Parts) == 0 {
+	if len(resp.Candidates) == 0 || resp.Candidates[0].Content == nil || len(resp.Candidates[0].Content.Parts) == 0 {
 		return []string{}, nil
 	}
 
 	// Extract text from response
 	var text string
 	for _, part := range resp.Candidates[0].Content.Parts {
-		if t, ok := part.(genai.Text); ok {
-			text += string(t)
+		if part.Text != "" {
+			text += part.Text
 		}
 	}
 
