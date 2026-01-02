@@ -154,7 +154,6 @@ func analyzeAndStore(ctx context.Context, filePath, filename string, data []byte
 		return fmt.Errorf("analysis failed: %w", err)
 	}
 
-	// Build the image record
 	now := time.Now()
 	img := &db.Image{
 		Filename:     filename,
@@ -167,17 +166,7 @@ func analyzeAndStore(ctx context.Context, filePath, filename string, data []byte
 		Words:        info.Words,
 		ProcessedAt:  &now,
 	}
-
-	// Set colors
-	if len(info.Colors) > 0 {
-		img.Color1 = info.Colors[0]
-	}
-	if len(info.Colors) > 1 {
-		img.Color2 = info.Colors[1]
-	}
-	if len(info.Colors) > 2 {
-		img.Color3 = info.Colors[2]
-	}
+	img.SetColors(info.Colors)
 
 	if err := database.UpsertImage(img); err != nil {
 		return fmt.Errorf("failed to store image: %w", err)
@@ -185,6 +174,5 @@ func analyzeAndStore(ctx context.Context, filePath, filename string, data []byte
 
 	log.Printf("stored metadata for %q: %dx%d, %d colors, %d words",
 		filename, info.Width, info.Height, len(info.Colors), len(info.Words))
-
 	return nil
 }

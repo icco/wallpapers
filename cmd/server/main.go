@@ -172,31 +172,13 @@ func main() {
 // gcsFilesToImages converts GCS file listings to Image structs with database metadata.
 func gcsFilesToImages(files []*wallpapers.File) []*db.Image {
 	result := make([]*db.Image, 0, len(files))
-
 	for _, f := range files {
-		img := &db.Image{
-			Filename:     f.Name,
-			DateAdded:    f.Created,
-			LastModified: f.Updated,
-		}
-
-		// Enrich with database metadata if available
+		img := &db.Image{Filename: f.Name, DateAdded: f.Created, LastModified: f.Updated}
 		if database != nil {
-			if dbImg, err := database.GetByFilename(f.Name); err == nil && dbImg != nil {
-				img.Width = dbImg.Width
-				img.Height = dbImg.Height
-				img.PixelDensity = dbImg.PixelDensity
-				img.FileFormat = dbImg.FileFormat
-				img.Color1 = dbImg.Color1
-				img.Color2 = dbImg.Color2
-				img.Color3 = dbImg.Color3
-				img.Words = dbImg.Words
-			}
+			dbImg, _ := database.GetByFilename(f.Name)
+			img.MergeMetadata(dbImg)
 		}
-
-		img.WithURLs()
-		result = append(result, img)
+		result = append(result, img.WithURLs())
 	}
-
 	return result
 }

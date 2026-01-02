@@ -85,6 +85,34 @@ func (img *Image) WithURLs() *Image {
 	return img
 }
 
+// SetColors sets Color1, Color2, Color3 from a slice.
+func (img *Image) SetColors(colors []string) {
+	if len(colors) > 0 {
+		img.Color1 = colors[0]
+	}
+	if len(colors) > 1 {
+		img.Color2 = colors[1]
+	}
+	if len(colors) > 2 {
+		img.Color3 = colors[2]
+	}
+}
+
+// MergeMetadata copies analysis metadata from another image (keeps original filename/dates).
+func (img *Image) MergeMetadata(other *Image) {
+	if other == nil {
+		return
+	}
+	img.Width = other.Width
+	img.Height = other.Height
+	img.PixelDensity = other.PixelDensity
+	img.FileFormat = other.FileFormat
+	img.Color1 = other.Color1
+	img.Color2 = other.Color2
+	img.Color3 = other.Color3
+	img.Words = other.Words
+}
+
 // fullRezURL returns the URL for a cropped version hosted by imgix.
 func fullRezURL(key string) string {
 	w := 3840
