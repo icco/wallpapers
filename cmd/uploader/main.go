@@ -155,16 +155,17 @@ func analyzeAndStore(ctx context.Context, filePath, filename string, data []byte
 	}
 
 	// Build the image record
+	now := time.Now()
 	img := &db.Image{
 		Filename:     filename,
-		DateAdded:    time.Now(),
+		DateAdded:    now,
 		LastModified: modTime,
 		Width:        info.Width,
 		Height:       info.Height,
 		PixelDensity: info.PixelDensity,
 		FileFormat:   info.FileFormat,
 		Words:        info.Words,
-		ProcessedAt:  time.Now(),
+		ProcessedAt:  &now,
 	}
 
 	// Set colors

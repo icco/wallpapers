@@ -45,19 +45,6 @@ var (
 	database *db.DB
 )
 
-// EnrichedFile extends the File struct with database metadata.
-type EnrichedFile struct {
-	*wallpapers.File
-	Width        int      `json:"width,omitempty"`
-	Height       int      `json:"height,omitempty"`
-	PixelDensity float64  `json:"pixel_density,omitempty"`
-	FileFormat   string   `json:"file_format,omitempty"`
-	Color1       string   `json:"color1,omitempty"`
-	Color2       string   `json:"color2,omitempty"`
-	Color3       string   `json:"color3,omitempty"`
-	Words        []string `json:"words,omitempty"`
-}
-
 func main() {
 	port := "8080"
 	if fromEnv := os.Getenv("PORT"); fromEnv != "" {
@@ -124,7 +111,7 @@ func main() {
 
 	r.Get("/all.json", func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		images, err := wallpapers.GetAll(ctx)
+		gcsFiles, err := wallpapers.GetAll(ctx)
 		if err != nil {
 			log.Errorw("error during get all", zap.Error(err))
 			if err := Renderer.JSON(w, 500, map[string]string{"error": "retrieval error"}); err != nil {
@@ -133,10 +120,10 @@ func main() {
 			return
 		}
 
-		// Enrich with database metadata
-		enriched := enrichImages(images)
+		// Convert GCS files to images with database metadata
+		images := gcsFilesToImages(gcsFiles)
 
-		if err := Renderer.JSON(w, http.StatusOK, enriched); err != nil {
+		if err := Renderer.JSON(w, http.StatusOK, images); err != nil {
 			log.Errorw("error during get all success render", zap.Error(err))
 		}
 	})
@@ -152,7 +139,7 @@ func main() {
 			return
 		}
 
-		dbImages, err := database.Search(query)
+		images, err := database.Search(query)
 		if err != nil {
 			log.Errorw("error during search", zap.Error(err))
 			if err := Renderer.JSON(w, 500, map[string]string{"error": "search error"}); err != nil {
@@ -161,32 +148,12 @@ func main() {
 			return
 		}
 
-		// Convert database images to enriched files
-		results := make([]*EnrichedFile, 0, len(dbImages))
-		for _, dbImg := range dbImages {
-			file := &wallpapers.File{
-				Name:         dbImg.Filename,
-				ThumbnailURL: wallpapers.ThumbURL(dbImg.Filename),
-				FullRezURL:   wallpapers.FullRezURL(dbImg.Filename),
-				Created:      dbImg.DateAdded,
-				Updated:      dbImg.LastModified,
-			}
-
-			enriched := &EnrichedFile{
-				File:         file,
-				Width:        dbImg.Width,
-				Height:       dbImg.Height,
-				PixelDensity: dbImg.PixelDensity,
-				FileFormat:   dbImg.FileFormat,
-				Color1:       dbImg.Color1,
-				Color2:       dbImg.Color2,
-				Color3:       dbImg.Color3,
-				Words:        dbImg.Words,
-			}
-			results = append(results, enriched)
+		// Add URLs to all images
+		for _, img := range images {
+			img.WithURLs()
 		}
 
-		if err := Renderer.JSON(w, http.StatusOK, results); err != nil {
+		if err := Renderer.JSON(w, http.StatusOK, images); err != nil {
 			log.Errorw("error rendering search results", zap.Error(err))
 		}
 	})
@@ -202,27 +169,33 @@ func main() {
 	log.Fatal(srv.ListenAndServe())
 }
 
-// enrichImages adds database metadata to GCS file listings.
-func enrichImages(files []*wallpapers.File) []*EnrichedFile {
-	result := make([]*EnrichedFile, 0, len(files))
+// gcsFilesToImages converts GCS file listings to Image structs with database metadata.
+func gcsFilesToImages(files []*wallpapers.File) []*db.Image {
+	result := make([]*db.Image, 0, len(files))
 
 	for _, f := range files {
-		enriched := &EnrichedFile{File: f}
+		img := &db.Image{
+			Filename:     f.Name,
+			DateAdded:    f.Created,
+			LastModified: f.Updated,
+		}
 
+		// Enrich with database metadata if available
 		if database != nil {
 			if dbImg, err := database.GetByFilename(f.Name); err == nil && dbImg != nil {
-				enriched.Width = dbImg.Width
-				enriched.Height = dbImg.Height
-				enriched.PixelDensity = dbImg.PixelDensity
-				enriched.FileFormat = dbImg.FileFormat
-				enriched.Color1 = dbImg.Color1
-				enriched.Color2 = dbImg.Color2
-				enriched.Color3 = dbImg.Color3
-				enriched.Words = dbImg.Words
+				img.Width = dbImg.Width
+				img.Height = dbImg.Height
+				img.PixelDensity = dbImg.PixelDensity
+				img.FileFormat = dbImg.FileFormat
+				img.Color1 = dbImg.Color1
+				img.Color2 = dbImg.Color2
+				img.Color3 = dbImg.Color3
+				img.Words = dbImg.Words
 			}
 		}
 
-		result = append(result, enriched)
+		img.WithURLs()
+		result = append(result, img)
 	}
 
 	return result
