@@ -14,6 +14,7 @@ import (
 	"github.com/icco/gutil/logging"
 	"github.com/icco/wallpapers"
 	"github.com/icco/wallpapers/cmd/server/static"
+	"github.com/icco/wallpapers/db"
 	"github.com/unrolled/render"
 	"github.com/unrolled/secure"
 	"go.uber.org/zap"
@@ -40,7 +41,22 @@ var (
 		RequirePartials:           false,
 		Funcs:                     []template.FuncMap{template.FuncMap{}},
 	})
+
+	database *db.DB
 )
+
+// EnrichedFile extends the File struct with database metadata.
+type EnrichedFile struct {
+	*wallpapers.File
+	Width        int      `json:"width,omitempty"`
+	Height       int      `json:"height,omitempty"`
+	PixelDensity float64  `json:"pixel_density,omitempty"`
+	FileFormat   string   `json:"file_format,omitempty"`
+	Color1       string   `json:"color1,omitempty"`
+	Color2       string   `json:"color2,omitempty"`
+	Color3       string   `json:"color3,omitempty"`
+	Words        []string `json:"words,omitempty"`
+}
 
 func main() {
 	port := "8080"
@@ -48,6 +64,15 @@ func main() {
 		port = fromEnv
 	}
 	log.Infow("Starting up", "host", fmt.Sprintf("http://localhost:%s", port))
+
+	// Open database
+	var err error
+	database, err = db.Open(db.DefaultDBPath())
+	if err != nil {
+		log.Warnw("could not open database, search will be unavailable", zap.Error(err))
+	} else {
+		defer database.Close()
+	}
 
 	secureMiddleware := secure.New(secure.Options{
 		SSLRedirect:        false,
@@ -104,18 +129,97 @@ func main() {
 			return
 		}
 
-		if err := Renderer.JSON(w, http.StatusOK, images); err != nil {
+		// Enrich with database metadata
+		enriched := enrichImages(images)
+
+		if err := Renderer.JSON(w, http.StatusOK, enriched); err != nil {
 			log.Errorw("error during get all success render", zap.Error(err))
+		}
+	})
+
+	r.Get("/search", func(w http.ResponseWriter, r *http.Request) {
+		query := r.URL.Query().Get("q")
+
+		if database == nil {
+			log.Errorw("search unavailable, database not connected")
+			if err := Renderer.JSON(w, 503, map[string]string{"error": "search unavailable"}); err != nil {
+				log.Errorw("error rendering search error", zap.Error(err))
+			}
+			return
+		}
+
+		dbImages, err := database.Search(query)
+		if err != nil {
+			log.Errorw("error during search", zap.Error(err))
+			if err := Renderer.JSON(w, 500, map[string]string{"error": "search error"}); err != nil {
+				log.Errorw("error rendering search error", zap.Error(err))
+			}
+			return
+		}
+
+		// Convert database images to enriched files
+		results := make([]*EnrichedFile, 0, len(dbImages))
+		for _, dbImg := range dbImages {
+			file := &wallpapers.File{
+				Name:         dbImg.Filename,
+				ThumbnailURL: wallpapers.ThumbURL(dbImg.Filename),
+				FullRezURL:   wallpapers.FullRezURL(dbImg.Filename),
+				Created:      dbImg.DateAdded,
+				Updated:      dbImg.LastModified,
+			}
+
+			enriched := &EnrichedFile{
+				File:         file,
+				Width:        dbImg.Width,
+				Height:       dbImg.Height,
+				PixelDensity: dbImg.PixelDensity,
+				FileFormat:   dbImg.FileFormat,
+				Color1:       dbImg.Color1,
+				Color2:       dbImg.Color2,
+				Color3:       dbImg.Color3,
+				Words:        dbImg.Words,
+			}
+			results = append(results, enriched)
+		}
+
+		if err := Renderer.JSON(w, http.StatusOK, results); err != nil {
+			log.Errorw("error rendering search results", zap.Error(err))
 		}
 	})
 
 	srv := &http.Server{
 		Addr:         ":" + port,
 		Handler:      r,
-		ReadTimeout:  1 * time.Second,
-		WriteTimeout: 1 * time.Second,
-		IdleTimeout:  1 * time.Second,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		IdleTimeout:  10 * time.Second,
 	}
 
 	log.Fatal(srv.ListenAndServe())
+}
+
+// enrichImages adds database metadata to GCS file listings.
+func enrichImages(files []*wallpapers.File) []*EnrichedFile {
+	result := make([]*EnrichedFile, 0, len(files))
+
+	for _, f := range files {
+		enriched := &EnrichedFile{File: f}
+
+		if database != nil {
+			if dbImg, err := database.GetByFilename(f.Name); err == nil && dbImg != nil {
+				enriched.Width = dbImg.Width
+				enriched.Height = dbImg.Height
+				enriched.PixelDensity = dbImg.PixelDensity
+				enriched.FileFormat = dbImg.FileFormat
+				enriched.Color1 = dbImg.Color1
+				enriched.Color2 = dbImg.Color2
+				enriched.Color3 = dbImg.Color3
+				enriched.Words = dbImg.Words
+			}
+		}
+
+		result = append(result, enriched)
+	}
+
+	return result
 }
