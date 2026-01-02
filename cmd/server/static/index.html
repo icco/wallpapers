@@ -1,5 +1,6 @@
 <!doctype html>
 <html>
+
   <head lang="en">
     <meta charset="utf-8">
     <title>Wallpapers.</title>
@@ -12,11 +13,15 @@
     <link rel="stylesheet" type="text/css" href="/css/tachyons.min.css">
     <style>
       @media (min-width: 900px) {
-        .item { width: 33%; }
+        .item {
+          width: 33%;
+        }
       }
 
       @media (max-width: 900px) {
-        .item { width: 100%; }
+        .item {
+          width: 100%;
+        }
       }
 
       .item img {
@@ -34,7 +39,9 @@
         border-color: #2BA6CB
       }
 
-      a, a:link, a:visited {
+      a,
+      a:link,
+      a:visited {
         transition: color .4s;
         color: #265C83;
       }
@@ -107,6 +114,7 @@
       onTTFB(sendToAnalytics);
     </script>
   </head>
+
   <body>
     <div class="pam">
 
@@ -122,7 +130,9 @@
       <div id="box" class="thumbnails"></div>
 
       <div class="footer">
-        <p class="muted"><i class="icon-edit"></i> <a href="https://github.com/icco/wallpapers">code</a> &copy; 2012 &mdash; 2025 Nat Welch. Source images copyright their original creators. All content somewhat modified by Nat.</p>
+        <p class="muted"><i class="icon-edit"></i> <a href="https://github.com/icco/wallpapers">code</a> &copy; 2012
+          &mdash; 2025 Nat Welch. Source images copyright their original creators. All content somewhat modified by Nat.
+        </p>
       </div>
 
     </div> <!-- /container -->
@@ -135,33 +145,33 @@
       var searchTimeout = null;
       var currentData = [];
 
-      $(document).ready(function() {
+      $(document).ready(function () {
         $('#box').isotope({
-          animationEngine : 'css',
-          itemSelector : '.item',
-          masonry: { },
+          animationEngine: 'css',
+          itemSelector: '.item',
+          masonry: {},
         });
 
         // Load all images initially
-        $.get("/all.json", function(data) {
+        $.get("/all.json", function (data) {
           currentData = data;
           parse_response(data);
           updateResultCount(data.length, '');
-        }).fail(function() {
+        }).fail(function () {
           console.error("Error getting data.");
         });
 
         // Set up search with debouncing
-        $('#search').on('input', function() {
+        $('#search').on('input', function () {
           var query = $(this).val().trim();
-          
+
           // Clear previous timeout
           if (searchTimeout) {
             clearTimeout(searchTimeout);
           }
 
           // Debounce: wait 300ms before searching
-          searchTimeout = setTimeout(function() {
+          searchTimeout = setTimeout(function () {
             performSearch(query);
           }, 300);
         });
@@ -174,20 +184,20 @@
 
         if (query === '') {
           // Empty query: reload all
-          $.get("/all.json", function(data) {
+          $.get("/all.json", function (data) {
             currentData = data;
             parse_response(data);
             updateResultCount(data.length, '');
-          }).fail(function() {
+          }).fail(function () {
             console.error("Error getting data.");
           });
         } else {
           // Search with query
-          $.get("/search", { q: query }, function(data) {
+          $.get("/search", { q: query }, function (data) {
             currentData = data;
             parse_response(data);
             updateResultCount(data.length, query);
-          }).fail(function() {
+          }).fail(function () {
             console.error("Error searching.");
             updateResultCount(0, query);
           });
@@ -215,7 +225,7 @@
         var div = $('<div>');
 
         a.attr('href', item.cdn);
-        
+
         // Build title with metadata
         var title = item.key;
         if (item.width && item.height) {
@@ -232,11 +242,11 @@
         div.addClass('item');
 
         // Preload
-        $(img).one('load', function() {
+        $(img).one('load', function () {
           $(div).addClass('item');
           $('#box').isotope('insert', $(div));
-        }).each(function() {
-          if(this.complete) $(this).load();
+        }).each(function () {
+          if (this.complete) $(this).load();
         });
       }
     </script>
@@ -245,11 +255,12 @@
       _gaq.push(['_setAccount', 'UA-333449-12']);
       _gaq.push(['_trackPageview']);
 
-      (function() {
+      (function () {
         var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
         ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
         var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
       })();
     </script>
   </body>
+
 </html>
