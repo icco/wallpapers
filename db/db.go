@@ -67,7 +67,7 @@ func Open(dbPath string) (*DB, error) {
 
 	if err := db.init(); err != nil {
 		if cerr := conn.Close(); cerr != nil {
-			return nil, fmt.Errorf("failed to initialize database: %w (also failed to close: %v)", err, cerr)
+			return nil, fmt.Errorf("failed to initialize database: %w (also failed to close: %w)", err, cerr)
 		}
 		return nil, fmt.Errorf("failed to initialize database: %w", err)
 	}
