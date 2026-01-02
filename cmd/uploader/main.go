@@ -163,10 +163,10 @@ func analyzeAndStore(ctx context.Context, filePath, filename string, data []byte
 		Height:       info.Height,
 		PixelDensity: info.PixelDensity,
 		FileFormat:   info.FileFormat,
+		Colors:       info.Colors,
 		Words:        info.Words,
 		ProcessedAt:  &now,
 	}
-	img.SetColors(info.Colors)
 
 	if err := database.UpsertImage(img); err != nil {
 		return fmt.Errorf("failed to store image: %w", err)

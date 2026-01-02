@@ -62,9 +62,7 @@ type Image struct {
 	Height       int         `json:"height,omitempty"`
 	PixelDensity float64     `json:"pixel_density,omitempty"`
 	FileFormat   string      `json:"file_format,omitempty"`
-	Color1       string      `json:"color1,omitempty" gorm:"index:idx_colors"`
-	Color2       string      `json:"color2,omitempty" gorm:"index:idx_colors"`
-	Color3       string      `json:"color3,omitempty" gorm:"index:idx_colors"`
+	Colors       StringSlice `json:"colors,omitempty" gorm:"type:text"`
 	Words        StringSlice `json:"words,omitempty" gorm:"type:text"`
 	ProcessedAt  *time.Time  `json:"-"`
 
@@ -85,19 +83,6 @@ func (img *Image) WithURLs() *Image {
 	return img
 }
 
-// SetColors sets Color1, Color2, Color3 from a slice.
-func (img *Image) SetColors(colors []string) {
-	if len(colors) > 0 {
-		img.Color1 = colors[0]
-	}
-	if len(colors) > 1 {
-		img.Color2 = colors[1]
-	}
-	if len(colors) > 2 {
-		img.Color3 = colors[2]
-	}
-}
-
 // MergeMetadata copies analysis metadata from another image (keeps original filename/dates).
 func (img *Image) MergeMetadata(other *Image) {
 	if other == nil {
@@ -107,9 +92,7 @@ func (img *Image) MergeMetadata(other *Image) {
 	img.Height = other.Height
 	img.PixelDensity = other.PixelDensity
 	img.FileFormat = other.FileFormat
-	img.Color1 = other.Color1
-	img.Color2 = other.Color2
-	img.Color3 = other.Color3
+	img.Colors = other.Colors
 	img.Words = other.Words
 }
 
@@ -185,7 +168,7 @@ func (db *DB) UpsertImage(img *Image) error {
 		Columns: []clause.Column{{Name: "filename"}},
 		DoUpdates: clause.AssignmentColumns([]string{
 			"last_modified", "width", "height", "pixel_density",
-			"file_format", "color1", "color2", "color3", "words", "processed_at",
+			"file_format", "colors", "words", "processed_at",
 		}),
 	}).Create(img).Error
 }
@@ -236,14 +219,11 @@ func (db *DB) Search(query string) ([]*Image, error) {
 
 	err := db.conn.Where(
 		"LOWER(words) LIKE ? OR "+
-			"LOWER(color1) LIKE ? OR "+
-			"LOWER(color2) LIKE ? OR "+
-			"LOWER(color3) LIKE ? OR "+
+			"LOWER(colors) LIKE ? OR "+
 			"LOWER(filename) LIKE ? OR "+
 			"LOWER(file_format) LIKE ? OR "+
 			"(width || 'x' || height) LIKE ?",
-		searchPattern, searchPattern, searchPattern,
-		searchPattern, searchPattern, searchPattern, searchPattern,
+		searchPattern, searchPattern, searchPattern, searchPattern, searchPattern,
 	).Order("date_added DESC").Find(&images).Error
 
 	return images, err
