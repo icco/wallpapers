@@ -33,7 +33,11 @@ func main() {
 		log.Printf("error opening database: %+v", err)
 		os.Exit(1)
 	}
-	defer database.Close()
+	defer func() {
+		if cerr := database.Close(); cerr != nil {
+			log.Printf("error closing database: %+v", cerr)
+		}
+	}()
 
 	knownRemoteFiles, err := wallpapers.GetAll(ctx)
 	if err != nil {

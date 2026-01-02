@@ -66,7 +66,9 @@ func Open(dbPath string) (*DB, error) {
 	db := &DB{conn: conn, path: dbPath}
 
 	if err := db.init(); err != nil {
-		conn.Close()
+		if cerr := conn.Close(); cerr != nil {
+			return nil, fmt.Errorf("failed to initialize database: %w (also failed to close: %v)", err, cerr)
+		}
 		return nil, fmt.Errorf("failed to initialize database: %w", err)
 	}
 
@@ -174,7 +176,9 @@ func (db *DB) GetAll() ([]*Image, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() {
+		_ = rows.Close()
+	}()
 
 	var images []*Image
 	for rows.Next() {
@@ -219,7 +223,9 @@ func (db *DB) Search(query string) ([]*Image, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() {
+		_ = rows.Close()
+	}()
 
 	var images []*Image
 	for rows.Next() {

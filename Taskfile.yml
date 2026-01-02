@@ -1,0 +1,55 @@
+version: "3"
+
+tasks:
+  default:
+    desc: Show available tasks
+    cmds:
+      - task --list
+
+  build:
+    desc: Build all binaries
+    cmds:
+      - go build -v ./...
+
+  test:
+    desc: Run all tests
+    cmds:
+      - go test -v ./...
+
+  lint:
+    desc: Run golangci-lint with CI settings
+    cmds:
+      - golangci-lint run -E bodyclose,misspell,gosec,goconst,errorlint,errcheck
+
+  fmt:
+    desc: Format Go code
+    cmds:
+      - go fmt ./...
+
+  vet:
+    desc: Run go vet
+    cmds:
+      - go vet ./...
+
+  tidy:
+    desc: Tidy go modules
+    cmds:
+      - go mod tidy
+
+  check:
+    desc: Run all checks (fmt, vet, lint, test)
+    cmds:
+      - task: fmt
+      - task: vet
+      - task: lint
+      - task: test
+
+  server:
+    desc: Run the server
+    cmds:
+      - go run ./cmd/server
+
+  uploader:
+    desc: Run the uploader
+    cmds:
+      - go run ./cmd/uploader

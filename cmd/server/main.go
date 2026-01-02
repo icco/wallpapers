@@ -71,7 +71,11 @@ func main() {
 	if err != nil {
 		log.Warnw("could not open database, search will be unavailable", zap.Error(err))
 	} else {
-		defer database.Close()
+		defer func() {
+			if cerr := database.Close(); cerr != nil {
+				log.Errorw("failed to close database", zap.Error(cerr))
+			}
+		}()
 	}
 
 	secureMiddleware := secure.New(secure.Options{

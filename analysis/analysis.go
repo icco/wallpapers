@@ -128,7 +128,11 @@ func extractWords(ctx context.Context, data []byte, format string) ([]string, er
 	if err != nil {
 		return nil, fmt.Errorf("failed to create Gemini client: %w", err)
 	}
-	defer client.Close()
+	defer func() {
+		if cerr := client.Close(); cerr != nil {
+			fmt.Fprintf(os.Stderr, "warning: failed to close Gemini client: %v\n", cerr)
+		}
+	}()
 
 	model := client.GenerativeModel("gemini-2.0-flash")
 
