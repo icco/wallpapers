@@ -1,65 +1,23 @@
 # Wallpapers
 
-A [site](http://walls.natwelch.com/) that lists the photos currently in my Wallpaper rotation. Hosts the images in Google Cloud Storage, and the site on my dev server.
+A [site](http://walls.natwelch.com/) that displays my wallpaper collection. Images are stored in Google Cloud Storage with metadata in SQLite.
 
 ## Features
 
-- **Image Gallery**: Browse wallpapers with a masonry grid layout
-- **Search**: Find images by word, color (hex), resolution, or file format
-- **Metadata**: Each image is analyzed for colors, text (OCR), and content description
-
-## Architecture
-
-- Images stored in Google Cloud Storage
-- SQLite database (`wallpapers.db`) stores metadata for each image
-- Uploader syncs from local Dropbox folder and analyzes new images
-- Server provides JSON API and static file serving
-
-## Environment Variables
-
-- `GEMINI_API_KEY`: Required for image analysis during upload (extracts text and descriptive words)
-- `PORT`: Server port (default: 8080)
-
-## Database Schema
-
-The `wallpapers.db` SQLite database stores:
-
-| Field | Description |
-|-------|-------------|
-| filename | Image filename |
-| date_added | When the image was first added |
-| last_modified | Last modification time |
-| width, height | Image dimensions in pixels |
-| pixel_density | Megapixels |
-| file_format | jpeg, png, gif, webp |
-| color1, color2, color3 | Top 3 prominent colors (hex) |
-| words | JSON array of OCR text and descriptive tags |
-| processed_at | When analysis was completed |
+- Masonry grid gallery with search by keyword, color (`#ff5500`), resolution (`1920x1080`), or format
+- Automatic image analysis using Gemini (colors, OCR, content tags)
 
 ## Usage
 
-### Running the Server
-
 ```bash
+# Run the server
 go run ./cmd/server
+
+# Sync images from Dropbox and analyze new ones
+GEMINI_API_KEY=... ./update.sh
 ```
 
-### Syncing Images
+## Environment Variables
 
-Set `GEMINI_API_KEY` and run:
-
-```bash
-./update.sh
-```
-
-This will:
-1. Sync images from Dropbox to Google Cloud Storage
-2. Analyze new images for colors and words
-3. Store metadata in the SQLite database
-
-### Search Examples
-
-- `mountain` - Find images with "mountain" in words
-- `#ff5500` - Find images with a specific color
-- `1920x1080` - Find images by resolution
-- `jpeg` - Find images by format
+- `GEMINI_API_KEY`: Required for image analysis during upload
+- `PORT`: Server port (default: 8080)
