@@ -120,6 +120,11 @@ func ThumbURL(key string) string {
 	return fmt.Sprintf("https://icco-walls.imgix.net/%s?w=%d&h=%d&fit=crop&auto=compress&auto=format", key, w, h)
 }
 
+// RawURL returns the direct URL to the original file in GCS.
+func RawURL(key string) string {
+	return fmt.Sprintf("https://storage.googleapis.com/%s/%s", Bucket, key)
+}
+
 // File is a subset of storage.ObjectAttrs that we need.
 type File struct {
 	CRC32C       uint32    `json:"-"`
