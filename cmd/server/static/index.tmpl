@@ -3,17 +3,27 @@
 
   <head lang="en">
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Wallpapers.</title>
 
     <link rel="stylesheet" type="text/css" href="/css/tachyons.min.css">
     <style>
+      /* Desktop: 3 columns */
       @media (min-width: 900px) {
         .item {
-          width: 33%;
+          width: 33.333%;
         }
       }
 
-      @media (max-width: 900px) {
+      /* Tablet: 2 columns */
+      @media (min-width: 600px) and (max-width: 899px) {
+        .item {
+          width: 50%;
+        }
+      }
+
+      /* Mobile: 1 column */
+      @media (max-width: 599px) {
         .item {
           width: 100%;
         }
@@ -28,11 +38,12 @@
       .item {
         padding: 1px;
         border: 1px solid #CCC;
-        margin: 1px
+        margin: 1px;
+        box-sizing: border-box;
       }
 
       .item:hover {
-        border-color: #2BA6CB
+        border-color: #2BA6CB;
       }
 
       a,
@@ -60,6 +71,7 @@
         max-width: 400px;
         margin: 0;
         transition: border-color 0.2s;
+        box-sizing: border-box;
       }
 
       .search-box:focus {
@@ -69,6 +81,7 @@
 
       .search-container {
         margin-bottom: 1rem;
+        padding: 0 0.5rem;
       }
 
       .search-hint {
@@ -88,6 +101,7 @@
         gap: 0.5rem;
         align-items: center;
         margin: 1rem 0;
+        flex-wrap: wrap;
       }
 
       .search-btn {
@@ -99,6 +113,7 @@
         color: white;
         cursor: pointer;
         transition: background-color 0.2s;
+        white-space: nowrap;
       }
 
       .search-btn:hover {
@@ -109,6 +124,53 @@
       .clear-link {
         margin-left: 0.5rem;
         font-size: 0.875rem;
+      }
+
+      /* Mobile-specific adjustments */
+      @media (max-width: 480px) {
+        .search-form {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .search-box {
+          max-width: 100%;
+        }
+
+        .search-btn {
+          width: 100%;
+          text-align: center;
+        }
+
+        .clear-link {
+          margin-left: 0;
+          margin-top: 0.5rem;
+          display: block;
+          text-align: center;
+        }
+
+        .search-hint {
+          font-size: 0.75rem;
+        }
+
+        h1 {
+          font-size: 1.5rem;
+        }
+
+        h2 {
+          font-size: 1rem;
+        }
+      }
+
+      /* Container padding for mobile */
+      .pam {
+        padding: 1rem;
+      }
+
+      @media (max-width: 599px) {
+        .pam {
+          padding: 0.75rem;
+        }
       }
     </style>
 

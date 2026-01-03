@@ -3,6 +3,7 @@
 
   <head lang="en">
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{.Image.Filename}} - Wallpapers</title>
 
     <link rel="stylesheet" type="text/css" href="/css/tachyons.min.css">
@@ -37,6 +38,62 @@
       dl, dd {
         margin-left: 0;
       }
+
+      /* Responsive metadata grid */
+      .meta-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem 2rem;
+      }
+
+      @media (max-width: 599px) {
+        .meta-grid {
+          gap: 1rem 1.5rem;
+        }
+      }
+
+      /* Download links */
+      .download-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem 1rem;
+        align-items: center;
+      }
+
+      @media (max-width: 480px) {
+        .download-links {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .download-links .separator {
+          display: none;
+        }
+      }
+
+      /* Mobile typography adjustments */
+      @media (max-width: 480px) {
+        .f3-ns {
+          font-size: 1.25rem;
+        }
+
+        .filename-text {
+          word-break: break-all;
+        }
+      }
+
+      /* Container padding for mobile */
+      @media (max-width: 599px) {
+        .pa3 {
+          padding: 0.75rem;
+        }
+      }
+
+      /* Keywords wrapping */
+      .keywords-list {
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+      }
     </style>
 
     <script type="module">
@@ -65,18 +122,19 @@
       <div class="tc mb3">
         <img src="{{.Image.FullRezURL}}" alt="{{.Image.Filename}}" class="main-image" />
       </div>
-      <p class="f6 mt2 mb4">
-        <a href="{{.Image.FullRezURL}}">Desktop Size (3840x2160)</a> &middot;
+      <p class="f6 mt2 mb4 download-links">
+        <a href="{{.Image.FullRezURL}}">Desktop Size (3840x2160)</a>
+        <span class="separator">&middot;</span>
         <a href="{{.Image.RawURL}}">Original Image</a>
       </p>
 
       <article>
         <dl class="db mb3">
           <dd class="f6 f5-ns b ml0 gray">Filename</dd>
-          <dd class="f4 f3-ns b ml0">{{.Image.Filename}}</dd>
+          <dd class="f4 f3-ns b ml0 filename-text">{{.Image.Filename}}</dd>
         </dl>
 
-        <div class="flex flex-wrap" style="gap: 2rem 3rem;">
+        <div class="meta-grid">
           {{if and .Image.Width .Image.Height}}
           <dl>
             <dd class="f6 f5-ns b ml0 gray">Resolution</dd>
@@ -115,7 +173,7 @@
 
         <dl class="db mt3">
           <dd class="f6 f5-ns b ml0 gray">Keywords</dd>
-          <dd class="f4 f3-ns b ml0">
+          <dd class="f4 f3-ns b ml0 keywords-list">
             {{if .Image.Words}}
             {{range $i, $word := .Image.Words}}{{if $i}} &middot; {{end}}<a href="/?q={{$word}}">{{$word}}</a>{{end}}
             {{else}}
