@@ -46,10 +46,11 @@
       .tag {
         display: inline-block;
         background: #f4f4f4;
-        border: 1px solid #CCC;
-        padding: 2px 8px;
-        margin: 2px;
+        border-radius: 2px;
+        padding: 4px 10px;
+        margin: 3px;
         font-size: 0.875rem;
+        color: #333;
       }
     </style>
 
@@ -111,20 +112,24 @@
       </article>
 
       {{if .Image.Colors}}
-      <div class="mv3">
-        <span class="f6 b">Colors:</span>
-        {{range .Image.Colors}}
-        <span class="color-swatch" style="background-color: {{.}};" title="{{.}}"></span>
-        {{end}}
+      <div class="mv4">
+        <h2 class="f6 f5-ns b gray mv2">Colors</h2>
+        <div>
+          {{range .Image.Colors}}
+          <span class="color-swatch" style="background-color: {{.}};" title="{{.}}"></span>
+          {{end}}
+        </div>
       </div>
       {{end}}
 
       {{if .Image.Words}}
-      <div class="mv3">
-        <span class="f6 b">Keywords:</span>
-        {{range .Image.Words}}
-        <span class="tag">{{.}}</span>
-        {{end}}
+      <div class="mv4">
+        <h2 class="f6 f5-ns b gray mv2">Keywords</h2>
+        <div>
+          {{range .Image.Words}}
+          <span class="tag">{{.}}</span>
+          {{end}}
+        </div>
       </div>
       {{end}}
 
