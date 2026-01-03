@@ -81,9 +81,12 @@
         <img src="{{.Image.FullRezURL}}" alt="{{.Image.Filename}}" class="main-image" />
       </div>
 
-      <h1 class="f4 mv2">{{.Image.Filename}}</h1>
-
       <article class="mv3">
+        <dl class="db mb3">
+          <dd class="f6 f5-ns b ml0 gray">Filename</dd>
+          <dd class="f4 f3-ns b ml0">{{.Image.Filename}}</dd>
+        </dl>
+
         {{if and .Image.Width .Image.Height}}
         <dl class="dib mr4 mr5-ns">
           <dd class="f6 f5-ns b ml0 gray">Resolution</dd>
@@ -109,29 +112,31 @@
           <dd class="f6 f5-ns b ml0 gray">Added</dd>
           <dd class="f4 f3-ns b ml0">{{.Image.DateAdded.Format "Jan 2, 2006"}}</dd>
         </dl>
+
+        {{if .Image.Colors}}
+        <dl class="dib mr4 mr5-ns v-top">
+          <dd class="f6 f5-ns b ml0 gray">Colors</dd>
+          <dd class="ml0 mt1">
+            {{range .Image.Colors}}
+            <span class="color-swatch" style="background-color: {{.}};" title="{{.}}"></span>
+            {{end}}
+          </dd>
+        </dl>
+        {{end}}
       </article>
 
-      {{if .Image.Colors}}
-      <div class="mv4">
-        <h2 class="f6 f5-ns b gray mv2">Colors</h2>
-        <div>
-          {{range .Image.Colors}}
-          <span class="color-swatch" style="background-color: {{.}};" title="{{.}}"></span>
-          {{end}}
-        </div>
-      </div>
-      {{end}}
-
-      {{if .Image.Words}}
       <div class="mv4">
         <h2 class="f6 f5-ns b gray mv2">Keywords</h2>
         <div>
+          {{if .Image.Words}}
           {{range .Image.Words}}
           <span class="tag">{{.}}</span>
           {{end}}
+          {{else}}
+          <span class="f6 gray i">No keywords extracted yet</span>
+          {{end}}
         </div>
       </div>
-      {{end}}
 
       <p class="mv3">
         <a href="{{.Image.FullRezURL}}">Desktop Size (3840x2160)</a> &middot;
