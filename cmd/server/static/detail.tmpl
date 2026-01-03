@@ -1,0 +1,386 @@
+<!doctype html>
+<html>
+
+  <head lang="en">
+    <meta charset="utf-8">
+    <title>{{.Image.Filename}} - Wallpapers</title>
+
+    <link rel="stylesheet" type="text/css" href="/css/tachyons.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'DM Sans', sans-serif;
+        background: linear-gradient(135deg, #0f1419 0%, #1a2332 50%, #0d1117 100%);
+        min-height: 100vh;
+        margin: 0;
+        color: #c9d1d9;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+      }
+
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #58a6ff;
+        text-decoration: none;
+        font-size: 0.9rem;
+        margin-bottom: 2rem;
+        transition: color 0.2s;
+      }
+
+      .back-link:hover {
+        color: #79c0ff;
+      }
+
+      .back-link svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      .image-container {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 2.5rem;
+      }
+
+      .main-image {
+        max-width: 100%;
+        max-height: 70vh;
+        border-radius: 12px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .content-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .metadata-card {
+        background: rgba(22, 27, 34, 0.8);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 2rem;
+        max-width: 700px;
+        width: 100%;
+      }
+
+      .filename {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 1.25rem;
+        color: #f0f6fc;
+        word-break: break-all;
+        margin-bottom: 1.5rem;
+        text-align: center;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .metadata-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.25rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .metadata-item {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
+        padding: 1rem;
+      }
+
+      .metadata-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #8b949e;
+        margin-bottom: 0.5rem;
+      }
+
+      .metadata-value {
+        font-size: 1rem;
+        color: #f0f6fc;
+        font-weight: 500;
+      }
+
+      .metadata-value.mono {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.9rem;
+      }
+
+      .colors-section, .words-section {
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .section-title {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #8b949e;
+        margin-bottom: 1rem;
+      }
+
+      .color-swatches {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        justify-content: center;
+      }
+
+      .color-swatch {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .color-circle {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        border: 2px solid rgba(255, 255, 255, 0.15);
+      }
+
+      .color-hex {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.7rem;
+        color: #8b949e;
+      }
+
+      .words-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        justify-content: center;
+      }
+
+      .word-tag {
+        background: rgba(88, 166, 255, 0.15);
+        color: #58a6ff;
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        border: 1px solid rgba(88, 166, 255, 0.3);
+      }
+
+      .download-links {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+      }
+
+      .download-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.875rem 1.5rem;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s;
+      }
+
+      .download-btn svg {
+        width: 18px;
+        height: 18px;
+      }
+
+      .download-btn.primary {
+        background: linear-gradient(135deg, #238636 0%, #2ea043 100%);
+        color: white;
+        border: 1px solid #2ea043;
+      }
+
+      .download-btn.primary:hover {
+        background: linear-gradient(135deg, #2ea043 0%, #3fb950 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(46, 160, 67, 0.3);
+      }
+
+      .download-btn.secondary {
+        background: rgba(110, 118, 129, 0.2);
+        color: #c9d1d9;
+        border: 1px solid rgba(110, 118, 129, 0.4);
+      }
+
+      .download-btn.secondary:hover {
+        background: rgba(110, 118, 129, 0.3);
+        border-color: rgba(110, 118, 129, 0.6);
+      }
+
+      .footer {
+        text-align: center;
+        margin-top: 3rem;
+        padding-top: 2rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        color: #8b949e;
+        font-size: 0.85rem;
+      }
+
+      .footer a {
+        color: #58a6ff;
+        text-decoration: none;
+      }
+
+      .footer a:hover {
+        text-decoration: underline;
+      }
+
+      @media (max-width: 600px) {
+        .container {
+          padding: 1rem;
+        }
+
+        .metadata-card {
+          padding: 1.5rem;
+        }
+
+        .download-links {
+          flex-direction: column;
+        }
+
+        .download-btn {
+          justify-content: center;
+        }
+      }
+    </style>
+
+    <script type="module">
+      import { onCLS, onINP, onLCP, onFCP, onFID, onTTFB } from 'https://unpkg.com/web-vitals@4?module';
+
+      function sendToAnalytics(metric) {
+        const body = JSON.stringify(metric);
+        (navigator.sendBeacon && navigator.sendBeacon('https://reportd.natwelch.com/analytics/wallpapers', body)) ||
+          fetch('https://reportd.natwelch.com/analytics/wallpapers', { body, method: 'POST', keepalive: true });
+      }
+
+      onCLS(sendToAnalytics);
+      onFCP(sendToAnalytics);
+      onFID(sendToAnalytics);
+      onINP(sendToAnalytics);
+      onLCP(sendToAnalytics);
+      onTTFB(sendToAnalytics);
+    </script>
+  </head>
+
+  <body>
+    <div class="container">
+      <a href="/" class="back-link">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to gallery
+      </a>
+
+      <div class="content-wrapper">
+        <div class="image-container">
+          <img src="{{.Image.FullRezURL}}" alt="{{.Image.Filename}}" class="main-image" />
+        </div>
+
+        <div class="metadata-card">
+          <div class="filename">{{.Image.Filename}}</div>
+
+          <div class="metadata-grid">
+            {{if and .Image.Width .Image.Height}}
+            <div class="metadata-item">
+              <div class="metadata-label">Resolution</div>
+              <div class="metadata-value mono">{{.Image.Width}} × {{.Image.Height}}</div>
+            </div>
+            {{end}}
+
+            {{if .Image.FileFormat}}
+            <div class="metadata-item">
+              <div class="metadata-label">Format</div>
+              <div class="metadata-value">{{.Image.FileFormat}}</div>
+            </div>
+            {{end}}
+
+            {{if .Image.PixelDensity}}
+            <div class="metadata-item">
+              <div class="metadata-label">Megapixels</div>
+              <div class="metadata-value mono">{{printf "%.1f" .Image.PixelDensity}} MP</div>
+            </div>
+            {{end}}
+
+            <div class="metadata-item">
+              <div class="metadata-label">Added</div>
+              <div class="metadata-value">{{.Image.DateAdded.Format "Jan 2, 2006"}}</div>
+            </div>
+
+            {{if not .Image.LastModified.IsZero}}
+            <div class="metadata-item">
+              <div class="metadata-label">Last Modified</div>
+              <div class="metadata-value">{{.Image.LastModified.Format "Jan 2, 2006"}}</div>
+            </div>
+            {{end}}
+          </div>
+
+          {{if .Image.Colors}}
+          <div class="colors-section">
+            <div class="section-title">Dominant Colors</div>
+            <div class="color-swatches">
+              {{range .Image.Colors}}
+              <div class="color-swatch">
+                <div class="color-circle" style="background-color: {{.}};"></div>
+                <span class="color-hex">{{.}}</span>
+              </div>
+              {{end}}
+            </div>
+          </div>
+          {{end}}
+
+          {{if .Image.Words}}
+          <div class="words-section">
+            <div class="section-title">Keywords</div>
+            <div class="words-list">
+              {{range .Image.Words}}
+              <span class="word-tag">{{.}}</span>
+              {{end}}
+            </div>
+          </div>
+          {{end}}
+
+          <div class="download-links">
+            <a href="{{.Image.FullRezURL}}" class="download-btn primary" target="_blank">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              Desktop Size (3840×2160)
+            </a>
+            <a href="{{.Image.RawURL}}" class="download-btn secondary" target="_blank">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+              Original Image
+            </a>
+          </div>
+        </div>
+
+        <div class="footer">
+          <p><a href="https://github.com/icco/wallpapers">code</a> &copy; 2012 &mdash; 2025 Nat Welch. Source images copyright their original creators.</p>
+        </div>
+      </div>
+    </div>
+  </body>
+
+</html>
+
