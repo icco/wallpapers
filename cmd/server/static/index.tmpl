@@ -1,0 +1,192 @@
+<!doctype html>
+<html>
+
+  <head lang="en">
+    <meta charset="utf-8">
+    <title>Wallpapers.</title>
+
+    <link rel="stylesheet" type="text/css" href="/css/tachyons.min.css">
+    <style>
+      @media (min-width: 900px) {
+        .item {
+          width: 33%;
+        }
+      }
+
+      @media (max-width: 900px) {
+        .item {
+          width: 100%;
+        }
+      }
+
+      .item img {
+        width: 100%;
+        display: block;
+      }
+
+      .item {
+        padding: 1px;
+        border: 1px solid #CCC;
+        margin: 1px
+      }
+
+      .item:hover {
+        border-color: #2BA6CB
+      }
+
+      a,
+      a:link,
+      a:visited {
+        transition: color .4s;
+        color: #265C83;
+      }
+
+      a:hover {
+        color: #7FDBFF;
+      }
+
+      a:active {
+        transition: color .3s;
+        color: #007BE6;
+      }
+
+      .search-box {
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        border: 2px solid #CCC;
+        border-radius: 4px;
+        width: 100%;
+        max-width: 400px;
+        margin: 0;
+        transition: border-color 0.2s;
+      }
+
+      .search-box:focus {
+        outline: none;
+        border-color: #2BA6CB;
+      }
+
+      .search-container {
+        margin-bottom: 1rem;
+      }
+
+      .search-hint {
+        font-size: 0.875rem;
+        color: #666;
+        margin-top: 0.5rem;
+      }
+
+      .result-count {
+        font-size: 0.875rem;
+        color: #333;
+        margin-bottom: 0.5rem;
+      }
+
+      .search-form {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        margin: 1rem 0;
+      }
+
+      .search-btn {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        border: 2px solid #2BA6CB;
+        border-radius: 4px;
+        background: #2BA6CB;
+        color: white;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+
+      .search-btn:hover {
+        background: #265C83;
+        border-color: #265C83;
+      }
+
+      .clear-link {
+        margin-left: 0.5rem;
+        font-size: 0.875rem;
+      }
+    </style>
+
+    <script type="module">
+      import { onCLS, onINP, onLCP, onFCP, onFID, onTTFB } from 'https://unpkg.com/web-vitals@4?module';
+
+      function sendToAnalytics(metric) {
+        const body = JSON.stringify(metric);
+        (navigator.sendBeacon && navigator.sendBeacon('https://reportd.natwelch.com/analytics/wallpapers', body)) ||
+          fetch('https://reportd.natwelch.com/analytics/wallpapers', { body, method: 'POST', keepalive: true });
+      }
+
+      onCLS(sendToAnalytics);
+      onFCP(sendToAnalytics);
+      onFID(sendToAnalytics);
+      onINP(sendToAnalytics);
+      onLCP(sendToAnalytics);
+      onTTFB(sendToAnalytics);
+    </script>
+  </head>
+
+  <body>
+    <div class="pam">
+
+      <h1 class="man pan"><a href="/">Wallpapers</a></h1>
+      <h2 class="f4 mvs">A Nat Welch Collection</h2>
+
+      <div class="search-container">
+        <form action="/" method="get" class="search-form">
+          <input type="text" name="q" class="search-box" placeholder="Search by word, color, or resolution..." value="{{.Query}}" />
+          <button type="submit" class="search-btn">Search</button>
+          {{if .Query}}<a href="/" class="clear-link">Clear</a>{{end}}
+        </form>
+        <div class="search-hint">Try: mountain, sunset, #ff0000, 1920x1080, jpeg</div>
+        <div class="result-count">
+          {{if .Query}}
+            {{len .Images}} result{{if ne (len .Images) 1}}s{{end}} for "{{.Query}}"
+          {{else}}
+            {{len .Images}} wallpapers
+          {{end}}
+        </div>
+      </div>
+
+      <div id="box" class="thumbnails">
+        {{range .Images}}
+        <div class="item">
+          <a href="{{.FullRezURL}}" title="{{.Filename}}{{if and .Width .Height}} ({{.Width}}x{{.Height}}){{end}}">
+            <img src="{{.ThumbnailURL}}" alt="{{.Filename}}{{if and .Width .Height}} ({{.Width}}x{{.Height}}){{end}}" loading="lazy" />
+          </a>
+        </div>
+        {{end}}
+      </div>
+
+      <div class="footer">
+        <p class="muted"><i class="icon-edit"></i> <a href="https://github.com/icco/wallpapers">code</a> &copy; 2012
+          &mdash; 2025 Nat Welch. Source images copyright their original creators. All content somewhat modified by Nat.
+        </p>
+      </div>
+
+    </div>
+
+    <script src="/js/imagesloaded.pkgd.min.js"></script>
+    <script src="/js/isotope.pkgd.min.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        var box = document.getElementById('box');
+
+        // Initialize Isotope
+        var iso = new Isotope(box, {
+          itemSelector: '.item',
+          layoutMode: 'masonry'
+        });
+
+        // Re-layout after images load
+        imagesLoaded(box, function() {
+          iso.layout();
+        });
+      });
+    </script>
+  </body>
+
+</html>

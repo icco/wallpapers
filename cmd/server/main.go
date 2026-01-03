@@ -43,7 +43,16 @@ var (
 	})
 
 	database *db.DB
+
+	// indexTemplate is the parsed template for the homepage
+	indexTemplate *template.Template
 )
+
+// PageData holds data passed to the index template
+type PageData struct {
+	Query  string
+	Images []*db.Image
+}
 
 func main() {
 	port := "8080"
@@ -52,8 +61,17 @@ func main() {
 	}
 	log.Infow("Starting up", "host", fmt.Sprintf("http://localhost:%s", port))
 
+	// Parse template from embedded files
+	tmplContent, err := static.Assets.ReadFile("index.tmpl")
+	if err != nil {
+		log.Fatalw("failed to read template", zap.Error(err))
+	}
+	indexTemplate, err = template.New("index").Parse(string(tmplContent))
+	if err != nil {
+		log.Fatalw("failed to parse template", zap.Error(err))
+	}
+
 	// Open database
-	var err error
 	database, err = db.Open(db.DefaultDBPath())
 	if err != nil {
 		log.Warnw("could not open database, search will be unavailable", zap.Error(err))
@@ -107,7 +125,53 @@ func main() {
 		}
 	})
 
-	r.Mount("/", http.FileServer(http.FS(static.Assets)))
+	// Serve static files (CSS, JS, etc.)
+	r.Handle("/css/*", http.FileServer(http.FS(static.Assets)))
+	r.Handle("/js/*", http.FileServer(http.FS(static.Assets)))
+	r.Handle("/favicon.ico", http.FileServer(http.FS(static.Assets)))
+	r.Handle("/robots.txt", http.FileServer(http.FS(static.Assets)))
+
+	// Homepage with server-side filtering
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		query := r.URL.Query().Get("q")
+
+		var images []*db.Image
+
+		if query != "" && database != nil {
+			// Search with query
+			var err error
+			images, err = database.Search(query)
+			if err != nil {
+				log.Errorw("error during search", zap.Error(err))
+				http.Error(w, "Search error", http.StatusInternalServerError)
+				return
+			}
+			// Add URLs to all images
+			for _, img := range images {
+				img.WithURLs()
+			}
+		} else {
+			// Load all images from GCS
+			gcsFiles, err := wallpapers.GetAll(ctx)
+			if err != nil {
+				log.Errorw("error during get all", zap.Error(err))
+				http.Error(w, "Retrieval error", http.StatusInternalServerError)
+				return
+			}
+			images = gcsFilesToImages(gcsFiles)
+		}
+
+		data := PageData{
+			Query:  query,
+			Images: images,
+		}
+
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		if err := indexTemplate.Execute(w, data); err != nil {
+			log.Errorw("error rendering template", zap.Error(err))
+		}
+	})
 
 	r.Get("/all.json", func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
