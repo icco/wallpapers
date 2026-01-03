@@ -21,6 +21,7 @@
 
       .item img {
         width: 100%;
+        height: auto;
         display: block;
       }
 
@@ -137,16 +138,17 @@
 
       <div class="search-container">
         <form action="/" method="get" class="search-form">
-          <input type="text" name="q" class="search-box" placeholder="Search by word, color, or resolution..." value="{{.Query}}" />
+          <input type="text" name="q" class="search-box" placeholder="Search by word, color, or resolution..."
+            value="{{.Query}}" />
           <button type="submit" class="search-btn">Search</button>
           {{if .Query}}<a href="/" class="clear-link">Clear</a>{{end}}
         </form>
         <div class="search-hint">Try: mountain, sunset, #ff0000, 1920x1080, jpeg</div>
         <div class="result-count">
           {{if .Query}}
-            {{len .Images}} result{{if ne (len .Images) 1}}s{{end}} for "{{.Query}}"
+          {{len .Images}} result{{if ne (len .Images) 1}}s{{end}} for "{{.Query}}"
           {{else}}
-            {{len .Images}} wallpapers
+          {{len .Images}} wallpapers
           {{end}}
         </div>
       </div>
@@ -155,7 +157,8 @@
         {{range .Images}}
         <div class="item">
           <a href="{{.FullRezURL}}" title="{{.Filename}}{{if and .Width .Height}} ({{.Width}}x{{.Height}}){{end}}">
-            <img src="{{.ThumbnailURL}}" alt="{{.Filename}}{{if and .Width .Height}} ({{.Width}}x{{.Height}}){{end}}" loading="lazy" />
+            <img src="{{.ThumbnailURL}}" alt="{{.Filename}}{{if and .Width .Height}} ({{.Width}}x{{.Height}}){{end}}"
+              width="800" height="450" loading="lazy" />
           </a>
         </div>
         {{end}}
@@ -172,7 +175,7 @@
     <script src="/js/imagesloaded.pkgd.min.js"></script>
     <script src="/js/isotope.pkgd.min.js"></script>
     <script>
-      document.addEventListener('DOMContentLoaded', function() {
+      document.addEventListener('DOMContentLoaded', function () {
         var box = document.getElementById('box');
 
         // Initialize Isotope
@@ -182,7 +185,7 @@
         });
 
         // Re-layout after images load
-        imagesLoaded(box, function() {
+        imagesLoaded(box, function () {
           iso.layout();
         });
       });
