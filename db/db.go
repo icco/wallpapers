@@ -15,6 +15,7 @@ import (
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"gorm.io/gorm/logger"
 )
 
 // StringSlice is a custom type for storing []string as JSON in the database.
@@ -125,7 +126,9 @@ func DefaultDBPath() string {
 
 // Open opens or creates the SQLite database.
 func Open(dbPath string) (*DB, error) {
-	conn, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
+	conn, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Silent),
+	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to open database: %w", err)
 	}
@@ -175,15 +178,15 @@ func (db *DB) GetByFilename(filename string) (*Image, error) {
 
 // IsProcessed checks if an image has been processed.
 func (db *DB) IsProcessed(filename string) (bool, error) {
-	var img Image
-	err := db.conn.Select("processed_at").Where("filename = ?", filename).First(&img).Error
+	var imgs []Image
+	err := db.conn.Select("processed_at").Where("filename = ?", filename).Limit(1).Find(&imgs).Error
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return false, nil
-		}
 		return false, err
 	}
-	return img.ProcessedAt != nil, nil
+	if len(imgs) == 0 {
+		return false, nil
+	}
+	return imgs[0].ProcessedAt != nil, nil
 }
 
 // GetAll retrieves all images.
