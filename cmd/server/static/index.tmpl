@@ -156,7 +156,7 @@
       <div id="box" class="thumbnails">
         {{range .Images}}
         <div class="item">
-          <a href="{{.FullRezURL}}" title="{{.Filename}}{{if and .Width .Height}} ({{.Width}}x{{.Height}}){{end}}">
+          <a href="/image/{{.Filename}}" title="{{.Filename}}{{if and .Width .Height}} ({{.Width}}x{{.Height}}){{end}}">
             <img src="{{.ThumbnailURL}}" alt="{{.Filename}}{{if and .Width .Height}} ({{.Width}}x{{.Height}}){{end}}"
               width="800" height="450" loading="lazy" />
           </a>

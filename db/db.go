@@ -72,6 +72,7 @@ type Image struct {
 	// Computed fields (not stored in database)
 	ThumbnailURL string `json:"thumbnail,omitempty" gorm:"-"`
 	FullRezURL   string `json:"cdn,omitempty" gorm:"-"`
+	RawURL       string `json:"raw,omitempty" gorm:"-"`
 }
 
 // TableName specifies the table name for the Image model.
@@ -83,6 +84,7 @@ func (Image) TableName() string {
 func (img *Image) WithURLs() *Image {
 	img.ThumbnailURL = wallpapers.ThumbURL(img.Filename)
 	img.FullRezURL = wallpapers.FullRezURL(img.Filename)
+	img.RawURL = wallpapers.RawURL(img.Filename)
 	return img
 }
 

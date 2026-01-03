@@ -46,12 +46,19 @@ var (
 
 	// indexTemplate is the parsed template for the homepage
 	indexTemplate *template.Template
+	// detailTemplate is the parsed template for the image detail page
+	detailTemplate *template.Template
 )
 
 // PageData holds data passed to the index template
 type PageData struct {
 	Query  string
 	Images []*db.Image
+}
+
+// DetailPageData holds data passed to the detail template
+type DetailPageData struct {
+	Image *db.Image
 }
 
 func main() {
@@ -61,14 +68,23 @@ func main() {
 	}
 	log.Infow("Starting up", "host", fmt.Sprintf("http://localhost:%s", port))
 
-	// Parse template from embedded files
+	// Parse templates from embedded files
 	tmplContent, err := static.Assets.ReadFile("index.tmpl")
 	if err != nil {
-		log.Fatalw("failed to read template", zap.Error(err))
+		log.Fatalw("failed to read index template", zap.Error(err))
 	}
 	indexTemplate, err = template.New("index").Parse(string(tmplContent))
 	if err != nil {
-		log.Fatalw("failed to parse template", zap.Error(err))
+		log.Fatalw("failed to parse index template", zap.Error(err))
+	}
+
+	detailContent, err := static.Assets.ReadFile("detail.tmpl")
+	if err != nil {
+		log.Fatalw("failed to read detail template", zap.Error(err))
+	}
+	detailTemplate, err = template.New("detail").Parse(string(detailContent))
+	if err != nil {
+		log.Fatalw("failed to parse detail template", zap.Error(err))
 	}
 
 	// Open database
@@ -193,6 +209,66 @@ func main() {
 
 		if err := Renderer.JSON(w, http.StatusOK, images); err != nil {
 			log.Errorw("error during get all success render", zap.Error(err))
+		}
+	})
+
+	// Image detail page
+	r.Get("/image/{filename}", func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		filename := chi.URLParam(r, "filename")
+
+		if filename == "" {
+			http.Error(w, "Filename required", http.StatusBadRequest)
+			return
+		}
+
+		var img *db.Image
+
+		// First try to get from database (has full metadata)
+		if database != nil {
+			dbImg, err := database.GetByFilename(filename)
+			if err != nil {
+				log.Errorw("error fetching from database", zap.Error(err))
+			}
+			if dbImg != nil {
+				img = dbImg.WithURLs()
+			}
+		}
+
+		// If not in database, try to find in GCS
+		if img == nil {
+			gcsFiles, err := wallpapers.GetAll(ctx)
+			if err != nil {
+				log.Errorw("error during get all", zap.Error(err))
+				http.Error(w, "Retrieval error", http.StatusInternalServerError)
+				return
+			}
+
+			for _, f := range gcsFiles {
+				if f.Name == filename {
+					img = &db.Image{
+						Filename:     f.Name,
+						DateAdded:    f.Created,
+						LastModified: f.Updated,
+					}
+					img.WithURLs()
+					break
+				}
+			}
+		}
+
+		if img == nil {
+			http.Error(w, "Image not found", http.StatusNotFound)
+			return
+		}
+
+		data := DetailPageData{
+			Image: img,
+		}
+
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		if err := detailTemplate.Execute(w, data); err != nil {
+			log.Errorw("error rendering detail template", zap.Error(err))
 		}
 	})
 
