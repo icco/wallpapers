@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
@@ -244,4 +245,88 @@ func (db *DB) EnsureImage(filename string, created, updated time.Time) error {
 			},
 		},
 	}).Create(img).Error
+}
+
+// RunMigrations runs data migrations on the database.
+func (db *DB) RunMigrations() error {
+	return db.migrateCleanInvalidWords()
+}
+
+// migrateCleanInvalidWords removes invalid words (unicode, meta-phrases) from all images.
+func (db *DB) migrateCleanInvalidWords() error {
+	var images []*Image
+	if err := db.conn.Where("words IS NOT NULL AND words != '[]' AND words != ''").Find(&images).Error; err != nil {
+		return fmt.Errorf("failed to fetch images: %w", err)
+	}
+
+	// Regex to match only ASCII letters, numbers, spaces, and common punctuation
+	asciiOnly := regexp.MustCompile(`^[a-zA-Z0-9\s\-']+$`)
+
+	// Patterns that indicate invalid/meta content
+	invalidPatterns := []string{
+		"no text", "not visible", "not readable", "cannot read",
+		"no visible", "n/a", "text not", "no words", "unreadable",
+	}
+
+	for _, img := range images {
+		if len(img.Words) == 0 {
+			continue
+		}
+
+		cleanedWords := make([]string, 0, len(img.Words))
+		changed := false
+
+		for _, word := range img.Words {
+			word = strings.TrimSpace(word)
+
+			// Skip empty
+			if word == "" {
+				changed = true
+				continue
+			}
+
+			// Skip non-ASCII (unicode characters from other languages)
+			if !asciiOnly.MatchString(word) {
+				changed = true
+				continue
+			}
+
+			// Skip meta-phrases
+			lower := strings.ToLower(word)
+			skip := false
+			for _, pattern := range invalidPatterns {
+				if strings.Contains(lower, pattern) {
+					skip = true
+					break
+				}
+			}
+			if skip {
+				changed = true
+				continue
+			}
+
+			// Skip parenthetical content
+			if strings.HasPrefix(word, "(") || strings.HasSuffix(word, ")") {
+				changed = true
+				continue
+			}
+
+			// Skip single character words (except common ones)
+			if len(word) == 1 && word != "a" && word != "i" {
+				changed = true
+				continue
+			}
+
+			cleanedWords = append(cleanedWords, word)
+		}
+
+		if changed {
+			img.Words = cleanedWords
+			if err := db.conn.Model(img).Update("words", img.Words).Error; err != nil {
+				return fmt.Errorf("failed to update image %s: %w", img.Filename, err)
+			}
+		}
+	}
+
+	return nil
 }

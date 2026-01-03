@@ -39,6 +39,12 @@ func main() {
 		}
 	}()
 
+	// Run data migrations
+	if err := database.RunMigrations(); err != nil {
+		log.Printf("error running migrations: %+v", err)
+		os.Exit(1)
+	}
+
 	knownRemoteFiles, err := wallpapers.GetAll(ctx)
 	if err != nil {
 		log.Printf("error walking: %+v", err)

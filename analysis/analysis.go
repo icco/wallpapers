@@ -132,12 +132,15 @@ func extractWords(ctx context.Context, data []byte, format string) ([]string, er
 	}
 
 	// Set up the prompt for extracting words
-	prompt := `Analyze this image and provide:
-1. Any text visible in the image (OCR)
-2. Keywords describing what's in the image (objects, scenery, mood, style, colors)
+	prompt := `Analyze this image and provide keywords describing what's in the image (objects, scenery, mood, style, colors). If there is readable English text in the image, include those words too.
 
-Return ONLY a comma-separated list of single words or short phrases (2-3 words max).
-Do not include sentences, explanations, or categories.
+Rules:
+- Return ONLY a comma-separated list of single words or short phrases (2-3 words max)
+- English words only - no other languages or scripts
+- Do not include meta-commentary like "no text visible" or "text not readable"
+- Do not include explanations, categories, or sentences
+- If you cannot identify anything, return nothing
+
 Example output: mountain, sunset, orange sky, peaceful, landscape, snow peak, clouds
 
 Words:`
@@ -190,11 +193,23 @@ func parseWords(text string) []string {
 	text = strings.ReplaceAll(text, "*", "")
 	text = strings.ReplaceAll(text, "`", "")
 
+	// Remove parenthetical content (e.g., "(no text visible)")
+	text = regexp.MustCompile(`\([^)]*\)`).ReplaceAllString(text, "")
+
 	// Split by comma or newline
 	parts := regexp.MustCompile(`[,\n]+`).Split(text, -1)
 
 	words := make([]string, 0, len(parts))
 	seen := make(map[string]bool)
+
+	// Regex to match only ASCII letters, numbers, spaces, and common punctuation
+	asciiOnly := regexp.MustCompile(`^[a-zA-Z0-9\s\-']+$`)
+
+	// Meta-phrases to skip
+	skipPhrases := []string{
+		"no text", "not visible", "not readable", "cannot read",
+		"no visible", "none", "n/a", "nothing", "text not",
+	}
 
 	for _, part := range parts {
 		word := strings.TrimSpace(strings.ToLower(part))
@@ -204,6 +219,21 @@ func parseWords(text string) []string {
 		}
 		// Skip if too long (probably a sentence)
 		if len(word) > 50 {
+			continue
+		}
+		// Skip non-ASCII content (unicode characters from other languages)
+		if !asciiOnly.MatchString(word) {
+			continue
+		}
+		// Skip meta-phrases
+		skip := false
+		for _, phrase := range skipPhrases {
+			if strings.Contains(word, phrase) {
+				skip = true
+				break
+			}
+		}
+		if skip {
 			continue
 		}
 		seen[word] = true

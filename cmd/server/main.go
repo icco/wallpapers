@@ -81,6 +81,10 @@ func main() {
 				log.Errorw("failed to close database", zap.Error(cerr))
 			}
 		}()
+		// Run data migrations
+		if err := database.RunMigrations(); err != nil {
+			log.Warnw("failed to run migrations", zap.Error(err))
+		}
 	}
 
 	secureMiddleware := secure.New(secure.Options{
