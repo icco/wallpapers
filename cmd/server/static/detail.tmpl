@@ -123,20 +123,20 @@
           </dd>
         </dl>
         {{end}}
-      </article>
 
-      <div class="mv4">
-        <h2 class="f6 f5-ns b gray mv2">Keywords</h2>
-        <div>
-          {{if .Image.Words}}
-          {{range .Image.Words}}
-          <span class="tag">{{.}}</span>
-          {{end}}
-          {{else}}
-          <span class="f6 gray i">No keywords extracted yet</span>
-          {{end}}
-        </div>
-      </div>
+        <dl class="dib mr4 mr5-ns v-top">
+          <dd class="f6 f5-ns b ml0 gray">Keywords</dd>
+          <dd class="ml0 mt1">
+            {{if .Image.Words}}
+            {{range .Image.Words}}
+            <span class="tag">{{.}}</span>
+            {{end}}
+            {{else}}
+            <span class="f6 gray i">No keywords extracted yet</span>
+            {{end}}
+          </dd>
+        </dl>
+      </article>
 
       <p class="mv3">
         <a href="{{.Image.FullRezURL}}">Desktop Size (3840x2160)</a> &middot;
