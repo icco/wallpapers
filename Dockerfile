@@ -1,5 +1,9 @@
-# Build stage
-FROM golang:1.25-alpine AS builder
+FROM golang:1.25 AS builder
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    libc6-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /usr/src/app
 
@@ -11,16 +15,20 @@ COPY cmd cmd
 COPY db db
 COPY analysis analysis
 
-RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o /server ./cmd/server
-RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o /uploader ./cmd/uploader
+ENV CGO_ENABLED=1
 
-# Runtime stage
-FROM alpine:3.23
+RUN go build -ldflags="-s -w" -o /server ./cmd/server
+RUN go build -ldflags="-s -w" -o /uploader ./cmd/uploader
 
-RUN apk add --no-cache ca-certificates
+FROM debian:bookworm-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /server /usr/local/bin/server
 COPY --from=builder /uploader /usr/local/bin/uploader
+COPY wallpapers.db .
 
 ENV PORT=8080
 EXPOSE 8080
