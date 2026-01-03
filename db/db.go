@@ -12,11 +12,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/icco/wallpapers"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"gorm.io/gorm/logger"
+)
+
+const (
+	bucket   = "iccowalls"
+	imgixURL = "icco-walls.imgix.net"
 )
 
 // StringSlice is a custom type for storing []string as JSON in the database.
@@ -68,11 +72,6 @@ type Image struct {
 	Colors       StringSlice `json:"colors,omitempty" gorm:"type:text"`
 	Words        StringSlice `json:"words,omitempty" gorm:"type:text"`
 	ProcessedAt  *time.Time  `json:"-"`
-
-	// Computed fields (not stored in database)
-	ThumbnailURL string `json:"thumbnail,omitempty" gorm:"-"`
-	FullRezURL   string `json:"cdn,omitempty" gorm:"-"`
-	RawURL       string `json:"raw,omitempty" gorm:"-"`
 }
 
 // TableName specifies the table name for the Image model.
@@ -80,12 +79,35 @@ func (Image) TableName() string {
 	return "images"
 }
 
-// WithURLs populates the computed URL fields based on the filename.
-func (img *Image) WithURLs() *Image {
-	img.ThumbnailURL = wallpapers.ThumbURL(img.Filename)
-	img.FullRezURL = wallpapers.FullRezURL(img.Filename)
-	img.RawURL = wallpapers.RawURL(img.Filename)
-	return img
+// ThumbnailURL returns the URL for a small cropped thumbnail via imgix.
+func (img *Image) ThumbnailURL() string {
+	return fmt.Sprintf("https://%s/%s?w=800&h=450&fit=crop&auto=compress&auto=format", imgixURL, img.Filename)
+}
+
+// FullRezURL returns the URL for a desktop-sized version via imgix.
+func (img *Image) FullRezURL() string {
+	return fmt.Sprintf("https://%s/%s?auto=compress&w=3840&h=2160&crop=entropy&fm=png", imgixURL, img.Filename)
+}
+
+// RawURL returns the direct URL to the original file in GCS.
+func (img *Image) RawURL() string {
+	return fmt.Sprintf("https://storage.googleapis.com/%s/%s", bucket, img.Filename)
+}
+
+// MarshalJSON implements custom JSON marshaling to include computed URL fields.
+func (img *Image) MarshalJSON() ([]byte, error) {
+	type imageAlias Image // avoid recursion
+	return json.Marshal(&struct {
+		*imageAlias
+		ThumbnailURL string `json:"thumbnail,omitempty"`
+		FullRezURL   string `json:"cdn,omitempty"`
+		RawURL       string `json:"raw,omitempty"`
+	}{
+		imageAlias:   (*imageAlias)(img),
+		ThumbnailURL: img.ThumbnailURL(),
+		FullRezURL:   img.FullRezURL(),
+		RawURL:       img.RawURL(),
+	})
 }
 
 // MergeMetadata copies analysis metadata from another image (keeps original filename/dates).

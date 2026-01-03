@@ -174,11 +174,6 @@ func main() {
 			return
 		}
 
-		// Add URLs to all images
-		for _, img := range images {
-			img.WithURLs()
-		}
-
 		data := PageData{
 			Query:  query,
 			Images: images,
@@ -206,11 +201,6 @@ func main() {
 				log.Errorw("error during get all render", zap.Error(err))
 			}
 			return
-		}
-
-		// Add URLs to all images
-		for _, img := range images {
-			img.WithURLs()
 		}
 
 		if err := Renderer.JSON(w, http.StatusOK, images); err != nil {
@@ -245,8 +235,6 @@ func main() {
 			return
 		}
 
-		img.WithURLs()
-
 		data := DetailPageData{
 			Image: img,
 		}
@@ -275,11 +263,6 @@ func main() {
 				log.Errorw("error rendering search error", zap.Error(err))
 			}
 			return
-		}
-
-		// Add URLs to all images
-		for _, img := range images {
-			img.WithURLs()
 		}
 
 		if err := Renderer.JSON(w, http.StatusOK, images); err != nil {
