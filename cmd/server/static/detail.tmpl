@@ -43,15 +43,6 @@
         vertical-align: middle;
       }
 
-      .tag {
-        display: inline-block;
-        background: #f4f4f4;
-        border-radius: 2px;
-        padding: 4px 10px;
-        margin: 3px;
-        font-size: 0.875rem;
-        color: #333;
-      }
     </style>
 
     <script type="module">
@@ -80,6 +71,10 @@
       <div class="tc mb3">
         <img src="{{.Image.FullRezURL}}" alt="{{.Image.Filename}}" class="main-image" />
       </div>
+      <p class="f6 mv2">
+        <a href="{{.Image.FullRezURL}}">Desktop Size (3840x2160)</a> &middot;
+        <a href="{{.Image.RawURL}}">Original Image</a>
+      </p>
 
       <article class="mv3">
         <dl class="db mb3">
@@ -124,24 +119,17 @@
         </dl>
         {{end}}
 
-        <dl class="dib mr4 mr5-ns v-top">
+        <dl class="db mt3">
           <dd class="f6 f5-ns b ml0 gray">Keywords</dd>
           <dd class="ml0 mt1">
             {{if .Image.Words}}
-            {{range .Image.Words}}
-            <span class="tag">{{.}}</span>
-            {{end}}
+            {{range $i, $word := .Image.Words}}{{if $i}} &middot; {{end}}<a href="/?q={{$word}}">{{$word}}</a>{{end}}
             {{else}}
             <span class="f6 gray i">No keywords extracted yet</span>
             {{end}}
           </dd>
         </dl>
       </article>
-
-      <p class="mv3">
-        <a href="{{.Image.FullRezURL}}">Desktop Size (3840x2160)</a> &middot;
-        <a href="{{.Image.RawURL}}">Original Image</a>
-      </p>
 
       <div class="footer mt4 pt3 bt b--light-gray">
         <p class="f6 gray"><a href="https://github.com/icco/wallpapers">code</a> &copy; 2012 &mdash; 2025 Nat Welch.</p>
