@@ -82,25 +82,33 @@
 
       <h1 class="f4 mv2">{{.Image.Filename}}</h1>
 
-      <dl class="f6 lh-copy mv3">
+      <article class="mv3">
         {{if and .Image.Width .Image.Height}}
-        <dt class="dib b">Resolution:</dt>
-        <dd class="dib ml1 mr3">{{.Image.Width}}x{{.Image.Height}}</dd>
+        <dl class="dib mr4 mr5-ns">
+          <dd class="f6 f5-ns b ml0 gray">Resolution</dd>
+          <dd class="f4 f3-ns b ml0">{{.Image.Width}} &times; {{.Image.Height}}</dd>
+        </dl>
         {{end}}
 
         {{if .Image.FileFormat}}
-        <dt class="dib b">Format:</dt>
-        <dd class="dib ml1 mr3">{{.Image.FileFormat}}</dd>
+        <dl class="dib mr4 mr5-ns">
+          <dd class="f6 f5-ns b ml0 gray">Format</dd>
+          <dd class="f4 f3-ns b ml0 ttu">{{.Image.FileFormat}}</dd>
+        </dl>
         {{end}}
 
         {{if .Image.PixelDensity}}
-        <dt class="dib b">Megapixels:</dt>
-        <dd class="dib ml1 mr3">{{printf "%.1f" .Image.PixelDensity}} MP</dd>
+        <dl class="dib mr4 mr5-ns">
+          <dd class="f6 f5-ns b ml0 gray">Megapixels</dd>
+          <dd class="f4 f3-ns b ml0">{{printf "%.1f" .Image.PixelDensity}} MP</dd>
+        </dl>
         {{end}}
 
-        <dt class="dib b">Added:</dt>
-        <dd class="dib ml1 mr3">{{.Image.DateAdded.Format "Jan 2, 2006"}}</dd>
-      </dl>
+        <dl class="dib mr4 mr5-ns">
+          <dd class="f6 f5-ns b ml0 gray">Added</dd>
+          <dd class="f4 f3-ns b ml0">{{.Image.DateAdded.Format "Jan 2, 2006"}}</dd>
+        </dl>
+      </article>
 
       {{if .Image.Colors}}
       <div class="mv3">
