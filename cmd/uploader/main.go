@@ -9,18 +9,42 @@ import (
 	"os/user"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/icco/wallpapers"
+	"github.com/icco/wallpapers/analysis"
+	"github.com/icco/wallpapers/db"
 )
 
 const DropboxPath = "/Photos/Wallpapers/DesktopWallpapers"
 
 var (
 	knownLocalFiles map[string]bool
+	database        *db.DB
 )
 
 func main() {
 	ctx := context.Background()
+
+	// Open database
+	var err error
+	database, err = db.Open(db.DefaultDBPath())
+	if err != nil {
+		log.Printf("error opening database: %+v", err)
+		os.Exit(1)
+	}
+	defer func() {
+		if cerr := database.Close(); cerr != nil {
+			log.Printf("error closing database: %+v", cerr)
+		}
+	}()
+
+	// Run data migrations
+	if err := database.RunMigrations(); err != nil {
+		log.Printf("error running migrations: %+v", err)
+		os.Exit(1)
+	}
+
 	knownRemoteFiles, err := wallpapers.GetAll(ctx)
 	if err != nil {
 		log.Printf("error walking: %+v", err)
@@ -46,6 +70,10 @@ func main() {
 			if err := wallpapers.DeleteFile(ctx, filename); err != nil {
 				log.Printf("could not delete %q: %+v", filename, err)
 				os.Exit(1)
+			}
+			// Also remove from database
+			if err := database.Delete(filename); err != nil {
+				log.Printf("could not delete from db %q: %+v", filename, err)
 			}
 			log.Printf("deleted %q", filename)
 		}
@@ -98,14 +126,59 @@ func walkFn(path string, info fs.FileInfo, err error) error {
 	}
 	lc := wallpapers.GetFileCRC(dat)
 	if gc == lc {
-		log.Printf("%q unchanged, skipping", newName)
-		return nil
+		log.Printf("%q unchanged, skipping upload", newName)
+	} else {
+		if err := wallpapers.UploadFile(ctx, newName, dat); err != nil {
+			return fmt.Errorf("cloud not upload file: %w", err)
+		}
+		log.Printf("uploaded file: %q", newName)
 	}
 
-	if err := wallpapers.UploadFile(ctx, newName, dat); err != nil {
-		return fmt.Errorf("cloud not upload file: %w", err)
+	// Check if image needs analysis
+	processed, err := database.IsProcessed(newName)
+	if err != nil {
+		return fmt.Errorf("could not check processing status: %w", err)
 	}
 
-	log.Printf("uploaded file: %q", newName)
+	if !processed {
+		log.Printf("analyzing %q...", newName)
+		if err := analyzeAndStore(ctx, newPath, newName, dat, info.ModTime()); err != nil {
+			// Log but don't fail - we can retry later
+			log.Printf("warning: failed to analyze %q: %v", newName, err)
+		}
+	} else {
+		log.Printf("%q already processed, skipping analysis", newName)
+	}
+
+	return nil
+}
+
+// analyzeAndStore analyzes an image and stores the metadata in the database.
+func analyzeAndStore(ctx context.Context, filePath, filename string, data []byte, modTime time.Time) error {
+	info, err := analysis.AnalyzeImage(ctx, filePath, data)
+	if err != nil {
+		return fmt.Errorf("analysis failed: %w", err)
+	}
+
+	now := time.Now()
+	img := &db.Image{
+		Filename:     filename,
+		DateAdded:    now,
+		LastModified: modTime,
+		Width:        info.Width,
+		Height:       info.Height,
+		PixelDensity: info.PixelDensity,
+		FileFormat:   info.FileFormat,
+		Colors:       info.Colors,
+		Words:        info.Words,
+		ProcessedAt:  &now,
+	}
+
+	if err := database.UpsertImage(img); err != nil {
+		return fmt.Errorf("failed to store image: %w", err)
+	}
+
+	log.Printf("stored metadata for %q: %dx%d, %d colors, %d words",
+		filename, info.Width, info.Height, len(info.Colors), len(info.Words))
 	return nil
 }

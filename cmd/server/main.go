@@ -14,6 +14,7 @@ import (
 	"github.com/icco/gutil/logging"
 	"github.com/icco/wallpapers"
 	"github.com/icco/wallpapers/cmd/server/static"
+	"github.com/icco/wallpapers/db"
 	"github.com/unrolled/render"
 	"github.com/unrolled/secure"
 	"go.uber.org/zap"
@@ -40,7 +41,18 @@ var (
 		RequirePartials:           false,
 		Funcs:                     []template.FuncMap{template.FuncMap{}},
 	})
+
+	database *db.DB
+
+	// indexTemplate is the parsed template for the homepage
+	indexTemplate *template.Template
 )
+
+// PageData holds data passed to the index template
+type PageData struct {
+	Query  string
+	Images []*db.Image
+}
 
 func main() {
 	port := "8080"
@@ -48,6 +60,32 @@ func main() {
 		port = fromEnv
 	}
 	log.Infow("Starting up", "host", fmt.Sprintf("http://localhost:%s", port))
+
+	// Parse template from embedded files
+	tmplContent, err := static.Assets.ReadFile("index.tmpl")
+	if err != nil {
+		log.Fatalw("failed to read template", zap.Error(err))
+	}
+	indexTemplate, err = template.New("index").Parse(string(tmplContent))
+	if err != nil {
+		log.Fatalw("failed to parse template", zap.Error(err))
+	}
+
+	// Open database
+	database, err = db.Open(db.DefaultDBPath())
+	if err != nil {
+		log.Warnw("could not open database, search will be unavailable", zap.Error(err))
+	} else {
+		defer func() {
+			if cerr := database.Close(); cerr != nil {
+				log.Errorw("failed to close database", zap.Error(cerr))
+			}
+		}()
+		// Run data migrations
+		if err := database.RunMigrations(); err != nil {
+			log.Warnw("failed to run migrations", zap.Error(err))
+		}
+	}
 
 	secureMiddleware := secure.New(secure.Options{
 		SSLRedirect:        false,
@@ -91,11 +129,57 @@ func main() {
 		}
 	})
 
-	r.Mount("/", http.FileServer(http.FS(static.Assets)))
+	// Serve static files (CSS, JS, etc.)
+	r.Handle("/css/*", http.FileServer(http.FS(static.Assets)))
+	r.Handle("/js/*", http.FileServer(http.FS(static.Assets)))
+	r.Handle("/favicon.ico", http.FileServer(http.FS(static.Assets)))
+	r.Handle("/robots.txt", http.FileServer(http.FS(static.Assets)))
+
+	// Homepage with server-side filtering
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		query := r.URL.Query().Get("q")
+
+		var images []*db.Image
+
+		if query != "" && database != nil {
+			// Search with query
+			var err error
+			images, err = database.Search(query)
+			if err != nil {
+				log.Errorw("error during search", zap.Error(err))
+				http.Error(w, "Search error", http.StatusInternalServerError)
+				return
+			}
+			// Add URLs to all images
+			for _, img := range images {
+				img.WithURLs()
+			}
+		} else {
+			// Load all images from GCS
+			gcsFiles, err := wallpapers.GetAll(ctx)
+			if err != nil {
+				log.Errorw("error during get all", zap.Error(err))
+				http.Error(w, "Retrieval error", http.StatusInternalServerError)
+				return
+			}
+			images = gcsFilesToImages(gcsFiles)
+		}
+
+		data := PageData{
+			Query:  query,
+			Images: images,
+		}
+
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		if err := indexTemplate.Execute(w, data); err != nil {
+			log.Errorw("error rendering template", zap.Error(err))
+		}
+	})
 
 	r.Get("/all.json", func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		images, err := wallpapers.GetAll(ctx)
+		gcsFiles, err := wallpapers.GetAll(ctx)
 		if err != nil {
 			log.Errorw("error during get all", zap.Error(err))
 			if err := Renderer.JSON(w, 500, map[string]string{"error": "retrieval error"}); err != nil {
@@ -104,18 +188,65 @@ func main() {
 			return
 		}
 
+		// Convert GCS files to images with database metadata
+		images := gcsFilesToImages(gcsFiles)
+
 		if err := Renderer.JSON(w, http.StatusOK, images); err != nil {
 			log.Errorw("error during get all success render", zap.Error(err))
+		}
+	})
+
+	r.Get("/search", func(w http.ResponseWriter, r *http.Request) {
+		query := r.URL.Query().Get("q")
+
+		if database == nil {
+			log.Errorw("search unavailable, database not connected")
+			if err := Renderer.JSON(w, 503, map[string]string{"error": "search unavailable"}); err != nil {
+				log.Errorw("error rendering search error", zap.Error(err))
+			}
+			return
+		}
+
+		images, err := database.Search(query)
+		if err != nil {
+			log.Errorw("error during search", zap.Error(err))
+			if err := Renderer.JSON(w, 500, map[string]string{"error": "search error"}); err != nil {
+				log.Errorw("error rendering search error", zap.Error(err))
+			}
+			return
+		}
+
+		// Add URLs to all images
+		for _, img := range images {
+			img.WithURLs()
+		}
+
+		if err := Renderer.JSON(w, http.StatusOK, images); err != nil {
+			log.Errorw("error rendering search results", zap.Error(err))
 		}
 	})
 
 	srv := &http.Server{
 		Addr:         ":" + port,
 		Handler:      r,
-		ReadTimeout:  1 * time.Second,
-		WriteTimeout: 1 * time.Second,
-		IdleTimeout:  1 * time.Second,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		IdleTimeout:  10 * time.Second,
 	}
 
 	log.Fatal(srv.ListenAndServe())
+}
+
+// gcsFilesToImages converts GCS file listings to Image structs with database metadata.
+func gcsFilesToImages(files []*wallpapers.File) []*db.Image {
+	result := make([]*db.Image, 0, len(files))
+	for _, f := range files {
+		img := &db.Image{Filename: f.Name, DateAdded: f.Created, LastModified: f.Updated}
+		if database != nil {
+			dbImg, _ := database.GetByFilename(f.Name)
+			img.MergeMetadata(dbImg)
+		}
+		result = append(result, img.WithURLs())
+	}
+	return result
 }
