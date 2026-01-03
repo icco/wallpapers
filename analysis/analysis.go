@@ -161,7 +161,7 @@ Words:`
 		{InlineData: &genai.Blob{Data: data, MIMEType: mimeType}},
 	}
 
-	resp, err := client.Models.GenerateContent(ctx, "gemini-2.0-flash",
+	resp, err := client.Models.GenerateContent(ctx, "gemini-2.5-flash",
 		[]*genai.Content{{Parts: parts}}, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate content: %w", err)
