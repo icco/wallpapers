@@ -8,24 +8,24 @@
 
     <link rel="stylesheet" type="text/css" href="/css/tachyons.min.css">
     <style>
-      /* Desktop: 3 columns */
+      /* Desktop: 3 columns (subtract margin space) */
       @media (min-width: 900px) {
         .item {
-          width: 33.333%;
+          width: calc(33.333% - 3px);
         }
       }
 
       /* Tablet: 2 columns */
       @media (min-width: 600px) and (max-width: 899px) {
         .item {
-          width: 50%;
+          width: calc(50% - 3px);
         }
       }
 
       /* Mobile: 1 column */
       @media (max-width: 599px) {
         .item {
-          width: 100%;
+          width: calc(100% - 2px);
         }
       }
 
