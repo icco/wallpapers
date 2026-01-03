@@ -8,6 +8,8 @@ RUN go mod download && go mod verify
 
 COPY *.go .
 COPY cmd cmd
+COPY db db
+COPY analysis analysis
 
 RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o /server ./cmd/server
 RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o /uploader ./cmd/uploader
