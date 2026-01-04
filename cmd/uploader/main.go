@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"io/fs"
 	"log"
+	"math/rand"
 	"os"
 	"os/user"
 	"path/filepath"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/icco/wallpapers"
@@ -134,15 +136,33 @@ func walkFn(path string, info fs.FileInfo, err error) error {
 		log.Printf("uploaded file: %q", newName)
 	}
 
+	// Get file timestamps
+	modTime := info.ModTime()
+	createdTime := getCreationTime(info)
+
 	// Check if image needs analysis
-	processed, err := database.IsProcessed(newName)
+	existing, err := database.GetByFilename(newName)
 	if err != nil {
 		return fmt.Errorf("could not check processing status: %w", err)
 	}
 
-	if !processed {
-		log.Printf("analyzing %q...", newName)
-		if err := analyzeAndStore(ctx, newPath, newName, dat, info.ModTime()); err != nil {
+	needsAnalysis := false
+	reason := ""
+
+	if existing == nil || existing.ProcessedAt == nil {
+		needsAnalysis = true
+		reason = "not processed"
+	} else if len(existing.Words) == 0 {
+		needsAnalysis = true
+		reason = "words empty"
+	} else if rand.Float64() < 0.10 {
+		needsAnalysis = true
+		reason = "random reanalysis (10%)"
+	}
+
+	if needsAnalysis {
+		log.Printf("analyzing %q (%s)...", newName, reason)
+		if err := analyzeAndStore(ctx, newPath, newName, dat, createdTime, modTime); err != nil {
 			// Log but don't fail - we can retry later
 			log.Printf("warning: failed to analyze %q: %v", newName, err)
 		}
@@ -153,8 +173,18 @@ func walkFn(path string, info fs.FileInfo, err error) error {
 	return nil
 }
 
+// getCreationTime extracts the file creation time (birthtime) from os.FileInfo.
+func getCreationTime(info fs.FileInfo) time.Time {
+	if stat, ok := info.Sys().(*syscall.Stat_t); ok {
+		// On macOS, Birthtimespec contains the creation time
+		return time.Unix(stat.Birthtimespec.Sec, stat.Birthtimespec.Nsec)
+	}
+	// Fallback to modification time if birth time not available
+	return info.ModTime()
+}
+
 // analyzeAndStore analyzes an image and stores the metadata in the database.
-func analyzeAndStore(ctx context.Context, filePath, filename string, data []byte, modTime time.Time) error {
+func analyzeAndStore(ctx context.Context, filePath, filename string, data []byte, createdTime, modTime time.Time) error {
 	info, err := analysis.AnalyzeImage(ctx, filePath, data)
 	if err != nil {
 		return fmt.Errorf("analysis failed: %w", err)
@@ -163,7 +193,7 @@ func analyzeAndStore(ctx context.Context, filePath, filename string, data []byte
 	now := time.Now()
 	img := &db.Image{
 		Filename:     filename,
-		DateAdded:    now,
+		DateAdded:    createdTime,
 		LastModified: modTime,
 		Width:        info.Width,
 		Height:       info.Height,

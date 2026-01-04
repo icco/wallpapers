@@ -182,7 +182,7 @@ func (db *DB) UpsertImage(img *Image) error {
 	return db.conn.Clauses(clause.OnConflict{
 		Columns: []clause.Column{{Name: "filename"}},
 		DoUpdates: clause.AssignmentColumns([]string{
-			"last_modified", "width", "height", "pixel_density",
+			"date_added", "last_modified", "width", "height", "pixel_density",
 			"file_format", "colors", "words", "processed_at",
 		}),
 	}).Create(img).Error
@@ -217,7 +217,7 @@ func (db *DB) IsProcessed(filename string) (bool, error) {
 // GetAll retrieves all images.
 func (db *DB) GetAll() ([]*Image, error) {
 	var images []*Image
-	err := db.conn.Order("date_added DESC").Find(&images).Error
+	err := db.conn.Order("last_modified DESC").Find(&images).Error
 	return images, err
 }
 
@@ -239,7 +239,7 @@ func (db *DB) Search(query string) ([]*Image, error) {
 			"LOWER(file_format) LIKE ? OR "+
 			"(width || 'x' || height) LIKE ?",
 		searchPattern, searchPattern, searchPattern, searchPattern, searchPattern,
-	).Order("date_added DESC").Find(&images).Error
+	).Order("last_modified DESC").Find(&images).Error
 
 	return images, err
 }
