@@ -10,7 +10,6 @@ import (
 	"os/user"
 	"path/filepath"
 	"strings"
-	"syscall"
 	"time"
 
 	"github.com/icco/wallpapers"
@@ -171,16 +170,6 @@ func walkFn(path string, info fs.FileInfo, err error) error {
 	}
 
 	return nil
-}
-
-// getCreationTime extracts the file creation time (birthtime) from os.FileInfo.
-func getCreationTime(info fs.FileInfo) time.Time {
-	if stat, ok := info.Sys().(*syscall.Stat_t); ok {
-		// On macOS, Birthtimespec contains the creation time
-		return time.Unix(stat.Birthtimespec.Sec, stat.Birthtimespec.Nsec)
-	}
-	// Fallback to modification time if birth time not available
-	return info.ModTime()
 }
 
 // analyzeAndStore analyzes an image and stores the metadata in the database.
