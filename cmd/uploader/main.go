@@ -2,10 +2,10 @@ package main
 
 import (
 	"context"
+	"crypto/rand"
 	"fmt"
 	"io/fs"
 	"log"
-	"math/rand"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -154,7 +154,7 @@ func walkFn(path string, info fs.FileInfo, err error) error {
 	} else if len(existing.Words) == 0 {
 		needsAnalysis = true
 		reason = "words empty"
-	} else if rand.Float64() < 0.10 {
+	} else if shouldRandomlyReanalyze() {
 		needsAnalysis = true
 		reason = "random reanalysis (10%)"
 	}
@@ -200,4 +200,14 @@ func analyzeAndStore(ctx context.Context, filePath, filename string, data []byte
 	log.Printf("stored metadata for %q: %dx%d, %d colors, %d words",
 		filename, info.Width, info.Height, len(info.Colors), len(info.Words))
 	return nil
+}
+
+// shouldRandomlyReanalyze returns true approximately 10% of the time using crypto/rand.
+func shouldRandomlyReanalyze() bool {
+	var b [1]byte
+	if _, err := rand.Read(b[:]); err != nil {
+		return false
+	}
+	// 26/256 ≈ 10.15%
+	return b[0] < 26
 }
