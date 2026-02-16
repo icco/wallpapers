@@ -7,7 +7,7 @@ toolchain go1.24.2
 require (
 	cloud.google.com/go/storage v1.59.2
 	github.com/EdlinOrg/prominentcolor v1.0.0
-	github.com/go-chi/chi/v5 v5.2.4
+	github.com/go-chi/chi/v5 v5.2.5
 	github.com/go-chi/cors v1.2.2
 	github.com/icco/gutil v0.0.0-20260119173655-5dc56862d9f6
 	github.com/tjarratt/babble v0.0.0-20210505082055-cbca2a4833c1
