@@ -105,7 +105,7 @@ func walkFn(path string, info fs.FileInfo, err error) error {
 	newName := wallpapers.FormatName(info.Name())
 	newPath := filepath.Join(folder, newName)
 	if newName != info.Name() {
-		if err := os.Rename(path, newPath); err != nil {
+		if err := os.Rename(path, newPath); err != nil { //nolint:gosec // G122: trusted local directory, no symlink risk
 			return fmt.Errorf("could not rename: %w", err)
 		}
 		log.Printf("renamed %q => %q", oldName, newName)
