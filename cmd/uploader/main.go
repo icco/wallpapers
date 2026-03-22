@@ -15,7 +15,7 @@ import (
 	"github.com/icco/wallpapers"
 	"github.com/icco/wallpapers/analysis"
 	"github.com/icco/wallpapers/db"
-	"gopkg.in/gographics/imagick.v3/imagick"
+	"github.com/gographics/imagick/imagick"
 )
 
 const DropboxPath = "/Photos/Wallpapers/DesktopWallpapers"
