@@ -181,7 +181,7 @@ func TestLayoutSharedElements(t *testing.T) {
 	loadAll(t)
 
 	now := time.Now()
-	// Every page should include the analytics script and tachyons CSS.
+	// Every page should include the analytics script and DaisyUI/Tailwind CSS.
 	cases := []struct {
 		name string
 		tmpl *template.Template
@@ -201,7 +201,7 @@ func TestLayoutSharedElements(t *testing.T) {
 				t.Fatalf("execute %s: %v", tc.name, err)
 			}
 			body := buf.String()
-			assertContains(t, body, "tachyons.min.css")
+			assertContains(t, body, "daisyui")
 			assertContains(t, body, "web-vitals")
 			assertContains(t, body, "reportd.natwelch.com")
 		})

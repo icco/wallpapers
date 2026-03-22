@@ -1,42 +1,13 @@
 {{define "title"}}Tags - Wallpapers{{end}}
 
-{{define "page-styles"}}
-<style>
-  .tag-cloud {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    align-items: baseline;
-    margin-top: 1rem;
-    line-height: 1.8;
-  }
-  .tag {
-    padding: 0.15rem 0.4rem;
-    border-radius: 3px;
-    border: 1px solid #ddd;
-    white-space: nowrap;
-    text-decoration: none;
-  }
-  .tag:hover {
-    border-color: #2BA6CB;
-    background: #f0f8ff;
-  }
-  .tag-count {
-    color: #aaa;
-    font-size: 0.7em;
-    margin-left: 2px;
-  }
-</style>
-{{end}}
-
 {{define "content"}}
-<h2 class="f3 mb1">Tags</h2>
-<p class="f6 gray mb3">{{len .Tags}} unique tags extracted from wallpapers. More common tags appear larger.</p>
+<h2 class="text-2xl font-bold mb-2">Tags</h2>
+<p class="text-sm text-gray-500 mb-4">{{len .Tags}} unique tags extracted from wallpapers. More common tags appear larger.</p>
 
-<div class="tag-cloud">
+<div class="flex flex-wrap gap-2 mt-4 leading-relaxed items-baseline">
   {{range .Tags}}
-  <a href="/?q={{.Word}}" class="tag">
-    {{.Word}}<span class="tag-count">{{.Count}}</span>
+  <a href="/?q={{.Word}}" class="badge badge-outline gap-1 no-underline">
+    {{.Word}}<span class="text-gray-400 text-xs ml-0.5">{{.Count}}</span>
   </a>
   {{end}}
 </div>
