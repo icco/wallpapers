@@ -1,9 +1,9 @@
 {{define "title"}}{{.Image.Filename}} - Wallpapers{{end}}
 
 {{define "header"}}
-<p class="mb3">
+<p class="mb-4">
   <a href="/">&larr; Back</a>
-  <span class="ml3 f6">
+  <span class="ml-4 text-sm">
     <a href="/resolutions">Resolutions</a> &middot;
     <a href="/colors">Colors</a> &middot;
     <a href="/tags">Tags</a>
@@ -17,135 +17,78 @@
     max-width: 100%;
     height: auto;
     display: block;
-    border: 1px solid #CCC;
+    border: 1px solid var(--border-default);
   }
 
   .main-image:hover {
-    border-color: #2BA6CB;
+    border-color: var(--border-hover);
   }
 
   dl, dd {
     margin-left: 0;
   }
-
-  /* Responsive metadata grid */
-  .meta-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1.5rem 2rem;
-  }
-
-  @media (max-width: 599px) {
-    .meta-grid {
-      gap: 1rem 1.5rem;
-    }
-  }
-
-  /* Download links */
-  .download-links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem 1rem;
-    align-items: center;
-  }
-
-  @media (max-width: 480px) {
-    .download-links {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-
-    .download-links .separator {
-      display: none;
-    }
-  }
-
-  /* Mobile typography adjustments */
-  @media (max-width: 480px) {
-    .f3-ns {
-      font-size: 1.25rem;
-    }
-
-    .filename-text {
-      word-break: break-all;
-    }
-  }
-
-  /* Container padding for mobile */
-  @media (max-width: 599px) {
-    .pa3 {
-      padding: 0.75rem;
-    }
-  }
-
-  /* Keywords wrapping */
-  .keywords-list {
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-  }
 </style>
 {{end}}
 
 {{define "content"}}
-<div class="tc mb3">
+<div class="text-center mb-4">
   <img src="{{.Image.FullRezURL}}" alt="{{.Image.Filename}}" class="main-image" />
 </div>
-<p class="f6 mt2 mb4 download-links">
+<p class="text-sm mt-2 mb-8 flex flex-wrap gap-x-4 gap-y-1 items-center">
   <a href="{{.Image.FullRezURL}}">Desktop Size (3840x2160)</a>
-  <span class="separator">&middot;</span>
   <a href="{{.Image.RawURL}}">Original Image</a>
 </p>
 
 <article>
-  <dl class="db mb3">
-    <dd class="f6 f5-ns b ml0 gray">Filename</dd>
-    <dd class="f4 f3-ns b ml0 filename-text">{{.Image.Filename}}</dd>
+  <dl class="block mb-4">
+    <dd class="text-sm font-bold ml-0 text-gray-500">Filename</dd>
+    <dd class="text-xl font-bold ml-0 break-all">{{.Image.Filename}}</dd>
   </dl>
 
-  <div class="meta-grid">
+  <div class="flex flex-wrap gap-6">
     {{if and .Image.Width .Image.Height}}
     <dl>
-      <dd class="f6 f5-ns b ml0 gray">Resolution</dd>
-      <dd class="f4 f3-ns b ml0">{{.Image.Width}} &times; {{.Image.Height}}</dd>
+      <dd class="text-sm font-bold ml-0 text-gray-500">Resolution</dd>
+      <dd class="text-xl font-bold ml-0">{{.Image.Width}} &times; {{.Image.Height}}</dd>
     </dl>
     {{end}}
 
     {{if .Image.FileFormat}}
     <dl>
-      <dd class="f6 f5-ns b ml0 gray">Format</dd>
-      <dd class="f4 f3-ns b ml0 ttu">{{.Image.FileFormat}}</dd>
+      <dd class="text-sm font-bold ml-0 text-gray-500">Format</dd>
+      <dd class="text-xl font-bold ml-0 uppercase">{{.Image.FileFormat}}</dd>
     </dl>
     {{end}}
 
     {{if .Image.PixelDensity}}
     <dl>
-      <dd class="f6 f5-ns b ml0 gray">Megapixels</dd>
-      <dd class="f4 f3-ns b ml0">{{printf "%.1f" .Image.PixelDensity}} MP</dd>
+      <dd class="text-sm font-bold ml-0 text-gray-500">Megapixels</dd>
+      <dd class="text-xl font-bold ml-0">{{printf "%.1f" .Image.PixelDensity}} MP</dd>
     </dl>
     {{end}}
 
     <dl>
-      <dd class="f6 f5-ns b ml0 gray">Added</dd>
-      <dd class="f4 f3-ns b ml0">{{.Image.DateAdded.Format "Jan 2, 2006"}}</dd>
+      <dd class="text-sm font-bold ml-0 text-gray-500">Added</dd>
+      <dd class="text-xl font-bold ml-0">{{.Image.DateAdded.Format "Jan 2, 2006"}}</dd>
     </dl>
 
     {{if .Image.Colors}}
     <dl>
-      <dd class="f6 f5-ns b ml0 gray">Colors</dd>
-      <dd class="f4 f3-ns b ml0">
+      <dd class="text-sm font-bold ml-0 text-gray-500">Colors</dd>
+      <dd class="text-xl font-bold ml-0">
         {{range $i, $color := .Image.Colors}}{{if $i}} &middot; {{end}}<a href="/?q={{$color}}">{{$color}}</a>{{end}}
       </dd>
     </dl>
     {{end}}
   </div>
 
-  <dl class="db mt3">
-    <dd class="f6 f5-ns b ml0 gray">Keywords</dd>
-    <dd class="f4 f3-ns b ml0 keywords-list">
+  <dl class="block mt-4">
+    <dd class="text-sm font-bold ml-0 text-gray-500">Keywords</dd>
+    <dd class="text-xl font-bold ml-0 break-words">
       {{if .Image.Words}}
       {{range $i, $word := .Image.Words}}{{if $i}} &middot; {{end}}<a href="/?q={{$word}}">{{$word}}</a>{{end}}
       {{else}}
-      <span class="gray i">No keywords extracted yet</span>
+      <span class="text-gray-400 italic">No keywords extracted yet</span>
       {{end}}
     </dd>
   </dl>

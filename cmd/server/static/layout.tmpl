@@ -1,27 +1,35 @@
 <!doctype html>
-<html>
+<html data-theme="light">
 
   <head lang="en">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{block "title" .}}Wallpapers{{end}}</title>
 
-    <link rel="stylesheet" type="text/css" href="/css/tachyons.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
+      :root {
+        --accent: #265C83;
+        --accent-hover: #007BE6;
+        --border-default: #D1D5DB; /* gray-300 */
+        --border-hover: #265C83;
+      }
+
       a,
       a:link,
       a:visited {
         transition: color .4s;
-        color: #265C83;
+        color: var(--accent);
       }
 
       a:hover {
-        color: #7FDBFF;
+        color: var(--accent-hover);
       }
 
       a:active {
         transition: color .3s;
-        color: #007BE6;
+        color: var(--accent-hover);
       }
     </style>
     {{block "page-styles" .}}{{end}}
@@ -44,12 +52,12 @@
     </script>
   </head>
 
-  <body>
-    <div class="{{block "container-class" .}}pa3 mw8 center{{end}}">
+  <body class="bg-base-100">
+    <div class="{{block "container-class" .}}p-4 max-w-5xl mx-auto{{end}}">
 
       {{block "header" .}}
-      <h1 class="man pan"><a href="/">Wallpapers</a></h1>
-      <nav class="f6 mb3 mt1">
+      <h1 class="text-3xl font-bold m-0 p-0"><a href="/">Wallpapers</a></h1>
+      <nav class="text-sm mb-4 mt-2">
         <a href="/resolutions">Resolutions</a> &middot;
         <a href="/colors">Colors</a> &middot;
         <a href="/tags">Tags</a>
@@ -58,8 +66,8 @@
 
       {{block "content" .}}{{end}}
 
-      <div class="footer mt4 pt3 bt b--light-gray">
-        <p class="f6 gray"><a href="https://github.com/icco/wallpapers">code</a> &copy; 2012 &mdash; 2025 Nat Welch. Source images copyright their original creators. All content somewhat modified by Nat.</p>
+      <div class="mt-8 pt-4 border-t border-gray-200">
+        <p class="text-sm text-gray-500">A Nat Welch Collection &middot; <a href="https://github.com/icco/wallpapers">code</a> &copy; 2012 &mdash; {{currentYear}} Nat Welch. Source images copyright their original creators. All content somewhat modified by Nat.</p>
       </div>
 
     </div>

@@ -1,41 +1,13 @@
 {{define "title"}}Resolutions - Wallpapers{{end}}
 
-{{define "page-styles"}}
-<style>
-  .res-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-top: 1rem;
-  }
-  .res-item {
-    display: inline-block;
-    padding: 0.4rem 0.75rem;
-    border: 1px solid #CCC;
-    border-radius: 4px;
-    font-size: 0.9rem;
-    white-space: nowrap;
-    text-decoration: none;
-  }
-  .res-item:hover {
-    border-color: #2BA6CB;
-  }
-  .count {
-    color: #888;
-    font-size: 0.8rem;
-    margin-left: 0.25rem;
-  }
-</style>
-{{end}}
-
 {{define "content"}}
-<h2 class="f3 mb1">Resolutions</h2>
-<p class="f6 gray mb3">{{len .Resolutions}} unique resolutions. Click to browse matching wallpapers.</p>
+<h2 class="text-2xl font-bold mb-2">Resolutions</h2>
+<p class="text-sm text-gray-500 mb-4">{{len .Resolutions}} unique resolutions. Click to browse matching wallpapers.</p>
 
-<div class="res-list">
+<div class="flex flex-wrap gap-2 mt-4">
   {{range .Resolutions}}
-  <a href="/?q={{.Width}}x{{.Height}}" class="res-item">
-    {{.Width}}×{{.Height}}<span class="count">{{.Count}}</span>
+  <a href="/?q={{.Width}}x{{.Height}}" class="badge badge-outline gap-1 no-underline">
+    {{.Width}}×{{.Height}}<span class="text-gray-400 text-xs ml-0.5">{{.Count}}</span>
   </a>
   {{end}}
 </div>
