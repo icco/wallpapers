@@ -3,8 +3,7 @@
 {{define "container-class"}}p-4 max-w-5xl mx-auto{{end}}
 
 {{define "header"}}
-<h1 class="m-0 p-0"><a href="/">Wallpapers</a></h1>
-<h2 class="text-lg my-1">A Nat Welch Collection</h2>
+<h1 class="text-3xl font-bold m-0 p-0"><a href="/">Wallpapers</a></h1>
 <nav class="text-sm mb-3">
   <a href="/resolutions">Resolutions</a> &middot;
   <a href="/colors">Colors</a> &middot;
@@ -51,7 +50,7 @@
 {{define "content"}}
 <div class="mb-4 px-1">
   <form action="/" method="get" class="flex flex-wrap gap-2 items-center my-4">
-    <input type="text" name="q" class="input input-bordered w-full max-w-xs"
+    <input type="text" name="q" class="input input-bordered flex-1 min-w-0"
       placeholder="Search by word, color, or resolution..."
       value="{{.Query}}" />
     <button type="submit" class="btn btn-primary">Search</button>
