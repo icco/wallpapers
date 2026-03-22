@@ -87,10 +87,13 @@ func loadTemplate(name string, funcs template.FuncMap) (*template.Template, erro
 	if err != nil {
 		return nil, fmt.Errorf("read %s.tmpl: %w", name, err)
 	}
-	t := template.New("layout")
-	if funcs != nil {
-		t = t.Funcs(funcs)
+	base := template.FuncMap{
+		"currentYear": func() int { return time.Now().Year() },
 	}
+	for k, v := range funcs {
+		base[k] = v
+	}
+	t := template.New("layout").Funcs(base)
 	if t, err = t.Parse(string(layoutContent)); err != nil {
 		return nil, fmt.Errorf("parse layout.tmpl: %w", err)
 	}
