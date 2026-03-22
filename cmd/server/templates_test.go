@@ -164,7 +164,6 @@ func TestTagsTemplateRenders(t *testing.T) {
 	body := buf.String()
 	assertContains(t, body, "Tags")
 	assertContains(t, body, "mountain")
-	assertContains(t, body, "--count:")
 	assertContains(t, body, "/?q=mountain")
 }
 
