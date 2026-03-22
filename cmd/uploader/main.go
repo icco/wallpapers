@@ -15,6 +15,7 @@ import (
 	"github.com/icco/wallpapers"
 	"github.com/icco/wallpapers/analysis"
 	"github.com/icco/wallpapers/db"
+	"gopkg.in/gographics/imagick.v3/imagick"
 )
 
 const DropboxPath = "/Photos/Wallpapers/DesktopWallpapers"
@@ -25,6 +26,9 @@ var (
 )
 
 func main() {
+	imagick.Initialize()
+	defer imagick.Terminate()
+
 	ctx := context.Background()
 
 	// Open database
@@ -114,6 +118,13 @@ func walkFn(path string, info fs.FileInfo, err error) error {
 	// log existence
 	knownLocalFiles[newName] = true
 
+	// Resize if smaller than 4000px wide
+	if resized, rerr := resizeToMinWidth(newPath, 4000); rerr != nil {
+		log.Printf("warning: could not resize %q: %v", newName, rerr)
+	} else if resized {
+		log.Printf("resized %q to 4000px width", newName)
+	}
+
 	// Upload
 	//gosec:disable G304 We are uploading a file, so we need to read it
 	dat, err := os.ReadFile(newPath)
@@ -200,6 +211,32 @@ func analyzeAndStore(ctx context.Context, filePath, filename string, data []byte
 	log.Printf("stored metadata for %q: %dx%d, %d colors, %d words",
 		filename, info.Width, info.Height, len(info.Colors), len(info.Words))
 	return nil
+}
+
+// resizeToMinWidth upscales path to minWidth pixels wide if smaller, preserving aspect ratio.
+func resizeToMinWidth(path string, minWidth uint) (bool, error) {
+	mw := imagick.NewMagickWand()
+	defer mw.Destroy()
+
+	if err := mw.ReadImage(path); err != nil {
+		return false, fmt.Errorf("imagick read: %w", err)
+	}
+
+	w := mw.GetImageWidth()
+	if w >= minWidth {
+		return false, nil
+	}
+
+	h := mw.GetImageHeight()
+	newH := uint(float64(h) * float64(minWidth) / float64(w))
+	if err := mw.ResizeImage(minWidth, newH, imagick.FILTER_LANCZOS); err != nil {
+		return false, fmt.Errorf("imagick resize: %w", err)
+	}
+
+	if err := mw.WriteImage(path); err != nil {
+		return false, fmt.Errorf("imagick write: %w", err)
+	}
+	return true, nil
 }
 
 // shouldRandomlyReanalyze returns true approximately 10% of the time using crypto/rand.
