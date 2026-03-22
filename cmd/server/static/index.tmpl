@@ -36,13 +36,13 @@
 
   .item {
     padding: 1px;
-    border: 1px solid #CCC;
+    border: 1px solid var(--border-default);
     margin: 1px;
     box-sizing: border-box;
   }
 
   .item:hover {
-    border-color: #2BA6CB;
+    border-color: var(--border-hover);
   }
 </style>
 {{end}}
@@ -57,7 +57,7 @@
     {{if .Query}}<a href="/" class="link text-sm ml-1">Clear</a>{{end}}
   </form>
   <p class="text-sm text-gray-500 mt-1">Try: mountain, sunset, #ff0000, 1920x1080, jpeg</p>
-  <p class="text-sm text-gray-700 mb-1">
+  <p class="text-sm text-gray-500 mb-1">
     {{if .Query}}
     {{len .Images}} result{{if ne (len .Images) 1}}s{{end}} for &#34;{{.Query}}&#34;
     {{else}}

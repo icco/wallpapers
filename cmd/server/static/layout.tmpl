@@ -9,20 +9,27 @@
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4/dist/full.min.css" rel="stylesheet" type="text/css" />
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+      :root {
+        --accent: #265C83;
+        --accent-hover: #007BE6;
+        --border-default: #D1D5DB; /* gray-300 */
+        --border-hover: #265C83;
+      }
+
       a,
       a:link,
       a:visited {
         transition: color .4s;
-        color: #265C83;
+        color: var(--accent);
       }
 
       a:hover {
-        color: #7FDBFF;
+        color: var(--accent-hover);
       }
 
       a:active {
         transition: color .3s;
-        color: #007BE6;
+        color: var(--accent-hover);
       }
     </style>
     {{block "page-styles" .}}{{end}}
