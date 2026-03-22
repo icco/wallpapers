@@ -366,23 +366,11 @@ type TagEntry struct {
 
 // GetResolutions returns all unique resolutions sorted by count descending.
 func (db *DB) GetResolutions() ([]ResolutionEntry, error) {
-	type row struct {
-		Width  int
-		Height int
-		Count  int
-	}
-	var rows []row
+	var result []ResolutionEntry
 	err := db.conn.Raw(
 		"SELECT width, height, COUNT(*) as count FROM images WHERE width > 0 AND height > 0 GROUP BY width, height ORDER BY count DESC",
-	).Scan(&rows).Error
-	if err != nil {
-		return nil, err
-	}
-	result := make([]ResolutionEntry, len(rows))
-	for i, r := range rows {
-		result[i] = ResolutionEntry{Width: r.Width, Height: r.Height, Count: r.Count}
-	}
-	return result, nil
+	).Scan(&result).Error
+	return result, err
 }
 
 // GetColors returns all unique colors (from images.colors JSON arrays) sorted by count descending.
