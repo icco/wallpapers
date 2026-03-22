@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"log"
 	"os"
+	"os/exec"
 	"os/user"
 	"path/filepath"
 	"strings"
@@ -114,6 +115,13 @@ func walkFn(path string, info fs.FileInfo, err error) error {
 	// log existence
 	knownLocalFiles[newName] = true
 
+	// Resize if smaller than 4000px wide
+	if resized, rerr := resizeToMinWidth(newPath, 4000); rerr != nil {
+		log.Printf("warning: could not resize %q: %v", newName, rerr)
+	} else if resized {
+		log.Printf("resized %q to 4000px width", newName)
+	}
+
 	// Upload
 	//gosec:disable G304 We are uploading a file, so we need to read it
 	dat, err := os.ReadFile(newPath)
@@ -200,6 +208,19 @@ func analyzeAndStore(ctx context.Context, filePath, filename string, data []byte
 	log.Printf("stored metadata for %q: %dx%d, %d colors, %d words",
 		filename, info.Width, info.Height, len(info.Colors), len(info.Words))
 	return nil
+}
+
+// resizeToMinWidth uses ImageMagick to enlarge the image at path to minWidth pixels wide
+// (maintaining aspect ratio) if its current width is less than minWidth.
+// Returns true if the image was resized.
+func resizeToMinWidth(path string, minWidth int) (bool, error) {
+	geometry := fmt.Sprintf("%dx<", minWidth)
+	//nolint:gosec // G204: path is derived from a trusted local directory walk
+	out, err := exec.Command("magick", path, "-resize", geometry, path).CombinedOutput()
+	if err != nil {
+		return false, fmt.Errorf("magick: %w: %s", err, out)
+	}
+	return true, nil
 }
 
 // shouldRandomlyReanalyze returns true approximately 10% of the time using crypto/rand.
