@@ -377,38 +377,27 @@ const colorGridSize = 18 // columns; also controls hue and lightness step counts
 
 // GetColors returns a color grid with the count of images whose colors fall within
 // the fuzzy search threshold of each cell. Layout (all rows are 18 cells wide):
-//   - Row 1: near-black  — all 18 hues at L=3%
-//   - Rows 2–19: hue spectrum — 18 hues × 18 lightness levels (10%–95%) at S=75%
-//   - Row 20: near-white  — all 18 hues at L=97%
-//   - Row 21: grayscale   — S=0, L=0%–100%
+//   - Rows 1–18: hue spectrum — 18 hues × 18 lightness levels (0%–100%) at S=75%
+//     Left column = black, right column = white for every hue row.
+//   - Row 19: grayscale — S=0, L=0%–100% (black → white)
 func (db *DB) GetColors() ([]ColorEntry, error) {
 	const saturation = 0.75
 	const maxDist = 0.314 // same threshold as searchByColor
 
 	// Build the grid cells.
-	totalCells := colorGridSize * (colorGridSize + 3) // 18 hue rows + 3 extra rows
+	totalCells := colorGridSize * (colorGridSize + 1) // 18 hue rows + 1 grayscale row
 	cells := make([]colorful.Color, 0, totalCells)
 
-	// Row 1: near-black — all hues at very low lightness.
-	for h := range colorGridSize {
-		cells = append(cells, colorful.Hsl(float64(h)*360.0/colorGridSize, saturation, 0.03))
-	}
-
-	// Rows 2–19: main hue × lightness grid.
+	// Rows 1–18: hue × lightness, L spanning full 0%–100%.
 	for h := range colorGridSize {
 		hue := float64(h) * 360.0 / colorGridSize
 		for l := range colorGridSize {
-			lightness := 0.10 + float64(l)*(0.85/float64(colorGridSize-1))
+			lightness := float64(l) / float64(colorGridSize-1)
 			cells = append(cells, colorful.Hsl(hue, saturation, lightness))
 		}
 	}
 
-	// Row 20: near-white — all hues at very high lightness.
-	for h := range colorGridSize {
-		cells = append(cells, colorful.Hsl(float64(h)*360.0/colorGridSize, saturation, 0.97))
-	}
-
-	// Row 21: grayscale — pure black to pure white.
+	// Row 19: grayscale — pure black to pure white.
 	for l := range colorGridSize {
 		lightness := float64(l) / float64(colorGridSize-1)
 		cells = append(cells, colorful.Hsl(0, 0, lightness))

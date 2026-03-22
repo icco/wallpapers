@@ -210,7 +210,7 @@ func TestGetColors_GridSize(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetColors: %v", err)
 	}
-	want := colorGridSize * (colorGridSize + 3) // 18 hue rows + 3 extra rows
+	want := colorGridSize * (colorGridSize + 1) // 18 hue rows + 1 grayscale row
 	if len(colors) != want {
 		t.Fatalf("expected %d grid entries, got %d", want, len(colors))
 	}
@@ -244,7 +244,7 @@ func TestGetColors_EmptyDB(t *testing.T) {
 		t.Fatalf("GetColors empty: %v", err)
 	}
 	// Grid is always returned; all counts should be 0.
-	want := colorGridSize * (colorGridSize + 3)
+	want := colorGridSize * (colorGridSize + 1)
 	if len(colors) != want {
 		t.Fatalf("expected %d entries, got %d", want, len(colors))
 	}
