@@ -3,6 +3,7 @@ FROM golang:1.26 AS builder
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     libc6-dev \
+    libmagickwand-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /usr/src/app
@@ -21,6 +22,7 @@ FROM debian:bookworm-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
+    libmagickwand-6.q16-6 \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /server /usr/local/bin/server
