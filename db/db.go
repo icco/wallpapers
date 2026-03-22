@@ -6,12 +6,16 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
+	"strconv"
 	"strings"
 	"time"
 
+	colorful "github.com/lucasb-eyer/go-colorful"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -221,12 +225,35 @@ func (db *DB) GetAll() ([]*Image, error) {
 	return images, err
 }
 
+var (
+	colorQueryRe      = regexp.MustCompile(`^#[0-9a-fA-F]{6}$`)
+	resolutionQueryRe = regexp.MustCompile(`^(\d+)x(\d+)$`)
+)
+
 // Search searches for images by query string.
-// Searches in words (JSON array), colors, filename, and file format.
+// For hex colors, uses RGB color distance for fuzzy matching.
+// For resolutions, uses ±20% tolerance.
+// Otherwise searches words, colors, filename, and file format.
 func (db *DB) Search(query string) ([]*Image, error) {
 	query = strings.ToLower(strings.TrimSpace(query))
 	if query == "" {
 		return db.GetAll()
+	}
+
+	if colorQueryRe.MatchString(query) {
+		return db.searchByColor(query)
+	}
+
+	if m := resolutionQueryRe.FindStringSubmatch(query); m != nil {
+		qW, err := strconv.Atoi(m[1])
+		if err != nil {
+			return nil, fmt.Errorf("invalid width in resolution query: %w", err)
+		}
+		qH, err := strconv.Atoi(m[2])
+		if err != nil {
+			return nil, fmt.Errorf("invalid height in resolution query: %w", err)
+		}
+		return db.searchByResolution(qW, qH)
 	}
 
 	searchPattern := "%" + query + "%"
@@ -234,19 +261,200 @@ func (db *DB) Search(query string) ([]*Image, error) {
 
 	err := db.conn.Where(
 		"LOWER(words) LIKE ? OR "+
-			"LOWER(colors) LIKE ? OR "+
 			"LOWER(filename) LIKE ? OR "+
-			"LOWER(file_format) LIKE ? OR "+
-			"(width || 'x' || height) LIKE ?",
-		searchPattern, searchPattern, searchPattern, searchPattern, searchPattern,
+			"LOWER(file_format) LIKE ?",
+		searchPattern, searchPattern, searchPattern,
 	).Order("last_modified DESC").Find(&images).Error
 
 	return images, err
 }
 
+// searchByColor returns images whose stored colors are within maxColorDist of
+// hexQuery, using go-colorful's normalized RGB distance (0–√3), sorted closest-first.
+func (db *DB) searchByColor(hexQuery string) ([]*Image, error) {
+	const maxColorDist = 0.314 // ≈ 80/255 in normalized [0,1] RGB space
+
+	query, err := colorful.Hex(hexQuery)
+	if err != nil {
+		return nil, fmt.Errorf("invalid color %q: %w", hexQuery, err)
+	}
+
+	var all []*Image
+	if err := db.conn.Where("colors IS NOT NULL AND colors != '[]' AND colors != ''").
+		Order("last_modified DESC").Find(&all).Error; err != nil {
+		return nil, err
+	}
+
+	type scored struct {
+		img  *Image
+		dist float64
+	}
+	var matches []scored
+	for _, img := range all {
+		minDist := math.MaxFloat64
+		for _, c := range img.Colors {
+			col, err := colorful.Hex(c)
+			if err != nil {
+				continue
+			}
+			if d := query.DistanceRgb(col); d < minDist {
+				minDist = d
+			}
+		}
+		if minDist < maxColorDist {
+			matches = append(matches, scored{img, minDist})
+		}
+	}
+
+	sort.Slice(matches, func(i, j int) bool {
+		return matches[i].dist < matches[j].dist
+	})
+
+	result := make([]*Image, len(matches))
+	for i, m := range matches {
+		result[i] = m.img
+	}
+	return result, nil
+}
+
+// searchByResolution returns images within ±20% of the given dimensions, sorted closest-first.
+func (db *DB) searchByResolution(qW, qH int) ([]*Image, error) {
+	tolW := int(math.Round(float64(qW) * 0.20))
+	tolH := int(math.Round(float64(qH) * 0.20))
+
+	var images []*Image
+	err := db.conn.Where(
+		"width > 0 AND height > 0 AND ABS(width - ?) <= ? AND ABS(height - ?) <= ?",
+		qW, tolW, qH, tolH,
+	).Find(&images).Error
+	if err != nil {
+		return nil, err
+	}
+
+	sort.Slice(images, func(i, j int) bool {
+		di := math.Abs(float64(images[i].Width-qW)) + math.Abs(float64(images[i].Height-qH))
+		dj := math.Abs(float64(images[j].Width-qW)) + math.Abs(float64(images[j].Height-qH))
+		return di < dj
+	})
+
+	return images, nil
+}
+
 // Delete removes an image by filename.
 func (db *DB) Delete(filename string) error {
 	return db.conn.Where("filename = ?", filename).Delete(&Image{}).Error
+}
+
+// ResolutionEntry holds a unique resolution and its occurrence count.
+type ResolutionEntry struct {
+	Width  int
+	Height int
+	Count  int
+}
+
+// ColorEntry holds a hex color and its occurrence count across all images.
+type ColorEntry struct {
+	Hex   string
+	Count int
+}
+
+// TagEntry holds a word/tag and its occurrence count across all images.
+type TagEntry struct {
+	Word  string
+	Count int
+}
+
+// GetResolutions returns all unique resolutions sorted by count descending.
+func (db *DB) GetResolutions() ([]ResolutionEntry, error) {
+	var result []ResolutionEntry
+	err := db.conn.Raw(
+		"SELECT width, height, COUNT(*) as count FROM images WHERE width > 0 AND height > 0 GROUP BY width, height ORDER BY count DESC",
+	).Scan(&result).Error
+	return result, err
+}
+
+const colorGridSize = 18 // columns; also controls hue and lightness step counts
+
+// GetColors returns a color grid with the count of images whose colors fall within
+// the fuzzy search threshold of each cell. Layout (all rows are 18 cells wide):
+//   - Rows 1–18: hue spectrum — 18 hues × 18 lightness levels (0%–100%) at S=75%
+//     Left column = black, right column = white for every hue row.
+//   - Row 19: grayscale — S=0, L=0%–100% (black → white)
+func (db *DB) GetColors() ([]ColorEntry, error) {
+	const saturation = 0.75
+	const maxDist = 0.314 // same threshold as searchByColor
+
+	// Build the grid cells.
+	totalCells := colorGridSize * (colorGridSize + 1) // 18 hue rows + 1 grayscale row
+	cells := make([]colorful.Color, 0, totalCells)
+
+	// Rows 1–18: hue × lightness, L spanning full 0%–100%.
+	for h := range colorGridSize {
+		hue := float64(h) * 360.0 / colorGridSize
+		for l := range colorGridSize {
+			lightness := float64(l) / float64(colorGridSize-1)
+			cells = append(cells, colorful.Hsl(hue, saturation, lightness))
+		}
+	}
+
+	// Row 19: grayscale — pure black to pure white.
+	for l := range colorGridSize {
+		lightness := float64(l) / float64(colorGridSize-1)
+		cells = append(cells, colorful.Hsl(0, 0, lightness))
+	}
+
+	// Count images per cell; each image counts at most once per cell.
+	counts := make([]int, len(cells))
+	var images []*Image
+	if err := db.conn.Where("colors IS NOT NULL AND colors != '[]' AND colors != ''").Find(&images).Error; err != nil {
+		return nil, err
+	}
+	for _, img := range images {
+		matched := make([]bool, len(cells))
+		for _, c := range img.Colors {
+			imgColor, err := colorful.Hex(c)
+			if err != nil {
+				continue
+			}
+			for i, cell := range cells {
+				if !matched[i] && imgColor.DistanceRgb(cell) < maxDist {
+					matched[i] = true
+					counts[i]++
+				}
+			}
+		}
+	}
+
+	result := make([]ColorEntry, len(cells))
+	for i, cell := range cells {
+		result[i] = ColorEntry{Hex: cell.Hex(), Count: counts[i]}
+	}
+	return result, nil
+}
+
+// GetTags returns all unique words/tags sorted by count descending.
+func (db *DB) GetTags() ([]TagEntry, error) {
+	var images []*Image
+	if err := db.conn.Where("words IS NOT NULL AND words != '[]' AND words != ''").Find(&images).Error; err != nil {
+		return nil, err
+	}
+	counts := make(map[string]int)
+	for _, img := range images {
+		for _, w := range img.Words {
+			counts[strings.ToLower(w)]++
+		}
+	}
+	result := make([]TagEntry, 0, len(counts))
+	for word, cnt := range counts {
+		result = append(result, TagEntry{Word: word, Count: cnt})
+	}
+	sort.Slice(result, func(i, j int) bool {
+		if result[i].Count != result[j].Count {
+			return result[i].Count > result[j].Count
+		}
+		return result[i].Word < result[j].Word
+	})
+	return result, nil
 }
 
 // EnsureImage creates a basic record for an image if it doesn't exist.
@@ -303,19 +511,16 @@ func (db *DB) migrateCleanInvalidWords() error {
 		for _, word := range img.Words {
 			word = strings.TrimSpace(word)
 
-			// Skip empty
 			if word == "" {
 				changed = true
 				continue
 			}
 
-			// Skip non-ASCII (unicode characters from other languages)
 			if !asciiOnly.MatchString(word) {
 				changed = true
 				continue
 			}
 
-			// Skip meta-phrases
 			lower := strings.ToLower(word)
 			skip := false
 			for _, pattern := range invalidPatterns {
@@ -329,13 +534,11 @@ func (db *DB) migrateCleanInvalidWords() error {
 				continue
 			}
 
-			// Skip parenthetical content
 			if strings.HasPrefix(word, "(") || strings.HasSuffix(word, ")") {
 				changed = true
 				continue
 			}
 
-			// Skip single character words (except common ones)
 			if len(word) == 1 && word != "a" && word != "i" {
 				changed = true
 				continue

@@ -1,0 +1,70 @@
+<!doctype html>
+<html>
+
+  <head lang="en">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{block "title" .}}Wallpapers{{end}}</title>
+
+    <link rel="stylesheet" type="text/css" href="/css/tachyons.min.css">
+    <style>
+      a,
+      a:link,
+      a:visited {
+        transition: color .4s;
+        color: #265C83;
+      }
+
+      a:hover {
+        color: #7FDBFF;
+      }
+
+      a:active {
+        transition: color .3s;
+        color: #007BE6;
+      }
+    </style>
+    {{block "page-styles" .}}{{end}}
+
+    <script type="module">
+      import { onCLS, onINP, onLCP, onFCP, onFID, onTTFB } from 'https://unpkg.com/web-vitals@4?module';
+
+      function sendToAnalytics(metric) {
+        const body = JSON.stringify(metric);
+        (navigator.sendBeacon && navigator.sendBeacon('https://reportd.natwelch.com/analytics/wallpapers', body)) ||
+          fetch('https://reportd.natwelch.com/analytics/wallpapers', { body, method: 'POST', keepalive: true });
+      }
+
+      onCLS(sendToAnalytics);
+      onFCP(sendToAnalytics);
+      onFID(sendToAnalytics);
+      onINP(sendToAnalytics);
+      onLCP(sendToAnalytics);
+      onTTFB(sendToAnalytics);
+    </script>
+  </head>
+
+  <body>
+    <div class="{{block "container-class" .}}pa3 mw8 center{{end}}">
+
+      {{block "header" .}}
+      <h1 class="man pan"><a href="/">Wallpapers</a></h1>
+      <nav class="f6 mb3 mt1">
+        <a href="/resolutions">Resolutions</a> &middot;
+        <a href="/colors">Colors</a> &middot;
+        <a href="/tags">Tags</a>
+      </nav>
+      {{end}}
+
+      {{block "content" .}}{{end}}
+
+      <div class="footer mt4 pt3 bt b--light-gray">
+        <p class="f6 gray"><a href="https://github.com/icco/wallpapers">code</a> &copy; 2012 &mdash; 2025 Nat Welch. Source images copyright their original creators. All content somewhat modified by Nat.</p>
+      </div>
+
+    </div>
+
+    {{block "scripts" .}}{{end}}
+  </body>
+
+</html>

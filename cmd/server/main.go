@@ -43,10 +43,11 @@ var (
 
 	database *db.DB
 
-	// indexTemplate is the parsed template for the homepage
-	indexTemplate *template.Template
-	// detailTemplate is the parsed template for the image detail page
-	detailTemplate *template.Template
+	indexTemplate       *template.Template
+	detailTemplate      *template.Template
+	resolutionsTemplate *template.Template
+	colorsTemplate      *template.Template
+	tagsTemplate        *template.Template
 )
 
 // PageData holds data passed to the index template
@@ -60,6 +61,45 @@ type DetailPageData struct {
 	Image *db.Image
 }
 
+// ResolutionsPageData holds data passed to the resolutions template
+type ResolutionsPageData struct {
+	Resolutions []db.ResolutionEntry
+}
+
+// ColorsPageData holds data passed to the colors template
+type ColorsPageData struct {
+	Colors []db.ColorEntry
+}
+
+// TagsPageData holds data passed to the tags template
+type TagsPageData struct {
+	Tags []db.TagEntry
+}
+
+// loadTemplate parses layout.tmpl and the named page file into a single template set.
+// Pass funcs for pages that call custom template functions.
+func loadTemplate(name string, funcs template.FuncMap) (*template.Template, error) {
+	layoutContent, err := static.Assets.ReadFile("layout.tmpl")
+	if err != nil {
+		return nil, fmt.Errorf("read layout.tmpl: %w", err)
+	}
+	pageContent, err := static.Assets.ReadFile(name + ".tmpl")
+	if err != nil {
+		return nil, fmt.Errorf("read %s.tmpl: %w", name, err)
+	}
+	t := template.New("layout")
+	if funcs != nil {
+		t = t.Funcs(funcs)
+	}
+	if t, err = t.Parse(string(layoutContent)); err != nil {
+		return nil, fmt.Errorf("parse layout.tmpl: %w", err)
+	}
+	if t, err = t.Parse(string(pageContent)); err != nil {
+		return nil, fmt.Errorf("parse %s.tmpl: %w", name, err)
+	}
+	return t, nil
+}
+
 func main() {
 	port := "8080"
 	if fromEnv := os.Getenv("PORT"); fromEnv != "" {
@@ -67,26 +107,23 @@ func main() {
 	}
 	log.Infow("Starting up", "host", fmt.Sprintf("http://localhost:%s", port))
 
-	// Parse templates from embedded files
-	tmplContent, err := static.Assets.ReadFile("index.tmpl")
-	if err != nil {
-		log.Fatalw("failed to read index template", zap.Error(err))
+	var err error
+	if indexTemplate, err = loadTemplate("index", nil); err != nil {
+		log.Fatalw("failed to load index template", zap.Error(err))
 	}
-	indexTemplate, err = template.New("index").Parse(string(tmplContent))
-	if err != nil {
-		log.Fatalw("failed to parse index template", zap.Error(err))
+	if detailTemplate, err = loadTemplate("detail", nil); err != nil {
+		log.Fatalw("failed to load detail template", zap.Error(err))
 	}
-
-	detailContent, err := static.Assets.ReadFile("detail.tmpl")
-	if err != nil {
-		log.Fatalw("failed to read detail template", zap.Error(err))
+	if resolutionsTemplate, err = loadTemplate("resolutions", nil); err != nil {
+		log.Fatalw("failed to load resolutions template", zap.Error(err))
 	}
-	detailTemplate, err = template.New("detail").Parse(string(detailContent))
-	if err != nil {
-		log.Fatalw("failed to parse detail template", zap.Error(err))
+	if colorsTemplate, err = loadTemplate("colors", nil); err != nil {
+		log.Fatalw("failed to load colors template", zap.Error(err))
+	}
+	if tagsTemplate, err = loadTemplate("tags", nil); err != nil {
+		log.Fatalw("failed to load tags template", zap.Error(err))
 	}
 
-	// Open database
 	database, err = db.Open(db.DefaultDBPath())
 	if err != nil {
 		log.Warnw("could not open database, search will be unavailable", zap.Error(err))
@@ -96,7 +133,6 @@ func main() {
 				log.Errorw("failed to close database", zap.Error(cerr))
 			}
 		}()
-		// Run data migrations
 		if err := database.RunMigrations(); err != nil {
 			log.Warnw("failed to run migrations", zap.Error(err))
 		}
@@ -144,13 +180,11 @@ func main() {
 		}
 	})
 
-	// Serve static files (CSS, JS, etc.)
 	r.Handle("/css/*", http.FileServer(http.FS(static.Assets)))
 	r.Handle("/js/*", http.FileServer(http.FS(static.Assets)))
 	r.Handle("/favicon.ico", http.FileServer(http.FS(static.Assets)))
 	r.Handle("/robots.txt", http.FileServer(http.FS(static.Assets)))
 
-	// Homepage with server-side filtering
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		query := r.URL.Query().Get("q")
 
@@ -208,7 +242,6 @@ func main() {
 		}
 	})
 
-	// Image detail page
 	r.Get("/image/{filename}", func(w http.ResponseWriter, r *http.Request) {
 		filename := chi.URLParam(r, "filename")
 
@@ -242,6 +275,60 @@ func main() {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		if err := detailTemplate.Execute(w, data); err != nil {
 			log.Errorw("error rendering detail template", zap.Error(err))
+		}
+	})
+
+	r.Get("/resolutions", func(w http.ResponseWriter, r *http.Request) {
+		if database == nil {
+			log.Errorw("database not available")
+			http.Error(w, "Service unavailable", http.StatusServiceUnavailable)
+			return
+		}
+		resolutions, err := database.GetResolutions()
+		if err != nil {
+			log.Errorw("error fetching resolutions", zap.Error(err))
+			http.Error(w, "Retrieval error", http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		if err := resolutionsTemplate.Execute(w, ResolutionsPageData{Resolutions: resolutions}); err != nil {
+			log.Errorw("error rendering resolutions template", zap.Error(err))
+		}
+	})
+
+	r.Get("/colors", func(w http.ResponseWriter, r *http.Request) {
+		if database == nil {
+			log.Errorw("database not available")
+			http.Error(w, "Service unavailable", http.StatusServiceUnavailable)
+			return
+		}
+		colors, err := database.GetColors()
+		if err != nil {
+			log.Errorw("error fetching colors", zap.Error(err))
+			http.Error(w, "Retrieval error", http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		if err := colorsTemplate.Execute(w, ColorsPageData{Colors: colors}); err != nil {
+			log.Errorw("error rendering colors template", zap.Error(err))
+		}
+	})
+
+	r.Get("/tags", func(w http.ResponseWriter, r *http.Request) {
+		if database == nil {
+			log.Errorw("database not available")
+			http.Error(w, "Service unavailable", http.StatusServiceUnavailable)
+			return
+		}
+		tags, err := database.GetTags()
+		if err != nil {
+			log.Errorw("error fetching tags", zap.Error(err))
+			http.Error(w, "Retrieval error", http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		if err := tagsTemplate.Execute(w, TagsPageData{Tags: tags}); err != nil {
+			log.Errorw("error rendering tags template", zap.Error(err))
 		}
 	})
 
