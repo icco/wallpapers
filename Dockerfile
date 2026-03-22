@@ -1,10 +1,10 @@
-FROM golang:1.26 AS builder
+FROM golang:1.26-alpine AS builder
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apk add --no-cache \
     gcc \
-    libc6-dev \
-    libmagickwand-dev \
-    && rm -rf /var/lib/apt/lists/*
+    musl-dev \
+    imagemagick-dev \
+    pkgconf
 
 WORKDIR /usr/src/app
 
@@ -18,12 +18,11 @@ ENV CGO_ENABLED=1
 RUN go build -ldflags="-s -w" -o /server ./cmd/server
 RUN go build -ldflags="-s -w" -o /uploader ./cmd/uploader
 
-FROM debian:bookworm-slim
+FROM alpine:latest
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apk add --no-cache \
     ca-certificates \
-    libmagickwand-6.q16-6 \
-    && rm -rf /var/lib/apt/lists/*
+    imagemagick-libs
 
 COPY --from=builder /server /usr/local/bin/server
 COPY --from=builder /uploader /usr/local/bin/uploader

@@ -11,13 +11,14 @@ jobs:
   golangci:
     name: lint
     runs-on: ubuntu-latest
+    container: golang:1.25-alpine
     permissions:
       contents: write
       pull-requests: write
     steps:
       - uses: actions/checkout@v6
       - name: Install system dependencies
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libmagickwand-dev
+        run: apk add --no-cache imagemagick-dev pkgconf gcc musl-dev
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v9
         with:

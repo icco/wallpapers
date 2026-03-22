@@ -15,7 +15,7 @@ import (
 	"github.com/icco/wallpapers"
 	"github.com/icco/wallpapers/analysis"
 	"github.com/icco/wallpapers/db"
-	"gopkg.in/gographics/imagick.v2/imagick"
+	"gopkg.in/gographics/imagick.v3/imagick"
 )
 
 const DropboxPath = "/Photos/Wallpapers/DesktopWallpapers"
@@ -229,7 +229,7 @@ func resizeToMinWidth(path string, minWidth uint) (bool, error) {
 
 	h := mw.GetImageHeight()
 	newH := uint(float64(h) * float64(minWidth) / float64(w))
-	if err := mw.ResizeImage(minWidth, newH, imagick.FILTER_LANCZOS, 1.0); err != nil {
+	if err := mw.ResizeImage(minWidth, newH, imagick.FILTER_LANCZOS); err != nil {
 		return false, fmt.Errorf("imagick resize: %w", err)
 	}
 
