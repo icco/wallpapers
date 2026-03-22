@@ -18,8 +18,8 @@ A [site](http://walls.natwelch.com/) that displays Nat Welch's personal wallpape
 | `/` | Masonry gallery with search |
 | `/image/{filename}` | Image detail (metadata, colors, keywords) |
 | `/resolutions` | Browse all unique resolutions by count |
-| `/colors` | Browse all extracted colors as swatches |
-| `/tags` | Browse all AI-extracted keywords as a tag cloud |
+| `/colors` | 18×18 HSL color grid showing match counts per cell |
+| `/tags` | Browse all AI-extracted keywords sorted by count |
 | `/search?q=` | JSON search API |
 | `/all.json` | JSON dump of all images |
 
