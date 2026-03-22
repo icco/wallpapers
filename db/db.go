@@ -373,7 +373,7 @@ func (db *DB) GetResolutions() ([]ResolutionEntry, error) {
 	return result, err
 }
 
-// GetColors returns all unique colors (from images.colors JSON arrays) sorted by count descending.
+// GetColors returns all unique colors (from images.colors JSON arrays) sorted by hue.
 func (db *DB) GetColors() ([]ColorEntry, error) {
 	var images []*Image
 	if err := db.conn.Where("colors IS NOT NULL AND colors != '[]' AND colors != ''").Find(&images).Error; err != nil {
@@ -390,7 +390,20 @@ func (db *DB) GetColors() ([]ColorEntry, error) {
 		result = append(result, ColorEntry{Hex: hex, Count: cnt})
 	}
 	sort.Slice(result, func(i, j int) bool {
-		return result[i].Count > result[j].Count
+		ci, erri := colorful.Hex(result[i].Hex)
+		cj, errj := colorful.Hex(result[j].Hex)
+		if erri != nil || errj != nil {
+			return result[i].Hex < result[j].Hex
+		}
+		hi, si, li := ci.Hsl()
+		hj, sj, lj := cj.Hsl()
+		if hi != hj {
+			return hi < hj
+		}
+		if si != sj {
+			return si < sj
+		}
+		return li < lj
 	})
 	return result, nil
 }
