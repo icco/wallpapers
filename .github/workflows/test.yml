@@ -3,16 +3,30 @@ on:
   - push
 jobs:
   build:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            container: golang:1.25-alpine
+          - os: macos-latest
+    runs-on: ${{ matrix.os }}
+    container: ${{ matrix.container }}
     steps:
       - uses: actions/checkout@v6
       - name: Setup Go
+        if: runner.os == 'macOS'
         uses: actions/setup-go@v6
         with:
           go-version: 1.25.x
+      - name: Install deps (Linux)
+        if: runner.os == 'Linux'
+        run: apk add --no-cache imagemagick-dev pkgconf gcc musl-dev
+      - name: Install deps (macOS)
+        if: runner.os == 'macOS'
+        run: brew install imagemagick
       - name: Install dependencies
         run: go get .
       - name: Build
         run: go build -v ./...
-      - name: Test with the Go CLI
+      - name: Test
         run: go test -v ./...
