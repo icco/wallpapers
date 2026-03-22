@@ -204,38 +204,54 @@ func TestGetResolutions_Empty(t *testing.T) {
 
 // --- GetColors ---
 
-func TestGetColors(t *testing.T) {
+func TestGetColors_GridSize(t *testing.T) {
 	db := newTestDB(t)
-	seed(t, db,
-		&Image{Filename: "a.jpg", Colors: StringSlice{"#ff0000", "#00ff00"}},
-		&Image{Filename: "b.jpg", Colors: StringSlice{"#ff0000", "#0000ff"}},
-	)
+	colors, err := db.GetColors()
+	if err != nil {
+		t.Fatalf("GetColors: %v", err)
+	}
+	want := colorGridSize * colorGridSize
+	if len(colors) != want {
+		t.Fatalf("expected %d grid entries, got %d", want, len(colors))
+	}
+}
+
+func TestGetColors_CountsImages(t *testing.T) {
+	db := newTestDB(t)
+	// Seed an image with a vivid red. At least one grid cell should have count >= 1.
+	seed(t, db, &Image{Filename: "red.jpg", Colors: StringSlice{"#ff0000"}})
 
 	colors, err := db.GetColors()
 	if err != nil {
 		t.Fatalf("GetColors: %v", err)
 	}
-	if len(colors) != 3 {
-		t.Fatalf("expected 3 unique colors, got %d", len(colors))
+	anyNonZero := false
+	for _, c := range colors {
+		if c.Count > 0 {
+			anyNonZero = true
+			break
+		}
 	}
-	// Most common should be first.
-	if colors[0].Hex != "#ff0000" {
-		t.Errorf("expected #ff0000 first, got %s", colors[0].Hex)
-	}
-	if colors[0].Count != 2 {
-		t.Errorf("expected count 2, got %d", colors[0].Count)
+	if !anyNonZero {
+		t.Error("expected at least one grid cell with count > 0 after seeding a red image")
 	}
 }
 
-func TestGetColors_Empty(t *testing.T) {
+func TestGetColors_EmptyDB(t *testing.T) {
 	db := newTestDB(t)
-	seed(t, db, &Image{Filename: "a.jpg"}) // no colors
-	results, err := db.GetColors()
+	colors, err := db.GetColors()
 	if err != nil {
 		t.Fatalf("GetColors empty: %v", err)
 	}
-	if len(results) != 0 {
-		t.Errorf("expected empty, got %d", len(results))
+	// Grid is always returned; all counts should be 0.
+	want := colorGridSize * colorGridSize
+	if len(colors) != want {
+		t.Fatalf("expected %d entries, got %d", want, len(colors))
+	}
+	for _, c := range colors {
+		if c.Count != 0 {
+			t.Errorf("expected count 0 for empty db, got %d for %s", c.Count, c.Hex)
+		}
 	}
 }
 

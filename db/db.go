@@ -373,38 +373,52 @@ func (db *DB) GetResolutions() ([]ResolutionEntry, error) {
 	return result, err
 }
 
-// GetColors returns all unique colors (from images.colors JSON arrays) sorted by hue.
+const colorGridSize = 18
+
+// GetColors returns an 18×18 grid of HSL colors (18 hues × 18 lightness levels,
+// saturation fixed at 0.75) with the count of images whose colors fall within the
+// fuzzy search threshold of each cell. The grid is returned in row-major order
+// (hue changes per row, lightness changes per column).
 func (db *DB) GetColors() ([]ColorEntry, error) {
+	const saturation = 0.75
+	const maxDist = 0.314 // same threshold as searchByColor
+
+	// Build the grid cells.
+	cells := make([]colorful.Color, 0, colorGridSize*colorGridSize)
+	for h := 0; h < colorGridSize; h++ {
+		hue := float64(h) * 360.0 / colorGridSize
+		for l := 0; l < colorGridSize; l++ {
+			lightness := 0.10 + float64(l)*(0.85/float64(colorGridSize-1))
+			cells = append(cells, colorful.Hsl(hue, saturation, lightness))
+		}
+	}
+
+	// Count images per cell; each image counts at most once per cell.
+	counts := make([]int, len(cells))
 	var images []*Image
 	if err := db.conn.Where("colors IS NOT NULL AND colors != '[]' AND colors != ''").Find(&images).Error; err != nil {
 		return nil, err
 	}
-	counts := make(map[string]int)
 	for _, img := range images {
+		matched := make([]bool, len(cells))
 		for _, c := range img.Colors {
-			counts[strings.ToLower(c)]++
+			imgColor, err := colorful.Hex(c)
+			if err != nil {
+				continue
+			}
+			for i, cell := range cells {
+				if !matched[i] && imgColor.DistanceRgb(cell) < maxDist {
+					matched[i] = true
+					counts[i]++
+				}
+			}
 		}
 	}
-	result := make([]ColorEntry, 0, len(counts))
-	for hex, cnt := range counts {
-		result = append(result, ColorEntry{Hex: hex, Count: cnt})
+
+	result := make([]ColorEntry, len(cells))
+	for i, cell := range cells {
+		result[i] = ColorEntry{Hex: cell.Hex(), Count: counts[i]}
 	}
-	sort.Slice(result, func(i, j int) bool {
-		ci, erri := colorful.Hex(result[i].Hex)
-		cj, errj := colorful.Hex(result[j].Hex)
-		if erri != nil || errj != nil {
-			return result[i].Hex < result[j].Hex
-		}
-		hi, si, li := ci.Hsl()
-		hj, sj, lj := cj.Hsl()
-		if hi != hj {
-			return hi < hj
-		}
-		if si != sj {
-			return si < sj
-		}
-		return li < lj
-	})
 	return result, nil
 }
 
