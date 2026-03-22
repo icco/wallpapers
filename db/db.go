@@ -226,9 +226,7 @@ func (db *DB) GetAll() ([]*Image, error) {
 }
 
 var (
-	// colorQueryRe matches a 6-digit hex color like #ff0000.
-	colorQueryRe = regexp.MustCompile(`^#[0-9a-fA-F]{6}$`)
-	// resolutionQueryRe matches a resolution like 1920x1080.
+	colorQueryRe      = regexp.MustCompile(`^#[0-9a-fA-F]{6}$`)
 	resolutionQueryRe = regexp.MustCompile(`^(\d+)x(\d+)$`)
 )
 
@@ -242,12 +240,10 @@ func (db *DB) Search(query string) ([]*Image, error) {
 		return db.GetAll()
 	}
 
-	// Smart color search
 	if colorQueryRe.MatchString(query) {
 		return db.searchByColor(query)
 	}
 
-	// Smart resolution search
 	if m := resolutionQueryRe.FindStringSubmatch(query); m != nil {
 		qW, err := strconv.Atoi(m[1])
 		if err != nil {
@@ -263,7 +259,6 @@ func (db *DB) Search(query string) ([]*Image, error) {
 	searchPattern := "%" + query + "%"
 	var images []*Image
 
-	// Colors are hex codes handled by searchByColor; omit from general text search.
 	err := db.conn.Where(
 		"LOWER(words) LIKE ? OR "+
 			"LOWER(filename) LIKE ? OR "+
@@ -274,12 +269,10 @@ func (db *DB) Search(query string) ([]*Image, error) {
 	return images, err
 }
 
-// searchByColor fetches all images and returns those with a color within
-// maxColorDist (in go-colorful's DistanceRgb scale, 0–√3) of the query color,
-// sorted by closeness.
+// searchByColor returns images whose stored colors are within maxColorDist of
+// hexQuery, using go-colorful's normalized RGB distance (0–√3), sorted closest-first.
 func (db *DB) searchByColor(hexQuery string) ([]*Image, error) {
-	// 0.314 ≈ 80/255, matching the perceptual threshold used previously.
-	const maxColorDist = 0.314
+	const maxColorDist = 0.314 // ≈ 80/255 in normalized [0,1] RGB space
 
 	query, err := colorful.Hex(hexQuery)
 	if err != nil {
@@ -324,8 +317,7 @@ func (db *DB) searchByColor(hexQuery string) ([]*Image, error) {
 	return result, nil
 }
 
-// searchByResolution returns images whose dimensions are within 20% of the given width/height,
-// sorted by closeness.
+// searchByResolution returns images within ±20% of the given dimensions, sorted closest-first.
 func (db *DB) searchByResolution(qW, qH int) ([]*Image, error) {
 	tolW := int(math.Round(float64(qW) * 0.20))
 	tolH := int(math.Round(float64(qH) * 0.20))
@@ -494,19 +486,16 @@ func (db *DB) migrateCleanInvalidWords() error {
 		for _, word := range img.Words {
 			word = strings.TrimSpace(word)
 
-			// Skip empty
 			if word == "" {
 				changed = true
 				continue
 			}
 
-			// Skip non-ASCII (unicode characters from other languages)
 			if !asciiOnly.MatchString(word) {
 				changed = true
 				continue
 			}
 
-			// Skip meta-phrases
 			lower := strings.ToLower(word)
 			skip := false
 			for _, pattern := range invalidPatterns {
@@ -520,13 +509,11 @@ func (db *DB) migrateCleanInvalidWords() error {
 				continue
 			}
 
-			// Skip parenthetical content
 			if strings.HasPrefix(word, "(") || strings.HasSuffix(word, ")") {
 				changed = true
 				continue
 			}
 
-			// Skip single character words (except common ones)
 			if len(word) == 1 && word != "a" && word != "i" {
 				changed = true
 				continue

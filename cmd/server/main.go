@@ -43,19 +43,15 @@ var (
 
 	database *db.DB
 
-	// indexTemplate is the parsed template for the homepage
-	indexTemplate *template.Template
-	// detailTemplate is the parsed template for the image detail page
-	detailTemplate *template.Template
-	// listing page templates
+	indexTemplate       *template.Template
+	detailTemplate      *template.Template
 	resolutionsTemplate *template.Template
 	colorsTemplate      *template.Template
 	tagsTemplate        *template.Template
 
-	// templateFuncs are shared template helper functions
+	// templateFuncs is registered on templates that use custom functions.
 	templateFuncs = template.FuncMap{
-		// tagRatio returns count/maxCount as a decimal string for use as a CSS --ratio variable.
-		// Font scaling is computed in CSS: calc(0.8rem + var(--ratio) * 1.4rem).
+		// tagRatio outputs count/maxCount for use as a CSS --ratio custom property.
 		"tagRatio": func(count, maxCount int) string {
 			if maxCount <= 0 {
 				return "0"
@@ -92,10 +88,8 @@ type TagsPageData struct {
 	MaxCount int
 }
 
-// loadTemplate builds a template set from the shared layout plus a named page file.
-// The layout defines {{block}} hooks; the page file provides {{define}} overrides.
-// If funcs is non-nil it is registered before parsing (required for pages that call
-// custom template functions like tagFontSize).
+// loadTemplate parses layout.tmpl and the named page file into a single template set.
+// Pass funcs for pages that call custom template functions.
 func loadTemplate(name string, funcs template.FuncMap) (*template.Template, error) {
 	layoutContent, err := static.Assets.ReadFile("layout.tmpl")
 	if err != nil {
@@ -125,7 +119,6 @@ func main() {
 	}
 	log.Infow("Starting up", "host", fmt.Sprintf("http://localhost:%s", port))
 
-	// Parse templates from embedded layout + page files
 	var err error
 	if indexTemplate, err = loadTemplate("index", nil); err != nil {
 		log.Fatalw("failed to load index template", zap.Error(err))
@@ -143,7 +136,6 @@ func main() {
 		log.Fatalw("failed to load tags template", zap.Error(err))
 	}
 
-	// Open database
 	database, err = db.Open(db.DefaultDBPath())
 	if err != nil {
 		log.Warnw("could not open database, search will be unavailable", zap.Error(err))
@@ -153,7 +145,6 @@ func main() {
 				log.Errorw("failed to close database", zap.Error(cerr))
 			}
 		}()
-		// Run data migrations
 		if err := database.RunMigrations(); err != nil {
 			log.Warnw("failed to run migrations", zap.Error(err))
 		}
@@ -201,13 +192,11 @@ func main() {
 		}
 	})
 
-	// Serve static files (CSS, JS, etc.)
 	r.Handle("/css/*", http.FileServer(http.FS(static.Assets)))
 	r.Handle("/js/*", http.FileServer(http.FS(static.Assets)))
 	r.Handle("/favicon.ico", http.FileServer(http.FS(static.Assets)))
 	r.Handle("/robots.txt", http.FileServer(http.FS(static.Assets)))
 
-	// Homepage with server-side filtering
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		query := r.URL.Query().Get("q")
 
@@ -265,7 +254,6 @@ func main() {
 		}
 	})
 
-	// Image detail page
 	r.Get("/image/{filename}", func(w http.ResponseWriter, r *http.Request) {
 		filename := chi.URLParam(r, "filename")
 
