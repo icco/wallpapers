@@ -213,9 +213,7 @@ func analyzeAndStore(ctx context.Context, filePath, filename string, data []byte
 	return nil
 }
 
-// resizeToMinWidth uses ImageMagick (via gopkg.in/gographics/imagick.v3) to enlarge the image
-// at path to minWidth pixels wide (maintaining aspect ratio) if its current width is less than
-// minWidth. Returns true if the image was resized and written back to disk.
+// resizeToMinWidth upscales path to minWidth pixels wide if smaller, preserving aspect ratio.
 func resizeToMinWidth(path string, minWidth uint) (bool, error) {
 	mw := imagick.NewMagickWand()
 	defer mw.Destroy()
