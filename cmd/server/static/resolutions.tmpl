@@ -1,70 +1,42 @@
-<!doctype html>
-<html>
+{{define "title"}}Resolutions - Wallpapers{{end}}
 
-  <head lang="en">
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Resolutions - Wallpapers</title>
+{{define "page-styles"}}
+<style>
+  .res-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+  .res-item {
+    display: inline-block;
+    padding: 0.4rem 0.75rem;
+    border: 1px solid #CCC;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    text-decoration: none;
+  }
+  .res-item:hover {
+    border-color: #2BA6CB;
+  }
+  .count {
+    color: #888;
+    font-size: 0.8rem;
+    margin-left: 0.25rem;
+  }
+</style>
+{{end}}
 
-    <link rel="stylesheet" type="text/css" href="/css/tachyons.min.css">
-    <style>
-      a, a:link, a:visited {
-        transition: color .4s;
-        color: #265C83;
-      }
-      a:hover { color: #7FDBFF; }
-      a:active { transition: color .3s; color: #007BE6; }
+{{define "content"}}
+<h2 class="f3 mb1">Resolutions</h2>
+<p class="f6 gray mb3">{{len .Resolutions}} unique resolutions. Click to browse matching wallpapers.</p>
 
-      .res-list {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-        margin-top: 1rem;
-      }
-      .res-item {
-        display: inline-block;
-        padding: 0.4rem 0.75rem;
-        border: 1px solid #CCC;
-        border-radius: 4px;
-        font-size: 0.9rem;
-        white-space: nowrap;
-      }
-      .res-item:hover {
-        border-color: #2BA6CB;
-      }
-      .count {
-        color: #888;
-        font-size: 0.8rem;
-        margin-left: 0.25rem;
-      }
-    </style>
-  </head>
-
-  <body>
-    <div class="pa3 mw8 center">
-      <h1 class="man pan"><a href="/">Wallpapers</a></h1>
-      <nav class="f6 mb3 mt1">
-        <a href="/">Gallery</a> &middot;
-        <a href="/resolutions"><b>Resolutions</b></a> &middot;
-        <a href="/colors">Colors</a> &middot;
-        <a href="/tags">Tags</a>
-      </nav>
-
-      <h2 class="f3 mb1">Resolutions</h2>
-      <p class="f6 gray mb3">{{len .Resolutions}} unique resolutions. Click to browse matching wallpapers.</p>
-
-      <div class="res-list">
-        {{range .Resolutions}}
-        <a href="/?q={{.Width}}x{{.Height}}" class="res-item">
-          {{.Width}}×{{.Height}}<span class="count">{{.Count}}</span>
-        </a>
-        {{end}}
-      </div>
-
-      <div class="footer mt4 pt3 bt b--light-gray">
-        <p class="f6 gray"><a href="https://github.com/icco/wallpapers">code</a> &copy; 2012 &mdash; 2025 Nat Welch.</p>
-      </div>
-    </div>
-  </body>
-
-</html>
+<div class="res-list">
+  {{range .Resolutions}}
+  <a href="/?q={{.Width}}x{{.Height}}" class="res-item">
+    {{.Width}}×{{.Height}}<span class="count">{{.Count}}</span>
+  </a>
+  {{end}}
+</div>
+{{end}}

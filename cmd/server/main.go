@@ -94,6 +94,32 @@ type TagsPageData struct {
 	MaxCount int
 }
 
+// loadTemplate builds a template set from the shared layout plus a named page file.
+// The layout defines {{block}} hooks; the page file provides {{define}} overrides.
+// If funcs is non-nil it is registered before parsing (required for pages that call
+// custom template functions like tagFontSize).
+func loadTemplate(name string, funcs template.FuncMap) (*template.Template, error) {
+	layoutContent, err := static.Assets.ReadFile("layout.tmpl")
+	if err != nil {
+		return nil, fmt.Errorf("read layout.tmpl: %w", err)
+	}
+	pageContent, err := static.Assets.ReadFile(name + ".tmpl")
+	if err != nil {
+		return nil, fmt.Errorf("read %s.tmpl: %w", name, err)
+	}
+	t := template.New("layout")
+	if funcs != nil {
+		t = t.Funcs(funcs)
+	}
+	if t, err = t.Parse(string(layoutContent)); err != nil {
+		return nil, fmt.Errorf("parse layout.tmpl: %w", err)
+	}
+	if t, err = t.Parse(string(pageContent)); err != nil {
+		return nil, fmt.Errorf("parse %s.tmpl: %w", name, err)
+	}
+	return t, nil
+}
+
 func main() {
 	port := "8080"
 	if fromEnv := os.Getenv("PORT"); fromEnv != "" {
@@ -101,50 +127,22 @@ func main() {
 	}
 	log.Infow("Starting up", "host", fmt.Sprintf("http://localhost:%s", port))
 
-	// Parse templates from embedded files
-	tmplContent, err := static.Assets.ReadFile("index.tmpl")
-	if err != nil {
-		log.Fatalw("failed to read index template", zap.Error(err))
+	// Parse templates from embedded layout + page files
+	var err error
+	if indexTemplate, err = loadTemplate("index", nil); err != nil {
+		log.Fatalw("failed to load index template", zap.Error(err))
 	}
-	indexTemplate, err = template.New("index").Parse(string(tmplContent))
-	if err != nil {
-		log.Fatalw("failed to parse index template", zap.Error(err))
+	if detailTemplate, err = loadTemplate("detail", nil); err != nil {
+		log.Fatalw("failed to load detail template", zap.Error(err))
 	}
-
-	detailContent, err := static.Assets.ReadFile("detail.tmpl")
-	if err != nil {
-		log.Fatalw("failed to read detail template", zap.Error(err))
+	if resolutionsTemplate, err = loadTemplate("resolutions", nil); err != nil {
+		log.Fatalw("failed to load resolutions template", zap.Error(err))
 	}
-	detailTemplate, err = template.New("detail").Parse(string(detailContent))
-	if err != nil {
-		log.Fatalw("failed to parse detail template", zap.Error(err))
+	if colorsTemplate, err = loadTemplate("colors", nil); err != nil {
+		log.Fatalw("failed to load colors template", zap.Error(err))
 	}
-
-	resolutionsContent, err := static.Assets.ReadFile("resolutions.tmpl")
-	if err != nil {
-		log.Fatalw("failed to read resolutions template", zap.Error(err))
-	}
-	resolutionsTemplate, err = template.New("resolutions").Parse(string(resolutionsContent))
-	if err != nil {
-		log.Fatalw("failed to parse resolutions template", zap.Error(err))
-	}
-
-	colorsContent, err := static.Assets.ReadFile("colors.tmpl")
-	if err != nil {
-		log.Fatalw("failed to read colors template", zap.Error(err))
-	}
-	colorsTemplate, err = template.New("colors").Parse(string(colorsContent))
-	if err != nil {
-		log.Fatalw("failed to parse colors template", zap.Error(err))
-	}
-
-	tagsContent, err := static.Assets.ReadFile("tags.tmpl")
-	if err != nil {
-		log.Fatalw("failed to read tags template", zap.Error(err))
-	}
-	tagsTemplate, err = template.New("tags").Funcs(templateFuncs).Parse(string(tagsContent))
-	if err != nil {
-		log.Fatalw("failed to parse tags template", zap.Error(err))
+	if tagsTemplate, err = loadTemplate("tags", templateFuncs); err != nil {
+		log.Fatalw("failed to load tags template", zap.Error(err))
 	}
 
 	// Open database
