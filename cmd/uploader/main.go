@@ -7,7 +7,6 @@ import (
 	"io/fs"
 	"log"
 	"os"
-	"os/exec"
 	"os/user"
 	"path/filepath"
 	"strings"
@@ -16,6 +15,7 @@ import (
 	"github.com/icco/wallpapers"
 	"github.com/icco/wallpapers/analysis"
 	"github.com/icco/wallpapers/db"
+	"gopkg.in/gographics/imagick.v3/imagick"
 )
 
 const DropboxPath = "/Photos/Wallpapers/DesktopWallpapers"
@@ -26,6 +26,9 @@ var (
 )
 
 func main() {
+	imagick.Initialize()
+	defer imagick.Terminate()
+
 	ctx := context.Background()
 
 	// Open database
@@ -210,15 +213,30 @@ func analyzeAndStore(ctx context.Context, filePath, filename string, data []byte
 	return nil
 }
 
-// resizeToMinWidth uses ImageMagick to enlarge the image at path to minWidth pixels wide
-// (maintaining aspect ratio) if its current width is less than minWidth.
-// Returns true if the image was resized.
-func resizeToMinWidth(path string, minWidth int) (bool, error) {
-	geometry := fmt.Sprintf("%dx<", minWidth)
-	//nolint:gosec // G204: path is derived from a trusted local directory walk
-	out, err := exec.Command("magick", path, "-resize", geometry, path).CombinedOutput()
-	if err != nil {
-		return false, fmt.Errorf("magick: %w: %s", err, out)
+// resizeToMinWidth uses ImageMagick (via gopkg.in/gographics/imagick.v3) to enlarge the image
+// at path to minWidth pixels wide (maintaining aspect ratio) if its current width is less than
+// minWidth. Returns true if the image was resized and written back to disk.
+func resizeToMinWidth(path string, minWidth uint) (bool, error) {
+	mw := imagick.NewMagickWand()
+	defer mw.Destroy()
+
+	if err := mw.ReadImage(path); err != nil {
+		return false, fmt.Errorf("imagick read: %w", err)
+	}
+
+	w := mw.GetImageWidth()
+	if w >= minWidth {
+		return false, nil
+	}
+
+	h := mw.GetImageHeight()
+	newH := uint(float64(h) * float64(minWidth) / float64(w))
+	if err := mw.ResizeImage(minWidth, newH, imagick.FILTER_LANCZOS); err != nil {
+		return false, fmt.Errorf("imagick resize: %w", err)
+	}
+
+	if err := mw.WriteImage(path); err != nil {
+		return false, fmt.Errorf("imagick write: %w", err)
 	}
 	return true, nil
 }
