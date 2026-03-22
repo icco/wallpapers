@@ -1,0 +1,72 @@
+<!doctype html>
+<html>
+
+  <head lang="en">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tags - Wallpapers</title>
+
+    <link rel="stylesheet" type="text/css" href="/css/tachyons.min.css">
+    <style>
+      a, a:link, a:visited {
+        transition: color .4s;
+        color: #265C83;
+        text-decoration: none;
+      }
+      a:hover { color: #7FDBFF; }
+      a:active { transition: color .3s; color: #007BE6; }
+
+      .tag-cloud {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        align-items: baseline;
+        margin-top: 1rem;
+        line-height: 1.8;
+      }
+      .tag {
+        padding: 0.15rem 0.4rem;
+        border-radius: 3px;
+        border: 1px solid #ddd;
+        white-space: nowrap;
+      }
+      .tag:hover {
+        border-color: #2BA6CB;
+        background: #f0f8ff;
+      }
+      .tag-count {
+        color: #aaa;
+        font-size: 0.7em;
+        margin-left: 2px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="pa3 mw8 center">
+      <h1 class="man pan"><a href="/">Wallpapers</a></h1>
+      <nav class="f6 mb3 mt1">
+        <a href="/">Gallery</a> &middot;
+        <a href="/resolutions">Resolutions</a> &middot;
+        <a href="/colors">Colors</a> &middot;
+        <a href="/tags"><b>Tags</b></a>
+      </nav>
+
+      <h2 class="f3 mb1">Tags</h2>
+      <p class="f6 gray mb3">{{len .Tags}} unique tags extracted from wallpapers. More common tags appear larger.</p>
+
+      <div class="tag-cloud">
+        {{range .Tags}}
+        <a href="/?q={{.Word}}" class="tag" style="font-size: {{tagFontSize .Count $.MaxCount}}rem;">
+          {{.Word}}<span class="tag-count">{{.Count}}</span>
+        </a>
+        {{end}}
+      </div>
+
+      <div class="footer mt4 pt3 bt b--light-gray">
+        <p class="f6 gray"><a href="https://github.com/icco/wallpapers">code</a> &copy; 2012 &mdash; 2025 Nat Welch.</p>
+      </div>
+    </div>
+  </body>
+
+</html>

@@ -1,0 +1,87 @@
+<!doctype html>
+<html>
+
+  <head lang="en">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Colors - Wallpapers</title>
+
+    <link rel="stylesheet" type="text/css" href="/css/tachyons.min.css">
+    <style>
+      a, a:link, a:visited {
+        transition: color .4s;
+        color: #265C83;
+        text-decoration: none;
+      }
+      a:hover { color: #7FDBFF; }
+      a:active { transition: color .3s; color: #007BE6; }
+
+      .color-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-top: 1rem;
+      }
+      .color-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 70px;
+      }
+      .color-swatch {
+        width: 56px;
+        height: 56px;
+        border-radius: 4px;
+        border: 1px solid rgba(0,0,0,0.12);
+        display: block;
+      }
+      .color-swatch:hover {
+        transform: scale(1.08);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        transition: transform 0.15s, box-shadow 0.15s;
+      }
+      .color-hex {
+        font-size: 0.65rem;
+        color: #555;
+        margin-top: 0.25rem;
+        text-align: center;
+        font-family: monospace;
+      }
+      .color-count {
+        font-size: 0.6rem;
+        color: #999;
+        text-align: center;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="pa3 mw8 center">
+      <h1 class="man pan"><a href="/">Wallpapers</a></h1>
+      <nav class="f6 mb3 mt1">
+        <a href="/">Gallery</a> &middot;
+        <a href="/resolutions">Resolutions</a> &middot;
+        <a href="/colors"><b>Colors</b></a> &middot;
+        <a href="/tags">Tags</a>
+      </nav>
+
+      <h2 class="f3 mb1">Colors</h2>
+      <p class="f6 gray mb3">{{len .Colors}} unique colors extracted from wallpapers. Click to browse similar colors.</p>
+
+      <div class="color-grid">
+        {{range .Colors}}
+        <a href="/?q={{.Hex}}" class="color-item" title="{{.Hex}} — {{.Count}} wallpaper{{if ne .Count 1}}s{{end}}">
+          <span class="color-swatch" style="background-color: {{.Hex}};"></span>
+          <span class="color-hex">{{.Hex}}</span>
+          <span class="color-count">{{.Count}}</span>
+        </a>
+        {{end}}
+      </div>
+
+      <div class="footer mt4 pt3 bt b--light-gray">
+        <p class="f6 gray"><a href="https://github.com/icco/wallpapers">code</a> &copy; 2012 &mdash; 2025 Nat Welch.</p>
+      </div>
+    </div>
+  </body>
+
+</html>

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"html/template"
+	"math"
 	"net/http"
 	"os"
 	"time"
@@ -47,6 +48,23 @@ var (
 	indexTemplate *template.Template
 	// detailTemplate is the parsed template for the image detail page
 	detailTemplate *template.Template
+	// listing page templates
+	resolutionsTemplate *template.Template
+	colorsTemplate      *template.Template
+	tagsTemplate        *template.Template
+
+	// templateFuncs are shared template helper functions
+	templateFuncs = template.FuncMap{
+		// tagFontSize scales font size between 0.8 and 2.2rem based on count vs maxCount.
+		"tagFontSize": func(count, maxCount int) string {
+			if maxCount <= 0 {
+				return "1.0"
+			}
+			ratio := float64(count) / float64(maxCount)
+			size := 0.8 + ratio*1.4
+			return fmt.Sprintf("%.2f", math.Round(size*100)/100)
+		},
+	}
 )
 
 // PageData holds data passed to the index template
@@ -58,6 +76,22 @@ type PageData struct {
 // DetailPageData holds data passed to the detail template
 type DetailPageData struct {
 	Image *db.Image
+}
+
+// ResolutionsPageData holds data passed to the resolutions template
+type ResolutionsPageData struct {
+	Resolutions []db.ResolutionEntry
+}
+
+// ColorsPageData holds data passed to the colors template
+type ColorsPageData struct {
+	Colors []db.ColorEntry
+}
+
+// TagsPageData holds data passed to the tags template
+type TagsPageData struct {
+	Tags     []db.TagEntry
+	MaxCount int
 }
 
 func main() {
@@ -84,6 +118,33 @@ func main() {
 	detailTemplate, err = template.New("detail").Parse(string(detailContent))
 	if err != nil {
 		log.Fatalw("failed to parse detail template", zap.Error(err))
+	}
+
+	resolutionsContent, err := static.Assets.ReadFile("resolutions.tmpl")
+	if err != nil {
+		log.Fatalw("failed to read resolutions template", zap.Error(err))
+	}
+	resolutionsTemplate, err = template.New("resolutions").Parse(string(resolutionsContent))
+	if err != nil {
+		log.Fatalw("failed to parse resolutions template", zap.Error(err))
+	}
+
+	colorsContent, err := static.Assets.ReadFile("colors.tmpl")
+	if err != nil {
+		log.Fatalw("failed to read colors template", zap.Error(err))
+	}
+	colorsTemplate, err = template.New("colors").Parse(string(colorsContent))
+	if err != nil {
+		log.Fatalw("failed to parse colors template", zap.Error(err))
+	}
+
+	tagsContent, err := static.Assets.ReadFile("tags.tmpl")
+	if err != nil {
+		log.Fatalw("failed to read tags template", zap.Error(err))
+	}
+	tagsTemplate, err = template.New("tags").Funcs(templateFuncs).Parse(string(tagsContent))
+	if err != nil {
+		log.Fatalw("failed to parse tags template", zap.Error(err))
 	}
 
 	// Open database
@@ -242,6 +303,64 @@ func main() {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		if err := detailTemplate.Execute(w, data); err != nil {
 			log.Errorw("error rendering detail template", zap.Error(err))
+		}
+	})
+
+	r.Get("/resolutions", func(w http.ResponseWriter, r *http.Request) {
+		if database == nil {
+			log.Errorw("database not available")
+			http.Error(w, "Service unavailable", http.StatusServiceUnavailable)
+			return
+		}
+		resolutions, err := database.GetResolutions()
+		if err != nil {
+			log.Errorw("error fetching resolutions", zap.Error(err))
+			http.Error(w, "Retrieval error", http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		if err := resolutionsTemplate.Execute(w, ResolutionsPageData{Resolutions: resolutions}); err != nil {
+			log.Errorw("error rendering resolutions template", zap.Error(err))
+		}
+	})
+
+	r.Get("/colors", func(w http.ResponseWriter, r *http.Request) {
+		if database == nil {
+			log.Errorw("database not available")
+			http.Error(w, "Service unavailable", http.StatusServiceUnavailable)
+			return
+		}
+		colors, err := database.GetColors()
+		if err != nil {
+			log.Errorw("error fetching colors", zap.Error(err))
+			http.Error(w, "Retrieval error", http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		if err := colorsTemplate.Execute(w, ColorsPageData{Colors: colors}); err != nil {
+			log.Errorw("error rendering colors template", zap.Error(err))
+		}
+	})
+
+	r.Get("/tags", func(w http.ResponseWriter, r *http.Request) {
+		if database == nil {
+			log.Errorw("database not available")
+			http.Error(w, "Service unavailable", http.StatusServiceUnavailable)
+			return
+		}
+		tags, err := database.GetTags()
+		if err != nil {
+			log.Errorw("error fetching tags", zap.Error(err))
+			http.Error(w, "Retrieval error", http.StatusInternalServerError)
+			return
+		}
+		maxCount := 0
+		if len(tags) > 0 {
+			maxCount = tags[0].Count
+		}
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		if err := tagsTemplate.Execute(w, TagsPageData{Tags: tags, MaxCount: maxCount}); err != nil {
+			log.Errorw("error rendering tags template", zap.Error(err))
 		}
 	})
 
