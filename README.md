@@ -1,6 +1,6 @@
 # Wallpapers
 
-A [site](http://walls.natwelch.com/) that displays Nat Welch's personal wallpaper collection. Images live in Google Cloud Storage (`iccowalls`), served via Imgix CDN. Metadata (dimensions, colors, tags) is stored in a local SQLite file (`wallpapers.db`) that ships with the container.
+A [site](http://walls.natwelch.com/) that displays Nat Welch's personal wallpaper collection. Images live in Google Cloud Storage, served via Imgix CDN. Metadata (dimensions, colors, tags) is stored in a local SQLite file (`wallpapers.db`) that ships with the container.
 
 ## Architecture
 

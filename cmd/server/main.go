@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"html/template"
-	"math"
 	"net/http"
 	"os"
 	"time"
@@ -55,14 +54,13 @@ var (
 
 	// templateFuncs are shared template helper functions
 	templateFuncs = template.FuncMap{
-		// tagFontSize scales font size between 0.8 and 2.2rem based on count vs maxCount.
-		"tagFontSize": func(count, maxCount int) string {
+		// tagRatio returns count/maxCount as a decimal string for use as a CSS --ratio variable.
+		// Font scaling is computed in CSS: calc(0.8rem + var(--ratio) * 1.4rem).
+		"tagRatio": func(count, maxCount int) string {
 			if maxCount <= 0 {
-				return "1.0"
+				return "0"
 			}
-			ratio := float64(count) / float64(maxCount)
-			size := 0.8 + ratio*1.4
-			return fmt.Sprintf("%.2f", math.Round(size*100)/100)
+			return fmt.Sprintf("%.3f", float64(count)/float64(maxCount))
 		},
 	}
 )

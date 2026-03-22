@@ -165,7 +165,7 @@ func TestTagsTemplateRenders(t *testing.T) {
 	body := buf.String()
 	assertContains(t, body, "Tags")
 	assertContains(t, body, "mountain")
-	assertContains(t, body, "font-size:")
+	assertContains(t, body, "--ratio:")
 	assertContains(t, body, "/?q=mountain")
 }
 

@@ -15,6 +15,7 @@ import (
 	"strings"
 	"time"
 
+	colorful "github.com/lucasb-eyer/go-colorful"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -224,11 +225,12 @@ func (db *DB) GetAll() ([]*Image, error) {
 	return images, err
 }
 
-// colorQueryRe matches a 6-digit hex color like #ff0000.
-var colorQueryRe = regexp.MustCompile(`^#[0-9a-fA-F]{6}$`)
-
-// resolutionQueryRe matches a resolution like 1920x1080.
-var resolutionQueryRe = regexp.MustCompile(`^(\d+)x(\d+)$`)
+var (
+	// colorQueryRe matches a 6-digit hex color like #ff0000.
+	colorQueryRe = regexp.MustCompile(`^#[0-9a-fA-F]{6}$`)
+	// resolutionQueryRe matches a resolution like 1920x1080.
+	resolutionQueryRe = regexp.MustCompile(`^(\d+)x(\d+)$`)
+)
 
 // Search searches for images by query string.
 // For hex colors, uses RGB color distance for fuzzy matching.
@@ -247,33 +249,41 @@ func (db *DB) Search(query string) ([]*Image, error) {
 
 	// Smart resolution search
 	if m := resolutionQueryRe.FindStringSubmatch(query); m != nil {
-		qW, _ := strconv.Atoi(m[1])
-		qH, _ := strconv.Atoi(m[2])
+		qW, err := strconv.Atoi(m[1])
+		if err != nil {
+			return nil, fmt.Errorf("invalid width in resolution query: %w", err)
+		}
+		qH, err := strconv.Atoi(m[2])
+		if err != nil {
+			return nil, fmt.Errorf("invalid height in resolution query: %w", err)
+		}
 		return db.searchByResolution(qW, qH)
 	}
 
 	searchPattern := "%" + query + "%"
 	var images []*Image
 
+	// Colors are hex codes handled by searchByColor; omit from general text search.
 	err := db.conn.Where(
 		"LOWER(words) LIKE ? OR "+
-			"LOWER(colors) LIKE ? OR "+
 			"LOWER(filename) LIKE ? OR "+
 			"LOWER(file_format) LIKE ?",
-		searchPattern, searchPattern, searchPattern, searchPattern,
+		searchPattern, searchPattern, searchPattern,
 	).Order("last_modified DESC").Find(&images).Error
 
 	return images, err
 }
 
 // searchByColor fetches all images and returns those with a color within
-// maxColorDist RGB Euclidean units of the query color, sorted by closeness.
+// maxColorDist (in go-colorful's DistanceRgb scale, 0–√3) of the query color,
+// sorted by closeness.
 func (db *DB) searchByColor(hexQuery string) ([]*Image, error) {
-	const maxColorDist = 80.0
+	// 0.314 ≈ 80/255, matching the perceptual threshold used previously.
+	const maxColorDist = 0.314
 
-	qR, qG, qB, err := hexToRGB(hexQuery)
+	query, err := colorful.Hex(hexQuery)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("invalid color %q: %w", hexQuery, err)
 	}
 
 	var all []*Image
@@ -290,11 +300,11 @@ func (db *DB) searchByColor(hexQuery string) ([]*Image, error) {
 	for _, img := range all {
 		minDist := math.MaxFloat64
 		for _, c := range img.Colors {
-			r, g, b, err := hexToRGB(c)
+			col, err := colorful.Hex(c)
 			if err != nil {
 				continue
 			}
-			if d := colorDistance(qR, qG, qB, r, g, b); d < minDist {
+			if d := query.DistanceRgb(col); d < minDist {
 				minDist = d
 			}
 		}
@@ -428,35 +438,6 @@ func (db *DB) GetTags() ([]TagEntry, error) {
 		return result[i].Word < result[j].Word
 	})
 	return result, nil
-}
-
-// hexToRGB parses a hex color string like "#rrggbb" into R, G, B components.
-func hexToRGB(hex string) (r, g, b int, err error) {
-	hex = strings.TrimPrefix(hex, "#")
-	if len(hex) != 6 {
-		return 0, 0, 0, fmt.Errorf("invalid hex color: %q", hex)
-	}
-	rv, err := strconv.ParseInt(hex[0:2], 16, 32)
-	if err != nil {
-		return 0, 0, 0, err
-	}
-	gv, err := strconv.ParseInt(hex[2:4], 16, 32)
-	if err != nil {
-		return 0, 0, 0, err
-	}
-	bv, err := strconv.ParseInt(hex[4:6], 16, 32)
-	if err != nil {
-		return 0, 0, 0, err
-	}
-	return int(rv), int(gv), int(bv), nil
-}
-
-// colorDistance returns the Euclidean distance between two RGB colors.
-func colorDistance(r1, g1, b1, r2, g2, b2 int) float64 {
-	dr := float64(r1 - r2)
-	dg := float64(g1 - g2)
-	db := float64(b1 - b2)
-	return math.Sqrt(dr*dr + dg*dg + db*db)
 }
 
 // EnsureImage creates a basic record for an image if it doesn't exist.

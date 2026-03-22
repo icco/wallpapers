@@ -8,6 +8,7 @@ require (
 	github.com/go-chi/chi/v5 v5.2.5
 	github.com/go-chi/cors v1.2.2
 	github.com/icco/gutil v0.0.0-20260209153821-fe9ae42fb376
+	github.com/lucasb-eyer/go-colorful v1.3.0
 	github.com/tjarratt/babble v0.0.0-20210505082055-cbca2a4833c1
 	github.com/unrolled/render v1.7.0
 	github.com/unrolled/secure v1.17.0
@@ -50,7 +51,6 @@ require (
 	github.com/icco/zapdriver v1.4.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
-	github.com/lucasb-eyer/go-colorful v1.3.0 // indirect
 	github.com/mattn/go-sqlite3 v1.14.37 // indirect
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646 // indirect
 	github.com/oliamb/cutter v0.2.2 // indirect
