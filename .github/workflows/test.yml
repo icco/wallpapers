@@ -10,6 +10,8 @@ jobs:
         uses: actions/setup-go@v6
         with:
           go-version: 1.25.x
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libmagickwand-dev
       - name: Install dependencies
         run: go get .
       - name: Build
