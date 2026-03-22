@@ -27,7 +27,7 @@
     margin-left: 2px;
   }
   .tag {
-    font-size: calc(0.8rem + var(--ratio, 0) * 1.4rem);
+    font-size: clamp(0.8rem, calc(0.8rem + var(--count, 1) * 0.05rem), 2.2rem);
   }
 </style>
 {{end}}
@@ -38,7 +38,7 @@
 
 <div class="tag-cloud">
   {{range .Tags}}
-  <a href="/?q={{.Word}}" class="tag" style="--ratio: {{tagRatio .Count $.MaxCount}}">
+  <a href="/?q={{.Word}}" class="tag" style="--count: {{.Count}}">
     {{.Word}}<span class="tag-count">{{.Count}}</span>
   </a>
   {{end}}

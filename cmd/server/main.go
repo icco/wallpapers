@@ -48,17 +48,6 @@ var (
 	resolutionsTemplate *template.Template
 	colorsTemplate      *template.Template
 	tagsTemplate        *template.Template
-
-	// templateFuncs is registered on templates that use custom functions.
-	templateFuncs = template.FuncMap{
-		// tagRatio outputs count/maxCount for use as a CSS --ratio custom property.
-		"tagRatio": func(count, maxCount int) string {
-			if maxCount <= 0 {
-				return "0"
-			}
-			return fmt.Sprintf("%.3f", float64(count)/float64(maxCount))
-		},
-	}
 )
 
 // PageData holds data passed to the index template
@@ -84,8 +73,7 @@ type ColorsPageData struct {
 
 // TagsPageData holds data passed to the tags template
 type TagsPageData struct {
-	Tags     []db.TagEntry
-	MaxCount int
+	Tags []db.TagEntry
 }
 
 // loadTemplate parses layout.tmpl and the named page file into a single template set.
@@ -132,7 +120,7 @@ func main() {
 	if colorsTemplate, err = loadTemplate("colors", nil); err != nil {
 		log.Fatalw("failed to load colors template", zap.Error(err))
 	}
-	if tagsTemplate, err = loadTemplate("tags", templateFuncs); err != nil {
+	if tagsTemplate, err = loadTemplate("tags", nil); err != nil {
 		log.Fatalw("failed to load tags template", zap.Error(err))
 	}
 
@@ -338,12 +326,8 @@ func main() {
 			http.Error(w, "Retrieval error", http.StatusInternalServerError)
 			return
 		}
-		maxCount := 0
-		if len(tags) > 0 {
-			maxCount = tags[0].Count
-		}
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		if err := tagsTemplate.Execute(w, TagsPageData{Tags: tags, MaxCount: maxCount}); err != nil {
+		if err := tagsTemplate.Execute(w, TagsPageData{Tags: tags}); err != nil {
 			log.Errorw("error rendering tags template", zap.Error(err))
 		}
 	})

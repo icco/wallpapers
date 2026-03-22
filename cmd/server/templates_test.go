@@ -25,7 +25,7 @@ func loadAll(t *testing.T) {
 	if colorsTemplate, err = loadTemplate("colors", nil); err != nil {
 		t.Fatalf("load colors: %v", err)
 	}
-	if tagsTemplate, err = loadTemplate("tags", templateFuncs); err != nil {
+	if tagsTemplate, err = loadTemplate("tags", nil); err != nil {
 		t.Fatalf("load tags: %v", err)
 	}
 }
@@ -155,7 +155,6 @@ func TestTagsTemplateRenders(t *testing.T) {
 			{Word: "sunset", Count: 20},
 			{Word: "ocean", Count: 1},
 		},
-		MaxCount: 50,
 	}
 
 	var buf bytes.Buffer
@@ -165,14 +164,14 @@ func TestTagsTemplateRenders(t *testing.T) {
 	body := buf.String()
 	assertContains(t, body, "Tags")
 	assertContains(t, body, "mountain")
-	assertContains(t, body, "--ratio:")
+	assertContains(t, body, "--count:")
 	assertContains(t, body, "/?q=mountain")
 }
 
 func TestTagsTemplateEmpty(t *testing.T) {
 	loadAll(t)
 
-	data := TagsPageData{Tags: nil, MaxCount: 0}
+	data := TagsPageData{}
 	var buf bytes.Buffer
 	if err := tagsTemplate.Execute(&buf, data); err != nil {
 		t.Fatalf("execute tags (empty): %v", err)
