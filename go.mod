@@ -14,7 +14,7 @@ require (
 	github.com/unrolled/secure v1.17.0
 	go.uber.org/zap v1.27.1
 	golang.org/x/image v0.37.0
-	google.golang.org/api v0.273.0
+	google.golang.org/api v0.274.0
 	google.golang.org/genai v1.51.0
 	gopkg.in/gographics/imagick.v3 v3.7.3
 	gorm.io/driver/sqlite v1.6.0
