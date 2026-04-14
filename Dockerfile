@@ -18,15 +18,20 @@ ENV CGO_ENABLED=1
 RUN go build -ldflags="-s -w" -o /server ./cmd/server
 RUN go build -ldflags="-s -w" -o /uploader ./cmd/uploader
 
-FROM alpine:3.21
+FROM alpine:3.22
 
 RUN apk add --no-cache \
     ca-certificates \
     imagemagick-libs
 
-COPY --from=builder /server /usr/local/bin/server
-COPY --from=builder /uploader /usr/local/bin/uploader
-COPY wallpapers.db .
+# Create a non-root user.
+RUN addgroup -S app && adduser -S -u 1001 -G app app
+
+COPY --from=builder --chown=app:app /server /usr/local/bin/server
+COPY --from=builder --chown=app:app /uploader /usr/local/bin/uploader
+COPY --chown=app:app wallpapers.db .
+
+USER app
 
 ENV PORT=8080
 EXPOSE 8080
