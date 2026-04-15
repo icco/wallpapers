@@ -29,6 +29,9 @@ RUN addgroup -S app && adduser -S -u 1001 -G app app
 
 COPY --from=builder --chown=app:app /server /usr/local/bin/server
 COPY --from=builder --chown=app:app /uploader /usr/local/bin/uploader
+
+# Use a writable home directory so SQLite can create journal/WAL files alongside the DB.
+WORKDIR /home/app
 COPY --chown=app:app wallpapers.db .
 
 USER app
