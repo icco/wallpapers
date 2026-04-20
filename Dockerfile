@@ -18,7 +18,7 @@ ENV CGO_ENABLED=1
 RUN go build -ldflags="-s -w" -o /server ./cmd/server
 RUN go build -ldflags="-s -w" -o /uploader ./cmd/uploader
 
-FROM alpine:3.22
+FROM alpine:3.23
 
 RUN apk add --no-cache \
     ca-certificates \
