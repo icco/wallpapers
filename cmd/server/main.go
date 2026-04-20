@@ -158,7 +158,7 @@ func main() {
 	r.Use(secureMiddleware.Handler)
 
 	crs := cors.New(cors.Options{
-		AllowCredentials:   true,
+		AllowCredentials:   false,
 		OptionsPassthrough: false,
 		AllowedOrigins:     []string{"*"},
 		AllowedMethods:     []string{"GET", "POST", "OPTIONS"},
