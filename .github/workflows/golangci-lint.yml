@@ -11,7 +11,7 @@ jobs:
   golangci:
     name: lint
     runs-on: ubuntu-latest
-    container: golang:1.25-alpine
+    container: golang:1.26-alpine
     permissions:
       contents: write
       pull-requests: write

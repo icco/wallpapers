@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"html/template"
 	"net/http"
@@ -8,29 +9,31 @@ import (
 	"time"
 
 	chi "github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/icco/gutil/etag"
 	"github.com/icco/gutil/logging"
 	"github.com/icco/wallpapers/cmd/server/static"
 	"github.com/icco/wallpapers/db"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/unrolled/render"
 	"github.com/unrolled/secure"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"go.opentelemetry.io/otel"
+	otelprom "go.opentelemetry.io/otel/exporters/prometheus"
+	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
+	semconv "go.opentelemetry.io/otel/semconv/v1.40.0"
 	"go.uber.org/zap"
 )
 
 const (
 	service = "walls"
-	project = "icco-cloud"
 )
 
 var (
 	log = logging.Must(logging.NewLogger(service))
 
-	// Renderer is a renderer for all occasions. These are our preferred default options.
-	// See:
-	//  - https://github.com/unrolled/render/blob/v1/README.md
-	//  - https://godoc.org/gopkg.in/unrolled/render.v1
+	// Renderer is the default JSON/HTML renderer.
 	Renderer = render.New(render.Options{
 		Charset:                   "UTF-8",
 		DisableHTTPErrorRendering: false,
@@ -76,8 +79,21 @@ type TagsPageData struct {
 	Tags []db.TagEntry
 }
 
+// routeTag stamps the chi route pattern onto otelhttp metric labels.
+func routeTag(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		next.ServeHTTP(w, r)
+		labeler, ok := otelhttp.LabelerFromContext(r.Context())
+		if !ok {
+			return
+		}
+		if pattern := chi.RouteContext(r.Context()).RoutePattern(); pattern != "" {
+			labeler.Add(semconv.HTTPRoute(pattern))
+		}
+	})
+}
+
 // loadTemplate parses layout.tmpl and the named page file into a single template set.
-// Pass funcs for pages that call custom template functions.
 func loadTemplate(name string, funcs template.FuncMap) (*template.Template, error) {
 	layoutContent, err := static.Assets.ReadFile("layout.tmpl")
 	if err != nil {
@@ -110,7 +126,21 @@ func main() {
 	}
 	log.Infow("Starting up", "host", fmt.Sprintf("http://localhost:%s", port))
 
-	var err error
+	registry := prometheus.NewRegistry()
+	exporter, err := otelprom.New(otelprom.WithRegisterer(registry))
+	if err != nil {
+		log.Fatalw("otel prometheus exporter", zap.Error(err))
+	}
+	mp := sdkmetric.NewMeterProvider(sdkmetric.WithReader(exporter))
+	otel.SetMeterProvider(mp)
+	defer func() {
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if err := mp.Shutdown(shutdownCtx); err != nil {
+			log.Warnw("meter provider shutdown", zap.Error(err))
+		}
+	}()
+
 	if indexTemplate, err = loadTemplate("index", nil); err != nil {
 		log.Fatalw("failed to load index template", zap.Error(err))
 	}
@@ -153,8 +183,8 @@ func main() {
 
 	r := chi.NewRouter()
 	r.Use(etag.Handler(false))
-	r.Use(middleware.RealIP)
-	r.Use(logging.Middleware(log.Desugar(), project))
+	r.Use(logging.Middleware(log.Desugar()))
+	r.Use(routeTag)
 	r.Use(secureMiddleware.Handler)
 
 	crs := cors.New(cors.Options{
@@ -179,9 +209,11 @@ func main() {
 
 	r.Get("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		if _, err := w.Write([]byte("hi.")); err != nil {
-			log.Errorw("error writing healthz", zap.Error(err))
+			logging.FromContext(r.Context()).Errorw("error writing healthz", zap.Error(err))
 		}
 	})
+
+	r.Method(http.MethodGet, "/metrics", promhttp.HandlerFor(registry, promhttp.HandlerOpts{}))
 
 	r.Handle("/css/*", http.FileServer(http.FS(static.Assets)))
 	r.Handle("/js/*", http.FileServer(http.FS(static.Assets)))
@@ -189,10 +221,11 @@ func main() {
 	r.Handle("/robots.txt", http.FileServer(http.FS(static.Assets)))
 
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		l := logging.FromContext(r.Context())
 		query := r.URL.Query().Get("q")
 
 		if database == nil {
-			log.Errorw("database not available")
+			l.Errorw("database not available")
 			http.Error(w, "Service unavailable", http.StatusServiceUnavailable)
 			return
 		}
@@ -206,7 +239,7 @@ func main() {
 			images, err = database.GetAll()
 		}
 		if err != nil {
-			log.Errorw("error fetching images", zap.Error(err))
+			l.Errorw("error fetching images", "query", query, zap.Error(err))
 			http.Error(w, "Retrieval error", http.StatusInternalServerError)
 			return
 		}
@@ -218,34 +251,36 @@ func main() {
 
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		if err := indexTemplate.Execute(w, data); err != nil {
-			log.Errorw("error rendering template", zap.Error(err))
+			l.Errorw("error rendering template", zap.Error(err))
 		}
 	})
 
 	r.Get("/all.json", func(w http.ResponseWriter, r *http.Request) {
+		l := logging.FromContext(r.Context())
 		if database == nil {
-			log.Errorw("database not available")
+			l.Errorw("database not available")
 			if err := Renderer.JSON(w, 503, map[string]string{"error": "service unavailable"}); err != nil {
-				log.Errorw("error rendering unavailable", zap.Error(err))
+				l.Errorw("error rendering unavailable", zap.Error(err))
 			}
 			return
 		}
 
 		images, err := database.GetAll()
 		if err != nil {
-			log.Errorw("error during get all", zap.Error(err))
+			l.Errorw("error during get all", zap.Error(err))
 			if err := Renderer.JSON(w, 500, map[string]string{"error": "retrieval error"}); err != nil {
-				log.Errorw("error during get all render", zap.Error(err))
+				l.Errorw("error during get all render", zap.Error(err))
 			}
 			return
 		}
 
 		if err := Renderer.JSON(w, http.StatusOK, images); err != nil {
-			log.Errorw("error during get all success render", zap.Error(err))
+			l.Errorw("error during get all success render", zap.Error(err))
 		}
 	})
 
 	r.Get("/image/{filename}", func(w http.ResponseWriter, r *http.Request) {
+		l := logging.FromContext(r.Context())
 		filename := chi.URLParam(r, "filename")
 
 		if filename == "" {
@@ -254,14 +289,14 @@ func main() {
 		}
 
 		if database == nil {
-			log.Errorw("database not available")
+			l.Errorw("database not available")
 			http.Error(w, "Service unavailable", http.StatusServiceUnavailable)
 			return
 		}
 
 		img, err := database.GetByFilename(filename)
 		if err != nil {
-			log.Errorw("error fetching from database", zap.Error(err))
+			l.Errorw("error fetching from database", "filename", filename, zap.Error(err))
 			http.Error(w, "Retrieval error", http.StatusInternalServerError)
 			return
 		}
@@ -277,92 +312,102 @@ func main() {
 
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		if err := detailTemplate.Execute(w, data); err != nil {
-			log.Errorw("error rendering detail template", zap.Error(err))
+			l.Errorw("error rendering detail template", zap.Error(err))
 		}
 	})
 
 	r.Get("/resolutions", func(w http.ResponseWriter, r *http.Request) {
+		l := logging.FromContext(r.Context())
 		if database == nil {
-			log.Errorw("database not available")
+			l.Errorw("database not available")
 			http.Error(w, "Service unavailable", http.StatusServiceUnavailable)
 			return
 		}
 		resolutions, err := database.GetResolutions()
 		if err != nil {
-			log.Errorw("error fetching resolutions", zap.Error(err))
+			l.Errorw("error fetching resolutions", zap.Error(err))
 			http.Error(w, "Retrieval error", http.StatusInternalServerError)
 			return
 		}
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		if err := resolutionsTemplate.Execute(w, ResolutionsPageData{Resolutions: resolutions}); err != nil {
-			log.Errorw("error rendering resolutions template", zap.Error(err))
+			l.Errorw("error rendering resolutions template", zap.Error(err))
 		}
 	})
 
 	r.Get("/colors", func(w http.ResponseWriter, r *http.Request) {
+		l := logging.FromContext(r.Context())
 		if database == nil {
-			log.Errorw("database not available")
+			l.Errorw("database not available")
 			http.Error(w, "Service unavailable", http.StatusServiceUnavailable)
 			return
 		}
 		colors, err := database.GetColors()
 		if err != nil {
-			log.Errorw("error fetching colors", zap.Error(err))
+			l.Errorw("error fetching colors", zap.Error(err))
 			http.Error(w, "Retrieval error", http.StatusInternalServerError)
 			return
 		}
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		if err := colorsTemplate.Execute(w, ColorsPageData{Colors: colors}); err != nil {
-			log.Errorw("error rendering colors template", zap.Error(err))
+			l.Errorw("error rendering colors template", zap.Error(err))
 		}
 	})
 
 	r.Get("/tags", func(w http.ResponseWriter, r *http.Request) {
+		l := logging.FromContext(r.Context())
 		if database == nil {
-			log.Errorw("database not available")
+			l.Errorw("database not available")
 			http.Error(w, "Service unavailable", http.StatusServiceUnavailable)
 			return
 		}
 		tags, err := database.GetTags()
 		if err != nil {
-			log.Errorw("error fetching tags", zap.Error(err))
+			l.Errorw("error fetching tags", zap.Error(err))
 			http.Error(w, "Retrieval error", http.StatusInternalServerError)
 			return
 		}
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		if err := tagsTemplate.Execute(w, TagsPageData{Tags: tags}); err != nil {
-			log.Errorw("error rendering tags template", zap.Error(err))
+			l.Errorw("error rendering tags template", zap.Error(err))
 		}
 	})
 
 	r.Get("/search", func(w http.ResponseWriter, r *http.Request) {
+		l := logging.FromContext(r.Context())
 		query := r.URL.Query().Get("q")
 
 		if database == nil {
-			log.Errorw("search unavailable, database not connected")
+			l.Errorw("search unavailable, database not connected")
 			if err := Renderer.JSON(w, 503, map[string]string{"error": "search unavailable"}); err != nil {
-				log.Errorw("error rendering search error", zap.Error(err))
+				l.Errorw("error rendering search error", zap.Error(err))
 			}
 			return
 		}
 
 		images, err := database.Search(query)
 		if err != nil {
-			log.Errorw("error during search", zap.Error(err))
+			l.Errorw("error during search", "query", query, zap.Error(err))
 			if err := Renderer.JSON(w, 500, map[string]string{"error": "search error"}); err != nil {
-				log.Errorw("error rendering search error", zap.Error(err))
+				l.Errorw("error rendering search error", zap.Error(err))
 			}
 			return
 		}
 
 		if err := Renderer.JSON(w, http.StatusOK, images); err != nil {
-			log.Errorw("error rendering search results", zap.Error(err))
+			l.Errorw("error rendering search results", zap.Error(err))
 		}
 	})
 
+	handler := otelhttp.NewHandler(r, service,
+		otelhttp.WithFilter(func(req *http.Request) bool {
+			return req.URL.Path != "/metrics"
+		}),
+	)
+
 	srv := &http.Server{
 		Addr:              ":" + port,
-		Handler:           r,
+		Handler:           handler,
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       10 * time.Second,
 		WriteTimeout:      10 * time.Second,
