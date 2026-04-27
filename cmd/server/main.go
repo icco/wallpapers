@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"html/template"
 	"net/http"
@@ -13,8 +14,15 @@ import (
 	"github.com/icco/gutil/logging"
 	"github.com/icco/wallpapers/cmd/server/static"
 	"github.com/icco/wallpapers/db"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/unrolled/render"
 	"github.com/unrolled/secure"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"go.opentelemetry.io/otel"
+	otelprom "go.opentelemetry.io/otel/exporters/prometheus"
+	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
+	semconv "go.opentelemetry.io/otel/semconv/v1.40.0"
 	"go.uber.org/zap"
 )
 
@@ -25,10 +33,7 @@ const (
 var (
 	log = logging.Must(logging.NewLogger(service))
 
-	// Renderer is a renderer for all occasions. These are our preferred default options.
-	// See:
-	//  - https://github.com/unrolled/render/blob/v1/README.md
-	//  - https://godoc.org/gopkg.in/unrolled/render.v1
+	// Renderer is the default JSON/HTML renderer.
 	Renderer = render.New(render.Options{
 		Charset:                   "UTF-8",
 		DisableHTTPErrorRendering: false,
@@ -74,8 +79,21 @@ type TagsPageData struct {
 	Tags []db.TagEntry
 }
 
+// routeTag stamps the chi route pattern onto otelhttp metric labels.
+func routeTag(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		next.ServeHTTP(w, r)
+		labeler, ok := otelhttp.LabelerFromContext(r.Context())
+		if !ok {
+			return
+		}
+		if pattern := chi.RouteContext(r.Context()).RoutePattern(); pattern != "" {
+			labeler.Add(semconv.HTTPRoute(pattern))
+		}
+	})
+}
+
 // loadTemplate parses layout.tmpl and the named page file into a single template set.
-// Pass funcs for pages that call custom template functions.
 func loadTemplate(name string, funcs template.FuncMap) (*template.Template, error) {
 	layoutContent, err := static.Assets.ReadFile("layout.tmpl")
 	if err != nil {
@@ -108,7 +126,21 @@ func main() {
 	}
 	log.Infow("Starting up", "host", fmt.Sprintf("http://localhost:%s", port))
 
-	var err error
+	registry := prometheus.NewRegistry()
+	exporter, err := otelprom.New(otelprom.WithRegisterer(registry))
+	if err != nil {
+		log.Fatalw("otel prometheus exporter", zap.Error(err))
+	}
+	mp := sdkmetric.NewMeterProvider(sdkmetric.WithReader(exporter))
+	otel.SetMeterProvider(mp)
+	defer func() {
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if err := mp.Shutdown(shutdownCtx); err != nil {
+			log.Warnw("meter provider shutdown", zap.Error(err))
+		}
+	}()
+
 	if indexTemplate, err = loadTemplate("index", nil); err != nil {
 		log.Fatalw("failed to load index template", zap.Error(err))
 	}
@@ -152,6 +184,7 @@ func main() {
 	r := chi.NewRouter()
 	r.Use(etag.Handler(false))
 	r.Use(logging.Middleware(log.Desugar()))
+	r.Use(routeTag)
 	r.Use(secureMiddleware.Handler)
 
 	crs := cors.New(cors.Options{
@@ -179,6 +212,8 @@ func main() {
 			logging.FromContext(r.Context()).Errorw("error writing healthz", zap.Error(err))
 		}
 	})
+
+	r.Method(http.MethodGet, "/metrics", promhttp.HandlerFor(registry, promhttp.HandlerOpts{}))
 
 	r.Handle("/css/*", http.FileServer(http.FS(static.Assets)))
 	r.Handle("/js/*", http.FileServer(http.FS(static.Assets)))
@@ -364,9 +399,15 @@ func main() {
 		}
 	})
 
+	handler := otelhttp.NewHandler(r, service,
+		otelhttp.WithFilter(func(req *http.Request) bool {
+			return req.URL.Path != "/metrics"
+		}),
+	)
+
 	srv := &http.Server{
 		Addr:              ":" + port,
-		Handler:           r,
+		Handler:           handler,
 		ReadHeaderTimeout: 5 * time.Second,
 		ReadTimeout:       10 * time.Second,
 		WriteTimeout:      10 * time.Second,
