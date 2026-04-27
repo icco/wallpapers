@@ -20,6 +20,10 @@ RUN go build -ldflags="-s -w" -o /uploader ./cmd/uploader
 
 FROM alpine:3.23
 
+LABEL org.opencontainers.image.source=https://github.com/icco/wallpapers
+LABEL org.opencontainers.image.description="A site that lists the photos currently in my Wallpaper rotation."
+LABEL org.opencontainers.image.licenses=MIT
+
 RUN apk add --no-cache \
     ca-certificates \
     imagemagick-libs
