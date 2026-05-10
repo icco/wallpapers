@@ -2,11 +2,11 @@
 
 go get -v -u ./...
 git add go.mod go.sum
-git ci -m 'update go deps'
+git ci -m 'chore: update go deps'
 
 go run ./cmd/uploader
 
 git add wallpapers.db
-git ci -m 'update wallpapers.db'
+git ci -m 'chore: update wallpapers.db'
 
 git push -u
