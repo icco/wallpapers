@@ -5,6 +5,14 @@ import (
 	"time"
 )
 
+const (
+	testFileRed   = "red.jpg"
+	testFileBlue  = "blue.jpg"
+	testFileClose = "close.jpg"
+	testColorBlue = "#0000ff"
+	testTagMtn    = "mountain"
+)
+
 // newTestDB opens an in-memory SQLite database for testing.
 func newTestDB(t *testing.T) *DB {
 	t.Helper()
@@ -32,8 +40,8 @@ func now() *time.Time { t := time.Now(); return &t }
 func TestSearchByColor_ExactMatch(t *testing.T) {
 	db := newTestDB(t)
 	seed(t, db,
-		&Image{Filename: "red.jpg", Colors: StringSlice{"#ff0000", "#111111", "#222222"}, ProcessedAt: now()},
-		&Image{Filename: "blue.jpg", Colors: StringSlice{"#0000ff", "#333333", "#444444"}, ProcessedAt: now()},
+		&Image{Filename: testFileRed, Colors: StringSlice{"#ff0000", "#111111", "#222222"}, ProcessedAt: now()},
+		&Image{Filename: testFileBlue, Colors: StringSlice{testColorBlue, "#333333", "#444444"}, ProcessedAt: now()},
 	)
 
 	results, err := db.searchByColor("#ff0000")
@@ -43,7 +51,7 @@ func TestSearchByColor_ExactMatch(t *testing.T) {
 	if len(results) == 0 {
 		t.Fatal("expected at least one result for exact color match")
 	}
-	if results[0].Filename != "red.jpg" {
+	if results[0].Filename != testFileRed {
 		t.Errorf("expected red.jpg first, got %s", results[0].Filename)
 	}
 }
@@ -53,7 +61,7 @@ func TestSearchByColor_NearMatch(t *testing.T) {
 	// #fe0101 is very close to #ff0000 (distance ≈ 0.006)
 	seed(t, db,
 		&Image{Filename: "nearred.jpg", Colors: StringSlice{"#fe0101"}, ProcessedAt: now()},
-		&Image{Filename: "blue.jpg", Colors: StringSlice{"#0000ff"}, ProcessedAt: now()},
+		&Image{Filename: testFileBlue, Colors: StringSlice{testColorBlue}, ProcessedAt: now()},
 	)
 
 	results, err := db.searchByColor("#ff0000")
@@ -71,7 +79,7 @@ func TestSearchByColor_NearMatch(t *testing.T) {
 func TestSearchByColor_NoMatch(t *testing.T) {
 	db := newTestDB(t)
 	seed(t, db,
-		&Image{Filename: "blue.jpg", Colors: StringSlice{"#0000ff"}, ProcessedAt: now()},
+		&Image{Filename: testFileBlue, Colors: StringSlice{testColorBlue}, ProcessedAt: now()},
 	)
 
 	results, err := db.searchByColor("#ff0000")
@@ -96,7 +104,7 @@ func TestSearchByColor_SortedByCloseness(t *testing.T) {
 	// #ff1010 (dist≈0.089) is closer to #ff0000 than #ff3030 (dist≈0.266); both within threshold.
 	seed(t, db,
 		&Image{Filename: "far.jpg", Colors: StringSlice{"#ff3030"}, ProcessedAt: now()},
-		&Image{Filename: "close.jpg", Colors: StringSlice{"#ff1010"}, ProcessedAt: now()},
+		&Image{Filename: testFileClose, Colors: StringSlice{"#ff1010"}, ProcessedAt: now()},
 	)
 
 	results, err := db.searchByColor("#ff0000")
@@ -106,7 +114,7 @@ func TestSearchByColor_SortedByCloseness(t *testing.T) {
 	if len(results) < 2 {
 		t.Fatal("expected both images to match")
 	}
-	if results[0].Filename != "close.jpg" {
+	if results[0].Filename != testFileClose {
 		t.Errorf("expected close.jpg first, got %s", results[0].Filename)
 	}
 }
@@ -150,7 +158,7 @@ func TestSearchByResolution_SortedByCloseness(t *testing.T) {
 	db := newTestDB(t)
 	seed(t, db,
 		&Image{Filename: "farish.jpg", Width: 1700, Height: 900, ProcessedAt: now()},
-		&Image{Filename: "close.jpg", Width: 1900, Height: 1060, ProcessedAt: now()},
+		&Image{Filename: testFileClose, Width: 1900, Height: 1060, ProcessedAt: now()},
 	)
 
 	results, err := db.searchByResolution(1920, 1080)
@@ -160,7 +168,7 @@ func TestSearchByResolution_SortedByCloseness(t *testing.T) {
 	if len(results) < 2 {
 		t.Fatal("expected both images to match")
 	}
-	if results[0].Filename != "close.jpg" {
+	if results[0].Filename != testFileClose {
 		t.Errorf("expected close.jpg first, got %s", results[0].Filename)
 	}
 }
@@ -219,7 +227,7 @@ func TestGetColors_GridSize(t *testing.T) {
 func TestGetColors_CountsImages(t *testing.T) {
 	db := newTestDB(t)
 	// Seed an image with a vivid red. At least one grid cell should have count >= 1.
-	seed(t, db, &Image{Filename: "red.jpg", Colors: StringSlice{"#ff0000"}})
+	seed(t, db, &Image{Filename: testFileRed, Colors: StringSlice{"#ff0000"}})
 
 	colors, err := db.GetColors()
 	if err != nil {
@@ -260,8 +268,8 @@ func TestGetColors_EmptyDB(t *testing.T) {
 func TestGetTags(t *testing.T) {
 	db := newTestDB(t)
 	seed(t, db,
-		&Image{Filename: "a.jpg", Words: StringSlice{"mountain", "sky"}},
-		&Image{Filename: "b.jpg", Words: StringSlice{"mountain", "ocean"}},
+		&Image{Filename: "a.jpg", Words: StringSlice{testTagMtn, "sky"}},
+		&Image{Filename: "b.jpg", Words: StringSlice{testTagMtn, "ocean"}},
 	)
 
 	tags, err := db.GetTags()
@@ -271,7 +279,7 @@ func TestGetTags(t *testing.T) {
 	if len(tags) != 3 {
 		t.Fatalf("expected 3 unique tags, got %d", len(tags))
 	}
-	if tags[0].Word != "mountain" {
+	if tags[0].Word != testTagMtn {
 		t.Errorf("expected mountain first, got %s", tags[0].Word)
 	}
 	if tags[0].Count != 2 {
