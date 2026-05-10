@@ -28,6 +28,8 @@ import (
 
 const (
 	service = "walls"
+
+	jsonErrorKey = "error"
 )
 
 var (
@@ -259,7 +261,7 @@ func main() {
 		l := logging.FromContext(r.Context())
 		if database == nil {
 			l.Errorw("database not available")
-			if err := Renderer.JSON(w, 503, map[string]string{"error": "service unavailable"}); err != nil {
+			if err := Renderer.JSON(w, 503, map[string]string{jsonErrorKey: "service unavailable"}); err != nil {
 				l.Errorw("error rendering unavailable", zap.Error(err))
 			}
 			return
@@ -268,7 +270,7 @@ func main() {
 		images, err := database.GetAll()
 		if err != nil {
 			l.Errorw("error during get all", zap.Error(err))
-			if err := Renderer.JSON(w, 500, map[string]string{"error": "retrieval error"}); err != nil {
+			if err := Renderer.JSON(w, 500, map[string]string{jsonErrorKey: "retrieval error"}); err != nil {
 				l.Errorw("error during get all render", zap.Error(err))
 			}
 			return
@@ -379,7 +381,7 @@ func main() {
 
 		if database == nil {
 			l.Errorw("search unavailable, database not connected")
-			if err := Renderer.JSON(w, 503, map[string]string{"error": "search unavailable"}); err != nil {
+			if err := Renderer.JSON(w, 503, map[string]string{jsonErrorKey: "search unavailable"}); err != nil {
 				l.Errorw("error rendering search error", zap.Error(err))
 			}
 			return
@@ -388,7 +390,7 @@ func main() {
 		images, err := database.Search(query)
 		if err != nil {
 			l.Errorw("error during search", "query", query, zap.Error(err))
-			if err := Renderer.JSON(w, 500, map[string]string{"error": "search error"}); err != nil {
+			if err := Renderer.JSON(w, 500, map[string]string{jsonErrorKey: "search error"}); err != nil {
 				l.Errorw("error rendering search error", zap.Error(err))
 			}
 			return
