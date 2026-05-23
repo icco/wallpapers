@@ -20,7 +20,7 @@ require (
 	go.uber.org/zap v1.28.0
 	golang.org/x/image v0.40.0
 	google.golang.org/api v0.280.0
-	google.golang.org/genai v1.56.0
+	google.golang.org/genai v1.58.0
 	gopkg.in/gographics/imagick.v3 v3.7.3
 	gorm.io/driver/sqlite v1.6.0
 	gorm.io/gorm v1.31.1
