@@ -5,7 +5,7 @@ go 1.26.2
 require (
 	cloud.google.com/go/storage v1.62.1
 	github.com/EdlinOrg/prominentcolor v1.0.0
-	github.com/go-chi/chi/v5 v5.2.5
+	github.com/go-chi/chi/v5 v5.3.0
 	github.com/go-chi/cors v1.2.2
 	github.com/icco/gutil v0.0.0-20260507025405-5c92e792df94
 	github.com/lucasb-eyer/go-colorful v1.4.0
