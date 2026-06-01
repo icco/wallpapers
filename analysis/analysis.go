@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"image"
+	// Register decoders for GIF, JPEG, and PNG so image.Decode/DecodeConfig can handle them.
 	_ "image/gif"
 	_ "image/jpeg"
 	_ "image/png"
@@ -16,6 +17,7 @@ import (
 	"strings"
 
 	"github.com/EdlinOrg/prominentcolor"
+	// Register the WebP decoder so image.Decode/DecodeConfig can handle WebP files.
 	_ "golang.org/x/image/webp"
 	"google.golang.org/genai"
 )

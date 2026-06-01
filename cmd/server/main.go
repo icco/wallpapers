@@ -1,3 +1,5 @@
+// Command server runs the wallpapers HTTP service: it serves the web UI,
+// JSON API, and metrics endpoint backed by the wallpapers SQLite database.
 package main
 
 import (
@@ -96,7 +98,7 @@ func routeTag(next http.Handler) http.Handler {
 }
 
 // loadTemplate parses layout.tmpl and the named page file into a single template set.
-func loadTemplate(name string, funcs template.FuncMap) (*template.Template, error) {
+func loadTemplate(name string) (*template.Template, error) {
 	layoutContent, err := static.Assets.ReadFile("layout.tmpl")
 	if err != nil {
 		return nil, fmt.Errorf("read layout.tmpl: %w", err)
@@ -105,13 +107,10 @@ func loadTemplate(name string, funcs template.FuncMap) (*template.Template, erro
 	if err != nil {
 		return nil, fmt.Errorf("read %s.tmpl: %w", name, err)
 	}
-	base := template.FuncMap{
+	funcs := template.FuncMap{
 		"currentYear": func() int { return time.Now().Year() },
 	}
-	for k, v := range funcs {
-		base[k] = v
-	}
-	t := template.New("layout").Funcs(base)
+	t := template.New("layout").Funcs(funcs)
 	if t, err = t.Parse(string(layoutContent)); err != nil {
 		return nil, fmt.Errorf("parse layout.tmpl: %w", err)
 	}
@@ -143,19 +142,19 @@ func main() {
 		}
 	}()
 
-	if indexTemplate, err = loadTemplate("index", nil); err != nil {
+	if indexTemplate, err = loadTemplate("index"); err != nil {
 		log.Fatalw("failed to load index template", zap.Error(err))
 	}
-	if detailTemplate, err = loadTemplate("detail", nil); err != nil {
+	if detailTemplate, err = loadTemplate("detail"); err != nil {
 		log.Fatalw("failed to load detail template", zap.Error(err))
 	}
-	if resolutionsTemplate, err = loadTemplate("resolutions", nil); err != nil {
+	if resolutionsTemplate, err = loadTemplate("resolutions"); err != nil {
 		log.Fatalw("failed to load resolutions template", zap.Error(err))
 	}
-	if colorsTemplate, err = loadTemplate("colors", nil); err != nil {
+	if colorsTemplate, err = loadTemplate("colors"); err != nil {
 		log.Fatalw("failed to load colors template", zap.Error(err))
 	}
-	if tagsTemplate, err = loadTemplate("tags", nil); err != nil {
+	if tagsTemplate, err = loadTemplate("tags"); err != nil {
 		log.Fatalw("failed to load tags template", zap.Error(err))
 	}
 
@@ -416,5 +415,7 @@ func main() {
 		IdleTimeout:       60 * time.Second,
 	}
 
-	log.Fatal(srv.ListenAndServe())
+	if err := srv.ListenAndServe(); err != nil {
+		log.Errorw("http server exited", zap.Error(err))
+	}
 }
