@@ -13,19 +13,19 @@ import (
 func loadAll(t *testing.T) {
 	t.Helper()
 	var err error
-	if indexTemplate, err = loadTemplate("index", nil); err != nil {
+	if indexTemplate, err = loadTemplate("index"); err != nil {
 		t.Fatalf("load index: %v", err)
 	}
-	if detailTemplate, err = loadTemplate("detail", nil); err != nil {
+	if detailTemplate, err = loadTemplate("detail"); err != nil {
 		t.Fatalf("load detail: %v", err)
 	}
-	if resolutionsTemplate, err = loadTemplate("resolutions", nil); err != nil {
+	if resolutionsTemplate, err = loadTemplate("resolutions"); err != nil {
 		t.Fatalf("load resolutions: %v", err)
 	}
-	if colorsTemplate, err = loadTemplate("colors", nil); err != nil {
+	if colorsTemplate, err = loadTemplate("colors"); err != nil {
 		t.Fatalf("load colors: %v", err)
 	}
-	if tagsTemplate, err = loadTemplate("tags", nil); err != nil {
+	if tagsTemplate, err = loadTemplate("tags"); err != nil {
 		t.Fatalf("load tags: %v", err)
 	}
 }

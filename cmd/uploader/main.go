@@ -1,3 +1,6 @@
+// Command uploader walks the local Dropbox wallpapers folder, normalizes
+// filenames, upscales small images, uploads new/changed files to GCS, and
+// records image metadata in the wallpapers database.
 package main
 
 import (
@@ -18,6 +21,7 @@ import (
 	"gopkg.in/gographics/imagick.v3/imagick"
 )
 
+// DropboxPath is the location, relative to ~/Dropbox, where local wallpapers live.
 const DropboxPath = "/Photos/Wallpapers/DesktopWallpapers"
 
 var (
@@ -26,6 +30,12 @@ var (
 )
 
 func main() {
+	if err := run(); err != nil {
+		log.Fatalf("uploader failed: %+v", err)
+	}
+}
+
+func run() error {
 	imagick.Initialize()
 	defer imagick.Terminate()
 
@@ -35,8 +45,7 @@ func main() {
 	var err error
 	database, err = db.Open(db.DefaultDBPath())
 	if err != nil {
-		log.Printf("error opening database: %+v", err)
-		os.Exit(1)
+		return fmt.Errorf("error opening database: %w", err)
 	}
 	defer func() {
 		if cerr := database.Close(); cerr != nil {
@@ -46,35 +55,30 @@ func main() {
 
 	// Run data migrations
 	if err := database.RunMigrations(); err != nil {
-		log.Printf("error running migrations: %+v", err)
-		os.Exit(1)
+		return fmt.Errorf("error running migrations: %w", err)
 	}
 
 	knownRemoteFiles, err := wallpapers.GetAll(ctx)
 	if err != nil {
-		log.Printf("error walking: %+v", err)
-		os.Exit(1)
+		return fmt.Errorf("error listing remote files: %w", err)
 	}
 	knownLocalFiles = map[string]bool{}
 
 	u, err := user.Lookup("nat")
 	if err != nil {
-		log.Printf("error getting nat: %+v", err)
-		os.Exit(1)
+		return fmt.Errorf("error getting nat: %w", err)
 	}
 	localFiles := filepath.Join(u.HomeDir, "Dropbox", DropboxPath)
 
 	if err := filepath.Walk(localFiles, walkFn); err != nil {
-		log.Printf("error walking: %+v", err)
-		os.Exit(1)
+		return fmt.Errorf("error walking: %w", err)
 	}
 
 	for _, file := range knownRemoteFiles {
 		filename := file.Name
 		if !knownLocalFiles[filename] {
 			if err := wallpapers.DeleteFile(ctx, filename); err != nil {
-				log.Printf("could not delete %q: %+v", filename, err)
-				os.Exit(1)
+				return fmt.Errorf("could not delete %q: %w", filename, err)
 			}
 			// Also remove from database
 			if err := database.Delete(filename); err != nil {
@@ -83,6 +87,8 @@ func main() {
 			log.Printf("deleted %q", filename)
 		}
 	}
+
+	return nil
 }
 
 func walkFn(path string, info fs.FileInfo, err error) error {
@@ -159,13 +165,14 @@ func walkFn(path string, info fs.FileInfo, err error) error {
 	needsAnalysis := false
 	reason := ""
 
-	if existing == nil || existing.ProcessedAt == nil {
+	switch {
+	case existing == nil || existing.ProcessedAt == nil:
 		needsAnalysis = true
 		reason = "not processed"
-	} else if len(existing.Words) == 0 {
+	case len(existing.Words) == 0:
 		needsAnalysis = true
 		reason = "words empty"
-	} else if shouldRandomlyReanalyze() {
+	case shouldRandomlyReanalyze():
 		needsAnalysis = true
 		reason = "random reanalysis (10%)"
 	}

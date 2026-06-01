@@ -1,3 +1,5 @@
+// Package wallpapers provides helpers for managing wallpaper files stored in
+// Google Cloud Storage, including CRC checksums, URL generation, and metadata.
 package wallpapers
 
 import (
@@ -17,10 +19,12 @@ import (
 	"google.golang.org/api/iterator"
 )
 
+// Bucket is the GCS bucket name where wallpaper files are stored.
 const (
 	Bucket = "iccowalls"
 )
 
+// NameRegex matches characters that are not allowed in normalized wallpaper file names.
 var (
 	NameRegex = regexp.MustCompile("[^a-z0-9]")
 )
@@ -45,12 +49,14 @@ func FormatName(in string) string {
 		babbler.Separator = ""
 		babbler.Count = 1
 
-		name = name + babbler.Babble()
+		name += babbler.Babble()
 	}
 
 	return name + ext
 }
 
+// GetGoogleCRC returns the CRC32C checksum that GCS has stored for the given object.
+// If the object does not exist, it returns 0 with a nil error.
 func GetGoogleCRC(ctx context.Context, filename string) (uint32, error) {
 	client, err := storage.NewClient(ctx)
 	if err != nil {
@@ -71,10 +77,12 @@ func GetGoogleCRC(ctx context.Context, filename string) (uint32, error) {
 	return attr.CRC32C, nil
 }
 
+// GetFileCRC computes the CRC32C (Castagnoli) checksum of the given content.
 func GetFileCRC(content []byte) uint32 {
 	return crc32.Checksum(content, crc32.MakeTable(crc32.Castagnoli))
 }
 
+// DeleteFile removes the named object from the wallpaper GCS bucket.
 func DeleteFile(ctx context.Context, filename string) error {
 	client, err := storage.NewClient(ctx)
 	if err != nil {
@@ -113,7 +121,7 @@ func FullRezURL(key string) string {
 	return fmt.Sprintf("https://icco-walls.imgix.net/%s?auto=compress&w=%d&h=%d&crop=entropy&fm=png", key, w, h)
 }
 
-// ThumbUrl returns the URL a small cropped version hosted by imgix.
+// ThumbURL returns the URL a small cropped version hosted by imgix.
 func ThumbURL(key string) string {
 	w := 800
 	h := 450
