@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     container: golang:1.26-alpine
     permissions:
-      contents: write
+      contents: read
       pull-requests: write
     steps:
       - uses: actions/checkout@v6
