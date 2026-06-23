@@ -18,7 +18,7 @@ ENV CGO_ENABLED=1
 RUN go build -ldflags="-s -w" -o /server ./cmd/server
 RUN go build -ldflags="-s -w" -o /uploader ./cmd/uploader
 
-FROM alpine:3.23
+FROM alpine:3.24
 
 LABEL org.opencontainers.image.source=https://github.com/icco/wallpapers
 LABEL org.opencontainers.image.description="A site that lists the photos currently in my Wallpaper rotation."
