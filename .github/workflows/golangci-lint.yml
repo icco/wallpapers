@@ -16,7 +16,7 @@ jobs:
       contents: read
       pull-requests: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Install system dependencies
         run: apk add --no-cache imagemagick-dev pkgconf gcc musl-dev
       - name: golangci-lint

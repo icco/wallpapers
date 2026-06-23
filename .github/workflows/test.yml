@@ -12,7 +12,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     container: ${{ matrix.container }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Setup Go
         if: runner.os == 'macOS'
         uses: actions/setup-go@v6
