@@ -18,7 +18,7 @@ require (
 	go.opentelemetry.io/otel/exporters/prometheus v0.66.0
 	go.opentelemetry.io/otel/sdk/metric v1.44.0
 	go.uber.org/zap v1.28.0
-	golang.org/x/image v0.41.0
+	golang.org/x/image v0.43.0
 	google.golang.org/api v0.286.0
 	google.golang.org/genai v1.58.0
 	gopkg.in/gographics/imagick.v3 v3.7.3
