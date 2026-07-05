@@ -421,7 +421,8 @@ func main() {
 
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Fatalw("http server exited", zap.Error(err))
+			log.Errorw("http server exited", zap.Error(err))
+			stop() // unblock main so deferred cleanup runs
 		}
 	}()
 

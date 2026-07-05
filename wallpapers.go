@@ -112,10 +112,10 @@ func UploadFile(ctx context.Context, filename string, content []byte) error {
 	return nil
 }
 
-// FullRezURL returns the URL a cropped version hosted by imgix.
+// FullRezURL returns the imgix URL for a full-resolution render.
 func FullRezURL(key string) string { return cdn.FullRez(key) }
 
-// ThumbURL returns the URL a small cropped version hosted by imgix.
+// ThumbURL returns the imgix URL for a small cropped thumbnail.
 func ThumbURL(key string) string { return cdn.Thumb(key) }
 
 // RawURL returns the direct URL to the original file in GCS.

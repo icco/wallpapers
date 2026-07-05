@@ -8,7 +8,7 @@ import (
 )
 
 // asciiWord matches ASCII letters, numbers, spaces, hyphens and apostrophes.
-var asciiWord = regexp.MustCompile(`^[a-zA-Z0-9\s\-']+$`)
+var asciiWord = regexp.MustCompile(`^[a-zA-Z0-9 '-]+$`)
 
 // invalidPhrases are meta-commentary fragments to drop, not real keywords.
 var invalidPhrases = []string{
