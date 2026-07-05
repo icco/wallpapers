@@ -6,8 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{block "title" .}}Wallpapers{{end}}</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@4/dist/full.min.css" rel="stylesheet" type="text/css" />
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@5.6.13" rel="stylesheet" type="text/css"
+      integrity="sha384-eVHWtU15EAw/bYFWidpEvnPQ6/07hNHAAPLVqKpPMndfhSqy+xkGd4Caacw6AeQH" crossorigin="anonymous" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.2"
+      integrity="sha384-shaHAtPgz0ulP7R/YmFe0nZtC8FxdhJPi73vwJQcADVttxvHLJBJt/pjzkLSbIvL" crossorigin="anonymous"></script>
     <style>
       :root {
         --accent: #265C83;
@@ -35,7 +37,7 @@
     {{block "page-styles" .}}{{end}}
 
     <script type="module">
-      import { onCLS, onINP, onLCP, onFCP, onFID, onTTFB } from 'https://unpkg.com/web-vitals@4?module';
+      import { onCLS, onINP, onLCP, onFCP, onTTFB } from 'https://unpkg.com/web-vitals@5.3.0?module';
 
       function sendToAnalytics(metric) {
         const body = JSON.stringify(metric);
@@ -45,7 +47,6 @@
 
       onCLS(sendToAnalytics);
       onFCP(sendToAnalytics);
-      onFID(sendToAnalytics);
       onINP(sendToAnalytics);
       onLCP(sendToAnalytics);
       onTTFB(sendToAnalytics);
