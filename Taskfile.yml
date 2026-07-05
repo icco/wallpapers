@@ -13,7 +13,7 @@ tasks:
     cmds:
       - go test -v ./...
   lint:
-    desc: Run golangci-lint (config in .golangci.yml, shared with CI)
+    desc: Run golangci-lint
     cmds:
       - golangci-lint run
   fmt:
