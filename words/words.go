@@ -1,6 +1,5 @@
-// Package words provides shared validation for image keyword tags. Both the
-// analysis pipeline (parsing model output) and the database cleanup migration
-// use it so the two paths cannot disagree on what counts as a usable keyword.
+// Package words provides shared validation for image keyword tags, used by
+// both the analysis pipeline and the database cleanup migration.
 package words
 
 import (
@@ -8,20 +7,18 @@ import (
 	"strings"
 )
 
-// asciiWord matches only ASCII letters, numbers, spaces, hyphens and
-// apostrophes. Keywords with other scripts or punctuation are rejected.
+// asciiWord matches ASCII letters, numbers, spaces, hyphens and apostrophes.
 var asciiWord = regexp.MustCompile(`^[a-zA-Z0-9\s\-']+$`)
 
-// invalidPhrases are meta-commentary fragments the model sometimes emits
-// instead of real keywords. A tag containing any of these is dropped.
+// invalidPhrases are meta-commentary fragments to drop, not real keywords.
 var invalidPhrases = []string{
 	"no text", "not visible", "not readable", "cannot read",
 	"no visible", "none", "nothing", "n/a", "text not",
 	"no words", "unreadable",
 }
 
-// IsValid reports whether tag is a usable keyword. The tag should already be
-// whitespace-trimmed; matching is case-insensitive.
+// IsValid reports whether tag is a usable keyword (case-insensitive; tag
+// should be pre-trimmed).
 func IsValid(tag string) bool {
 	if tag == "" || len(tag) > 50 {
 		return false

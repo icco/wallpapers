@@ -1,7 +1,5 @@
-// Package cdn builds the public URLs for wallpaper assets: imgix-derived
-// thumbnails and full-resolution renders, plus the direct GCS object URL.
-// It is the single source of truth for the bucket name and imgix host so the
-// server and uploader cannot drift apart.
+// Package cdn builds the public URLs for wallpaper assets and is the single
+// source of truth for the bucket name and imgix host.
 package cdn
 
 import "fmt"

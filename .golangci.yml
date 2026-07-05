@@ -1,6 +1,5 @@
 version: "2"
-# Single source of truth for linters, shared by `task lint` and the
-# golangci-lint GitHub Action so local and CI runs stay in sync.
+# Shared by `task lint` and the golangci-lint Action so local and CI match.
 linters:
   enable:
     - bodyclose

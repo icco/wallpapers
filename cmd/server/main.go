@@ -170,8 +170,7 @@ func main() {
 				log.Errorw("failed to close database", zap.Error(cerr))
 			}
 		}()
-		// Data migrations are owned by the uploader, which writes the DB that
-		// ships in the image; the read-only server does not re-run them on boot.
+		// Migrations are owned by the uploader; the read-only server skips them.
 	}
 
 	secureMiddleware := secure.New(secure.Options{
@@ -416,8 +415,7 @@ func main() {
 		IdleTimeout:       60 * time.Second,
 	}
 
-	// Serve until we receive a termination signal, then drain gracefully so
-	// in-flight requests finish and the deferred DB/meter shutdowns run.
+	// Serve until a termination signal, then drain gracefully.
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
