@@ -1,0 +1,19 @@
+version: "2"
+# Single source of truth for linters, shared by `task lint` and the
+# golangci-lint GitHub Action so local and CI runs stay in sync.
+linters:
+  enable:
+    - bodyclose
+    - contextcheck
+    - copyloopvar
+    - errorlint
+    - gocritic
+    - gosec
+    - intrange
+    - misspell
+    - nilerr
+    - noctx
+    - revive
+    - unconvert
+    - unparam
+    - wastedassign

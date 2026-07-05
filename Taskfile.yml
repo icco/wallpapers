@@ -13,9 +13,9 @@ tasks:
     cmds:
       - go test -v ./...
   lint:
-    desc: Run golangci-lint with CI settings
+    desc: Run golangci-lint (config in .golangci.yml, shared with CI)
     cmds:
-      - golangci-lint run -E bodyclose,misspell,gosec,goconst,errorlint,errcheck
+      - golangci-lint run
   fmt:
     desc: Format Go code
     cmds:

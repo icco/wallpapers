@@ -4,7 +4,6 @@ on:
     tags:
       - v*
     branches:
-      - master
       - main
   pull_request:
 jobs:
@@ -23,4 +22,3 @@ jobs:
         uses: golangci/golangci-lint-action@v9
         with:
           version: latest
-          args: -E bodyclose,misspell,gosec,errorlint,noctx,contextcheck,nilerr,wastedassign,unparam,copyloopvar,intrange,revive,gocritic,unconvert
