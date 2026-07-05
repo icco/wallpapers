@@ -4,10 +4,13 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"html/template"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	chi "github.com/go-chi/chi/v5"
@@ -167,9 +170,8 @@ func main() {
 				log.Errorw("failed to close database", zap.Error(cerr))
 			}
 		}()
-		if err := database.RunMigrations(); err != nil {
-			log.Warnw("failed to run migrations", zap.Error(err))
-		}
+		// Data migrations are owned by the uploader, which writes the DB that
+		// ships in the image; the read-only server does not re-run them on boot.
 	}
 
 	secureMiddleware := secure.New(secure.Options{
@@ -192,7 +194,7 @@ func main() {
 		AllowCredentials:   false,
 		OptionsPassthrough: false,
 		AllowedOrigins:     []string{"*"},
-		AllowedMethods:     []string{"GET", "POST", "OPTIONS"},
+		AllowedMethods:     []string{"GET", "OPTIONS"},
 		AllowedHeaders:     []string{"Accept", "Authorization", "Content-Type"},
 		ExposedHeaders:     []string{"Link"},
 		MaxAge:             300, // Maximum value not ignored by any of major browsers
@@ -216,7 +218,6 @@ func main() {
 
 	r.Method(http.MethodGet, "/metrics", promhttp.HandlerFor(registry, promhttp.HandlerOpts{}))
 
-	r.Handle("/css/*", http.FileServer(http.FS(static.Assets)))
 	r.Handle("/js/*", http.FileServer(http.FS(static.Assets)))
 	r.Handle("/favicon.ico", http.FileServer(http.FS(static.Assets)))
 	r.Handle("/robots.txt", http.FileServer(http.FS(static.Assets)))
@@ -415,7 +416,23 @@ func main() {
 		IdleTimeout:       60 * time.Second,
 	}
 
-	if err := srv.ListenAndServe(); err != nil {
-		log.Errorw("http server exited", zap.Error(err))
+	// Serve until we receive a termination signal, then drain gracefully so
+	// in-flight requests finish and the deferred DB/meter shutdowns run.
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	go func() {
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Fatalw("http server exited", zap.Error(err))
+		}
+	}()
+
+	<-ctx.Done()
+	log.Infow("shutting down")
+
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if err := srv.Shutdown(shutdownCtx); err != nil {
+		log.Errorw("graceful shutdown failed", zap.Error(err))
 	}
 }
