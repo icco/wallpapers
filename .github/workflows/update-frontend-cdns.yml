@@ -1,0 +1,42 @@
+name: Update frontend CDNs
+# Dependabot can't see CDN <script>/<link> pins in HTML, so this bumps the
+# versions in layout.tmpl (recomputing SRI) and opens a PR. Set a
+# FRONTEND_UPDATE_TOKEN secret if you want the PR to trigger CI.
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          token: ${{ secrets.FRONTEND_UPDATE_TOKEN || secrets.GITHUB_TOKEN }}
+      - name: Bump pinned CDN versions and open PR
+        env:
+          GH_TOKEN: ${{ secrets.FRONTEND_UPDATE_TOKEN || secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/update_frontend_cdns.py
+          if git diff --quiet; then
+            echo "Front-end CDN pins are up to date."
+            exit 0
+          fi
+          summary=$(cat /tmp/frontend-cdn-summary.txt)
+          branch="chore/frontend-cdns-$(sha1sum /tmp/frontend-cdn-summary.txt | cut -c1-12)"
+          if git ls-remote --exit-code --heads origin "$branch" >/dev/null 2>&1; then
+            echo "Branch $branch already exists; PR already proposed."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git switch -c "$branch"
+          git commit -am "chore: update frontend CDN pins"
+          git push -u origin "$branch"
+          printf 'Automated bump of pinned front-end CDN versions (SRI recomputed):\n\n%s\n' "$summary" \
+            | gh pr create --base main --head "$branch" \
+              --title "chore: update frontend CDN pins" --body-file -
