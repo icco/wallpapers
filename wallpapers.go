@@ -3,7 +3,6 @@
 package wallpapers
 
 import (
-	"cmp"
 	"context"
 	"errors"
 	"fmt"
@@ -15,14 +14,13 @@ import (
 	"time"
 
 	"cloud.google.com/go/storage"
+	"github.com/icco/wallpapers/cdn"
 	"github.com/tjarratt/babble"
 	"google.golang.org/api/iterator"
 )
 
 // Bucket is the GCS bucket name where wallpaper files are stored.
-const (
-	Bucket = "iccowalls"
-)
+const Bucket = cdn.Bucket
 
 // NameRegex matches characters that are not allowed in normalized wallpaper file names.
 var (
@@ -115,23 +113,13 @@ func UploadFile(ctx context.Context, filename string, content []byte) error {
 }
 
 // FullRezURL returns the URL a cropped version hosted by imgix.
-func FullRezURL(key string) string {
-	w := 3840
-	h := 2160
-	return fmt.Sprintf("https://icco-walls.imgix.net/%s?auto=compress&w=%d&h=%d&crop=entropy&fm=png", key, w, h)
-}
+func FullRezURL(key string) string { return cdn.FullRez(key) }
 
 // ThumbURL returns the URL a small cropped version hosted by imgix.
-func ThumbURL(key string) string {
-	w := 800
-	h := 450
-	return fmt.Sprintf("https://icco-walls.imgix.net/%s?w=%d&h=%d&fit=crop&auto=compress&auto=format", key, w, h)
-}
+func ThumbURL(key string) string { return cdn.Thumb(key) }
 
 // RawURL returns the direct URL to the original file in GCS.
-func RawURL(key string) string {
-	return fmt.Sprintf("https://storage.googleapis.com/%s/%s", Bucket, key)
-}
+func RawURL(key string) string { return cdn.Raw(key) }
 
 // File is a subset of storage.ObjectAttrs that we need.
 type File struct {
@@ -182,9 +170,9 @@ func GetAll(ctx context.Context) ([]*File, error) {
 		})
 	}
 
-	// Sort by created date
-	slices.SortStableFunc(ret, func(b, a *File) int {
-		return cmp.Compare(a.Created.String(), b.Created.String())
+	// Sort by created date, newest first.
+	slices.SortStableFunc(ret, func(a, b *File) int {
+		return b.Created.Compare(a.Created)
 	})
 	return ret, nil
 }

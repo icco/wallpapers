@@ -15,16 +15,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/icco/wallpapers/cdn"
+	"github.com/icco/wallpapers/words"
 	colorful "github.com/lucasb-eyer/go-colorful"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"gorm.io/gorm/logger"
-)
-
-const (
-	bucket   = "iccowalls"
-	imgixURL = "icco-walls.imgix.net"
 )
 
 // StringSlice is a custom type for storing []string as JSON in the database.
@@ -84,19 +81,13 @@ func (Image) TableName() string {
 }
 
 // ThumbnailURL returns the URL for a small cropped thumbnail via imgix.
-func (img *Image) ThumbnailURL() string {
-	return fmt.Sprintf("https://%s/%s?w=800&h=450&fit=crop&auto=compress&auto=format", imgixURL, img.Filename)
-}
+func (img *Image) ThumbnailURL() string { return cdn.Thumb(img.Filename) }
 
 // FullRezURL returns the URL for a desktop-sized version via imgix.
-func (img *Image) FullRezURL() string {
-	return fmt.Sprintf("https://%s/%s?auto=compress&w=3840&h=2160&crop=entropy&fm=png", imgixURL, img.Filename)
-}
+func (img *Image) FullRezURL() string { return cdn.FullRez(img.Filename) }
 
 // RawURL returns the direct URL to the original file in GCS.
-func (img *Image) RawURL() string {
-	return fmt.Sprintf("https://storage.googleapis.com/%s/%s", bucket, img.Filename)
-}
+func (img *Image) RawURL() string { return cdn.Raw(img.Filename) }
 
 // MarshalJSON implements custom JSON marshaling to include computed URL fields.
 func (img *Image) MarshalJSON() ([]byte, error) {
@@ -484,20 +475,12 @@ func (db *DB) RunMigrations() error {
 	return db.migrateCleanInvalidWords()
 }
 
-// migrateCleanInvalidWords removes invalid words (unicode, meta-phrases) from all images.
+// migrateCleanInvalidWords removes invalid words (unicode, meta-phrases) from
+// all images, using the shared words.IsValid rules.
 func (db *DB) migrateCleanInvalidWords() error {
 	var images []*Image
 	if err := db.conn.Where("words IS NOT NULL AND words != '[]' AND words != ''").Find(&images).Error; err != nil {
 		return fmt.Errorf("failed to fetch images: %w", err)
-	}
-
-	// Regex to match only ASCII letters, numbers, spaces, and common punctuation
-	asciiOnly := regexp.MustCompile(`^[a-zA-Z0-9\s\-']+$`)
-
-	// Patterns that indicate invalid/meta content
-	invalidPatterns := []string{
-		"no text", "not visible", "not readable", "cannot read",
-		"no visible", "n/a", "text not", "no words", "unreadable",
 	}
 
 	for _, img := range images {
@@ -507,44 +490,12 @@ func (db *DB) migrateCleanInvalidWords() error {
 
 		cleanedWords := make([]string, 0, len(img.Words))
 		changed := false
-
 		for _, word := range img.Words {
-			word = strings.TrimSpace(word)
-
-			if word == "" {
+			if word = strings.TrimSpace(word); words.IsValid(word) {
+				cleanedWords = append(cleanedWords, word)
+			} else {
 				changed = true
-				continue
 			}
-
-			if !asciiOnly.MatchString(word) {
-				changed = true
-				continue
-			}
-
-			lower := strings.ToLower(word)
-			skip := false
-			for _, pattern := range invalidPatterns {
-				if strings.Contains(lower, pattern) {
-					skip = true
-					break
-				}
-			}
-			if skip {
-				changed = true
-				continue
-			}
-
-			if strings.HasPrefix(word, "(") || strings.HasSuffix(word, ")") {
-				changed = true
-				continue
-			}
-
-			if len(word) == 1 && word != "a" && word != "i" {
-				changed = true
-				continue
-			}
-
-			cleanedWords = append(cleanedWords, word)
 		}
 
 		if changed {
