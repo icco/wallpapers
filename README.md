@@ -65,7 +65,7 @@ task check
 
 ## Deployment
 
-Docker image builds both binaries from a single `golang:1.26` stage and copies `wallpapers.db` into the final `debian:bookworm-slim` image. The container runs `server` by default on port 8080.
+The Docker image is a multi-stage build: a `golang:1.26-alpine` stage (with ImageMagick and a C toolchain, since the SQLite driver needs cgo) compiles both binaries, and the final `alpine:3.24` image copies them in along with `wallpapers.db`. It runs as a non-root user and starts `server` by default on port 8080.
 
 ```bash
 docker build -t wallpapers .

@@ -1,0 +1,18 @@
+version: "2"
+# Shared by `task lint` and the golangci-lint Action so local and CI match.
+linters:
+  enable:
+    - bodyclose
+    - contextcheck
+    - copyloopvar
+    - errorlint
+    - gocritic
+    - gosec
+    - intrange
+    - misspell
+    - nilerr
+    - noctx
+    - revive
+    - unconvert
+    - unparam
+    - wastedassign

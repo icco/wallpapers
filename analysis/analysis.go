@@ -17,9 +17,17 @@ import (
 	"strings"
 
 	"github.com/EdlinOrg/prominentcolor"
+	"github.com/icco/wallpapers/words"
 	// Register the WebP decoder so image.Decode/DecodeConfig can handle WebP files.
 	_ "golang.org/x/image/webp"
 	"google.golang.org/genai"
+)
+
+var (
+	// parenRe strips parenthetical asides such as "(no text visible)".
+	parenRe = regexp.MustCompile(`\([^)]*\)`)
+	// splitRe separates the model's comma- or newline-delimited keyword list.
+	splitRe = regexp.MustCompile(`[,\n]+`)
 )
 
 // ImageInfo contains analyzed information about an image.
@@ -186,7 +194,8 @@ Words:`
 	return words, nil
 }
 
-// parseWords parses a comma-separated string of words into a slice.
+// parseWords parses a comma-separated string of words into a slice, keeping
+// only valid keywords (see words.IsValid).
 func parseWords(text string) []string {
 	// Clean up the text
 	text = strings.TrimSpace(text)
@@ -196,51 +205,22 @@ func parseWords(text string) []string {
 	text = strings.ReplaceAll(text, "`", "")
 
 	// Remove parenthetical content (e.g., "(no text visible)")
-	text = regexp.MustCompile(`\([^)]*\)`).ReplaceAllString(text, "")
+	text = parenRe.ReplaceAllString(text, "")
 
 	// Split by comma or newline
-	parts := regexp.MustCompile(`[,\n]+`).Split(text, -1)
+	parts := splitRe.Split(text, -1)
 
-	words := make([]string, 0, len(parts))
+	result := make([]string, 0, len(parts))
 	seen := make(map[string]bool)
-
-	// Regex to match only ASCII letters, numbers, spaces, and common punctuation
-	asciiOnly := regexp.MustCompile(`^[a-zA-Z0-9\s\-']+$`)
-
-	// Meta-phrases to skip
-	skipPhrases := []string{
-		"no text", "not visible", "not readable", "cannot read",
-		"no visible", "none", "n/a", "nothing", "text not",
-	}
 
 	for _, part := range parts {
 		word := strings.TrimSpace(strings.ToLower(part))
-		// Skip empty strings and duplicates
-		if word == "" || seen[word] {
-			continue
-		}
-		// Skip if too long (probably a sentence)
-		if len(word) > 50 {
-			continue
-		}
-		// Skip non-ASCII content (unicode characters from other languages)
-		if !asciiOnly.MatchString(word) {
-			continue
-		}
-		// Skip meta-phrases
-		skip := false
-		for _, phrase := range skipPhrases {
-			if strings.Contains(word, phrase) {
-				skip = true
-				break
-			}
-		}
-		if skip {
+		if word == "" || seen[word] || !words.IsValid(word) {
 			continue
 		}
 		seen[word] = true
-		words = append(words, word)
+		result = append(result, word)
 	}
 
-	return words
+	return result
 }
