@@ -9,7 +9,7 @@ require (
 	github.com/go-chi/cors v1.2.2
 	github.com/icco/gutil v0.0.0-20260630032459-de9e83f7fbb2
 	github.com/lucasb-eyer/go-colorful v1.4.0
-	github.com/prometheus/client_golang v1.23.2
+	github.com/prometheus/client_golang v1.24.0
 	github.com/tjarratt/babble v0.0.0-20210505082055-cbca2a4833c1
 	github.com/unrolled/render v1.7.0
 	github.com/unrolled/secure v1.17.0
