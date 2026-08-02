@@ -24,6 +24,10 @@ import (
 	_ "golang.org/x/image/webp"
 )
 
+// geminiBaseURL overrides the Gemini endpoint. Empty means the real one; tests
+// point it at a stub so the empty-response path can be exercised offline.
+var geminiBaseURL string
+
 var (
 	// parenRe strips parenthetical asides such as "(no text visible)".
 	parenRe = regexp.MustCompile(`\([^)]*\)`)
@@ -134,7 +138,7 @@ func extractWords(ctx context.Context, data []byte, format string) ([]string, er
 		return nil, fmt.Errorf("GEMINI_API_KEY environment variable not set")
 	}
 
-	client, err := vertex.New(ctx, vertex.Config{APIKey: apiKey})
+	client, err := vertex.New(ctx, vertex.Config{APIKey: apiKey, BaseURL: geminiBaseURL})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create Gemini client: %w", err)
 	}
@@ -166,6 +170,10 @@ Words:`
 
 	resp, err := client.Generate(ctx, vertex.Request{
 		Parts: vertex.TextWithBlob(prompt, mimeType, data),
+		// Listing what is in a picture needs no reasoning, and 2.5 models think
+		// by default. Thinking bills as output whether or not it helped, and
+		// this runs over every wallpaper in the rotation.
+		ThinkingBudget: vertex.NoThinking(),
 	})
 	switch {
 	case errors.Is(err, vertex.ErrEmptyResponse):
