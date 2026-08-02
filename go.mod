@@ -7,7 +7,7 @@ require (
 	github.com/EdlinOrg/prominentcolor v1.0.0
 	github.com/go-chi/chi/v5 v5.3.1
 	github.com/go-chi/cors v1.2.2
-	github.com/icco/gutil v0.0.0-20260720140633-ab8df527a38f
+	github.com/icco/gutil v1.0.3
 	github.com/lucasb-eyer/go-colorful v1.4.0
 	github.com/prometheus/client_golang v1.24.1
 	github.com/tjarratt/babble v0.0.0-20210505082055-cbca2a4833c1
@@ -20,7 +20,6 @@ require (
 	go.uber.org/zap v1.28.0
 	golang.org/x/image v0.44.0
 	google.golang.org/api v0.291.0
-	google.golang.org/genai v1.65.0
 	gopkg.in/gographics/imagick.v3 v3.7.3
 	gorm.io/driver/sqlite v1.6.0
 	gorm.io/gorm v1.31.2
@@ -83,9 +82,10 @@ require (
 	golang.org/x/sys v0.47.0 // indirect
 	golang.org/x/text v0.40.0 // indirect
 	golang.org/x/time v0.15.0 // indirect
+	google.golang.org/genai v1.66.0 // indirect
 	google.golang.org/genproto v0.0.0-20260727163830-6c54dddc4772 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20260727163830-6c54dddc4772 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260727163830-6c54dddc4772 // indirect
-	google.golang.org/grpc v1.82.1 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20260729162451-8efbd57d26e0 // indirect
+	google.golang.org/grpc v1.83.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 )

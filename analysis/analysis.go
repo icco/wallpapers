@@ -5,6 +5,7 @@ package analysis
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"image"
 	// Register decoders for GIF, JPEG, and PNG so image.Decode/DecodeConfig can handle them.
@@ -17,11 +18,15 @@ import (
 	"strings"
 
 	"github.com/EdlinOrg/prominentcolor"
+	"github.com/icco/gutil/vertex"
 	"github.com/icco/wallpapers/words"
 	// Register the WebP decoder so image.Decode/DecodeConfig can handle WebP files.
 	_ "golang.org/x/image/webp"
-	"google.golang.org/genai"
 )
+
+// geminiBaseURL overrides the Gemini endpoint. Empty means the real one; tests
+// point it at a stub so the empty-response path can be exercised offline.
+var geminiBaseURL string
 
 var (
 	// parenRe strips parenthetical asides such as "(no text visible)".
@@ -133,10 +138,7 @@ func extractWords(ctx context.Context, data []byte, format string) ([]string, er
 		return nil, fmt.Errorf("GEMINI_API_KEY environment variable not set")
 	}
 
-	client, err := genai.NewClient(ctx, &genai.ClientConfig{
-		APIKey:  apiKey,
-		Backend: genai.BackendGeminiAPI,
-	})
+	client, err := vertex.New(ctx, vertex.Config{APIKey: apiKey, BaseURL: geminiBaseURL})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create Gemini client: %w", err)
 	}
@@ -166,31 +168,24 @@ Words:`
 		mimeType = "image/webp"
 	}
 
-	parts := []*genai.Part{
-		{Text: prompt},
-		{InlineData: &genai.Blob{Data: data, MIMEType: mimeType}},
-	}
-
-	resp, err := client.Models.GenerateContent(ctx, "gemini-2.5-flash",
-		[]*genai.Content{{Parts: parts}}, nil)
-	if err != nil {
+	resp, err := client.Generate(ctx, vertex.Request{
+		Parts: vertex.TextWithBlob(prompt, mimeType, data),
+		// Listing what is in a picture needs no reasoning, and 2.5 models think
+		// by default. Thinking bills as output whether or not it helped, and
+		// this runs over every wallpaper in the rotation.
+		ThinkingBudget: vertex.NoThinking(),
+	})
+	switch {
+	case errors.Is(err, vertex.ErrEmptyResponse):
+		// A wallpaper the model has nothing to say about is a normal outcome,
+		// not a failure: the caller just gets no keywords.
+		return []string{}, nil
+	case err != nil:
 		return nil, fmt.Errorf("failed to generate content: %w", err)
 	}
 
-	if len(resp.Candidates) == 0 || resp.Candidates[0].Content == nil || len(resp.Candidates[0].Content.Parts) == 0 {
-		return []string{}, nil
-	}
-
-	// Extract text from response
-	var text string
-	for _, part := range resp.Candidates[0].Content.Parts {
-		if part.Text != "" {
-			text += part.Text
-		}
-	}
-
 	// Parse the comma-separated words
-	words := parseWords(text)
+	words := parseWords(resp.Text)
 	return words, nil
 }
 
