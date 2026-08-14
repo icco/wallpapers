@@ -7,7 +7,7 @@ require (
 	github.com/EdlinOrg/prominentcolor v1.0.0
 	github.com/go-chi/chi/v5 v5.3.1
 	github.com/go-chi/cors v1.2.2
-	github.com/icco/gutil v1.0.6
+	github.com/icco/gutil v1.0.8
 	github.com/lucasb-eyer/go-colorful v1.4.1
 	github.com/prometheus/client_golang v1.24.1
 	github.com/tjarratt/babble v0.0.0-20210505082055-cbca2a4833c1
