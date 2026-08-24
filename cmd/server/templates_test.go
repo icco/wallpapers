@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"html/template"
+	"regexp"
 	"testing"
 	"time"
 
@@ -212,5 +213,41 @@ func assertContains(t *testing.T, body, want string) {
 	t.Helper()
 	if !bytes.Contains([]byte(body), []byte(want)) {
 		t.Errorf("expected output to contain %q", want)
+	}
+}
+
+func TestPageTitles(t *testing.T) {
+	loadAll(t)
+
+	titleRe := regexp.MustCompile(`<title>([^<]*)</title>`)
+	now := time.Now()
+	cases := []struct {
+		name string
+		tmpl *template.Template
+		data any
+		want string
+	}{
+		{"index", indexTemplate, PageData{}, "Wallpapers"},
+		{"index with query", indexTemplate, PageData{Query: "mountain"}, "mountain - Wallpapers"},
+		{"detail", detailTemplate, DetailPageData{Image: &db.Image{Filename: "sunset.jpg", DateAdded: now}}, "sunset.jpg - Wallpapers"},
+		{"resolutions", resolutionsTemplate, ResolutionsPageData{}, "Resolutions - Wallpapers"},
+		{"colors", colorsTemplate, ColorsPageData{}, "Colors - Wallpapers"},
+		{"tags", tagsTemplate, TagsPageData{}, "Tags - Wallpapers"},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			var buf bytes.Buffer
+			if err := tc.tmpl.Execute(&buf, tc.data); err != nil {
+				t.Fatalf("execute %s: %v", tc.name, err)
+			}
+			m := titleRe.FindStringSubmatch(buf.String())
+			if m == nil {
+				t.Fatalf("no <title> found in %s output", tc.name)
+			}
+			if m[1] != tc.want {
+				t.Errorf("title = %q, want %q", m[1], tc.want)
+			}
+		})
 	}
 }

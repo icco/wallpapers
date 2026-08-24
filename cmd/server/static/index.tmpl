@@ -1,4 +1,4 @@
-{{define "title"}}Wallpapers{{end}}
+{{define "title"}}{{if .Query}}{{.Query}} - Wallpapers{{else}}Wallpapers{{end}}{{end}}
 
 {{define "container-class"}}p-4 max-w-5xl mx-auto{{end}}
 
