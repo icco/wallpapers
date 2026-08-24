@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{block "title" .}}Wallpapers{{end}}</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/daisyui@5.7.16" rel="stylesheet" type="text/css"
-      integrity="sha384-QZKsheWCf0KIwPTerb3nQ26HNvBodXo3kuy0cXfclfX6ehzcS9pYNKwjQBZOhwox" crossorigin="anonymous" />
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@5.7.17" rel="stylesheet" type="text/css"
+      integrity="sha384-39M1LQqzp+SSirSevKD4gsadFB7kgKzMiPY7o6hVhOXuRthgtd1oohKwlosU9KHi" crossorigin="anonymous" />
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.3"
       integrity="sha384-aJ9rL4k6lF+91guGvUFVSkpIcge7Zd9EiI4TQDLoK9kFaFJgKHgjEXVvG/qA5COj" crossorigin="anonymous"></script>
     <style>
@@ -37,7 +37,7 @@
     {{block "page-styles" .}}{{end}}
 
     <script type="module">
-      import { onCLS, onINP, onLCP, onFCP, onTTFB } from 'https://unpkg.com/web-vitals@6.1.0?module';
+      import { onCLS, onINP, onLCP, onFCP, onTTFB } from 'https://unpkg.com/web-vitals@6.1.1?module';
 
       function sendToAnalytics(metric) {
         const body = JSON.stringify(metric);
