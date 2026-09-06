@@ -7,7 +7,7 @@ require (
 	github.com/EdlinOrg/prominentcolor v1.0.0
 	github.com/go-chi/chi/v5 v5.3.2
 	github.com/go-chi/cors v1.2.2
-	github.com/icco/gutil v1.0.15
+	github.com/icco/gutil v1.0.18
 	github.com/lucasb-eyer/go-colorful v1.4.1
 	github.com/prometheus/client_golang v1.24.1
 	github.com/tjarratt/babble v0.0.0-20210505082055-cbca2a4833c1
@@ -82,7 +82,7 @@ require (
 	golang.org/x/sys v0.47.0 // indirect
 	golang.org/x/text v0.41.0 // indirect
 	golang.org/x/time v0.15.0 // indirect
-	google.golang.org/genai v1.69.0 // indirect
+	google.golang.org/genai v1.70.0 // indirect
 	google.golang.org/genproto v0.0.0-20260819154853-08b0e4226688 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20260819154853-08b0e4226688 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260819154853-08b0e4226688 // indirect
