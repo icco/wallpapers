@@ -95,8 +95,8 @@ github.com/googleapis/gax-go/v2 v2.24.0/go.mod h1:IaTHBDd7NHxSCiu0vEs8pQZu4dGZrW
 github.com/gorilla/websocket v1.5.3 h1:saDtZ6Pbx/0u+bgYQ3q96pZgCzfhKXGPqt7kZ72aNNg=
 github.com/gorilla/websocket v1.5.3/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
 github.com/hpcloud/tail v1.0.0/go.mod h1:ab1qPbhIpdTxEkNHXyeSf5vhxWSCs/tWer42PpOxQnU=
-github.com/icco/gutil v1.0.18 h1:e2+YAOAnr/pkSX/xRcOB1idda0WAFejAEQ0cul0olXk=
-github.com/icco/gutil v1.0.18/go.mod h1:5Y/MydHFbm6wPefKf+8SvQkVgR4V2BiwKg40nHjQrU8=
+github.com/icco/gutil v1.0.19 h1:uVUABFQOCY0xpCS134fhLyD9YILRpfgf+/mOYihIL2w=
+github.com/icco/gutil v1.0.19/go.mod h1:jnE3yHLhVGTaUR/79hNHEAaZYOT6sbcnRMZL/lcEOvI=
 github.com/jinzhu/inflection v1.0.0 h1:K317FqzuhWc8YvSVlFMCCUb36O/S9MCKRDI7QkRKD/E=
 github.com/jinzhu/inflection v1.0.0/go.mod h1:h+uFLlag+Qp1Va5pdKtLDYj+kHp5pxUVkryuEj+Srlc=
 github.com/jinzhu/now v1.1.5 h1:/o9tlHleP7gOFmsnYNz3RGnqzefHA47wQpKrrdTIwXQ=
