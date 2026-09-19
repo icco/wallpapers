@@ -11,7 +11,7 @@ require (
 	github.com/lucasb-eyer/go-colorful v1.4.1
 	github.com/prometheus/client_golang v1.24.1
 	github.com/tjarratt/babble v0.0.0-20210505082055-cbca2a4833c1
-	github.com/unrolled/render v1.7.0
+	github.com/unrolled/render v1.8.1
 	github.com/unrolled/secure v1.17.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.71.0
 	go.opentelemetry.io/otel v1.46.0
