@@ -18,7 +18,7 @@ import (
 	"strings"
 
 	"github.com/EdlinOrg/prominentcolor"
-	"github.com/icco/gutil/vertex"
+	"go.icco.me/gutil/vertex"
 	"go.icco.me/wallpapers/words"
 	// Register the WebP decoder so image.Decode/DecodeConfig can handle WebP files.
 	_ "golang.org/x/image/webp"

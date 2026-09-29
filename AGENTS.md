@@ -25,6 +25,6 @@ Run via `task <name>`:
 
 ## Conventions
 
-- Follow icco Go conventions (`github.com/icco/gutil` for logging and utilities).
+- Follow icco Go conventions (`go.icco.me/gutil` for logging and utilities).
 - PR titles and commits must follow Conventional Commits with lowercase subjects.
 - Ensure `task check` passes before submitting PRs.
