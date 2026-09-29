@@ -15,9 +15,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/icco/wallpapers/cdn"
-	"github.com/icco/wallpapers/words"
 	colorful "github.com/lucasb-eyer/go-colorful"
+	"go.icco.me/wallpapers/cdn"
+	"go.icco.me/wallpapers/words"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"

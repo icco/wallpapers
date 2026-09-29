@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/icco/wallpapers/db"
+	"go.icco.me/wallpapers/db"
 )
 
 // loadAll loads all five page templates and fails the test on any error.

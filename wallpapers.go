@@ -14,8 +14,8 @@ import (
 	"time"
 
 	"cloud.google.com/go/storage"
-	"github.com/icco/wallpapers/cdn"
 	"github.com/tjarratt/babble"
+	"go.icco.me/wallpapers/cdn"
 	"google.golang.org/api/iterator"
 )
 

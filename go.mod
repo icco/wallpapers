@@ -1,4 +1,4 @@
-module github.com/icco/wallpapers
+module go.icco.me/wallpapers
 
 go 1.26.2
 

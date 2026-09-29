@@ -4,7 +4,7 @@ Guidance for coding agents working on wallpapers.
 
 ## Project Overview
 
-Wallpaper serving web application and image uploader written in Go (`github.com/icco/wallpapers`).
+Wallpaper serving web application and image uploader written in Go (`go.icco.me/wallpapers`).
 
 ## Commands (Taskfile)
 

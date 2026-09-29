@@ -15,9 +15,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/icco/wallpapers"
-	"github.com/icco/wallpapers/analysis"
-	"github.com/icco/wallpapers/db"
+	"go.icco.me/wallpapers"
+	"go.icco.me/wallpapers/analysis"
+	"go.icco.me/wallpapers/db"
 	"gopkg.in/gographics/imagick.v3/imagick"
 )
 
