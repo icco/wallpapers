@@ -4,7 +4,7 @@ Guidance for coding agents working on wallpapers.
 
 ## Project Overview
 
-Wallpaper serving web application and image uploader written in Go (`github.com/icco/wallpapers`).
+Wallpaper serving web application and image uploader written in Go (`go.icco.me/wallpapers`).
 
 ## Commands (Taskfile)
 
@@ -25,6 +25,6 @@ Run via `task <name>`:
 
 ## Conventions
 
-- Follow icco Go conventions (`github.com/icco/gutil` for logging and utilities).
+- Follow icco Go conventions (`go.icco.me/gutil` for logging and utilities).
 - PR titles and commits must follow Conventional Commits with lowercase subjects.
 - Ensure `task check` passes before submitting PRs.

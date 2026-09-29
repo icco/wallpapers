@@ -1,4 +1,4 @@
-module github.com/icco/wallpapers
+module go.icco.me/wallpapers
 
 go 1.26.2
 
@@ -7,12 +7,12 @@ require (
 	github.com/EdlinOrg/prominentcolor v1.0.0
 	github.com/go-chi/chi/v5 v5.3.2
 	github.com/go-chi/cors v1.2.2
-	github.com/icco/gutil v1.0.25
 	github.com/lucasb-eyer/go-colorful v1.4.1
 	github.com/prometheus/client_golang v1.24.1
 	github.com/tjarratt/babble v0.0.0-20210505082055-cbca2a4833c1
 	github.com/unrolled/render v1.8.1
 	github.com/unrolled/secure v1.17.0
+	go.icco.me/gutil v1.0.27-0.20260929105600-f3e11752b837
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.71.0
 	go.opentelemetry.io/otel v1.46.0
 	go.opentelemetry.io/otel/exporters/prometheus v0.68.0
