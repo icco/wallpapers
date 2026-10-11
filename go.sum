@@ -150,8 +150,8 @@ github.com/unrolled/render v1.8.1/go.mod h1:nQ5rv5B38X4Xb3Vtx6tRVle+Vcy0XbcunTkx
 github.com/unrolled/secure v1.17.0 h1:Io7ifFgo99Bnh0J7+Q+qcMzWM6kaDPCA5FroFZEdbWU=
 github.com/unrolled/secure v1.17.0/go.mod h1:BmF5hyM6tXczk3MpQkFf1hpKSRqCyhqcbiQtiAF7+40=
 github.com/yuin/goldmark v1.2.1/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
-go.icco.me/gutil v1.0.27-0.20260929105600-f3e11752b837 h1:TQwtkAHFixqTkPOFXDEVw1BCHbNwQS+GA8mUVRWh9DI=
-go.icco.me/gutil v1.0.27-0.20260929105600-f3e11752b837/go.mod h1:xDhTYI90/ZUFfxXGR2SNJUC2xM5raKf+4kIULGO7xZE=
+go.icco.me/gutil v1.0.27 h1:O/0p47hk/VvSHS3RjOjY9JMM9ODDWEBLYSa0gF8JHlU=
+go.icco.me/gutil v1.0.27/go.mod h1:xDhTYI90/ZUFfxXGR2SNJUC2xM5raKf+4kIULGO7xZE=
 go.opentelemetry.io/auto/sdk v1.2.1 h1:jXsnJ4Lmnqd11kwkBV2LgLoFMZKizbCi5fNZ/ipaZ64=
 go.opentelemetry.io/auto/sdk v1.2.1/go.mod h1:KRTj+aOaElaLi+wW1kO/DZRXwkF4C5xPbEe3ZiIhN7Y=
 go.opentelemetry.io/contrib/detectors/gcp v1.46.0 h1:PI8dGkqDaQkwJ8kOopqMhDTbrnK3UIeG/RCHH4HErbo=
