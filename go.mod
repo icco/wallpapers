@@ -5,7 +5,7 @@ go 1.26.2
 require (
 	cloud.google.com/go/storage v1.69.0
 	github.com/EdlinOrg/prominentcolor v1.0.0
-	github.com/go-chi/chi/v5 v5.4.0
+	github.com/go-chi/chi/v5 v5.5.0
 	github.com/go-chi/cors v1.2.2
 	github.com/lucasb-eyer/go-colorful v1.4.1
 	github.com/prometheus/client_golang v1.25.0
@@ -19,7 +19,7 @@ require (
 	go.opentelemetry.io/otel/sdk/metric v1.47.0
 	go.uber.org/zap v1.28.0
 	golang.org/x/image v0.47.0
-	google.golang.org/api v0.302.0
+	google.golang.org/api v0.304.0
 	gopkg.in/gographics/imagick.v3 v3.7.3
 	gorm.io/driver/sqlite v1.6.0
 	gorm.io/gorm v1.31.2
