@@ -3,7 +3,7 @@ module go.icco.me/wallpapers
 go 1.26.2
 
 require (
-	cloud.google.com/go/storage v1.69.0
+	cloud.google.com/go/storage v1.70.0
 	github.com/EdlinOrg/prominentcolor v1.0.0
 	github.com/go-chi/chi/v5 v5.5.0
 	github.com/go-chi/cors v1.2.2
@@ -12,14 +12,14 @@ require (
 	github.com/tjarratt/babble v0.0.0-20210505082055-cbca2a4833c1
 	github.com/unrolled/render v1.8.1
 	github.com/unrolled/secure v1.17.0
-	go.icco.me/gutil v1.0.28
+	go.icco.me/gutil v1.0.36
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.72.0
 	go.opentelemetry.io/otel v1.47.0
 	go.opentelemetry.io/otel/exporters/prometheus v0.69.0
 	go.opentelemetry.io/otel/sdk/metric v1.47.0
 	go.uber.org/zap v1.28.0
 	golang.org/x/image v0.47.0
-	google.golang.org/api v0.304.0
+	google.golang.org/api v0.307.0
 	gopkg.in/gographics/imagick.v3 v3.7.3
 	gorm.io/driver/sqlite v1.6.0
 	gorm.io/gorm v1.31.2
@@ -82,10 +82,10 @@ require (
 	golang.org/x/sys v0.49.0 // indirect
 	golang.org/x/text v0.43.0 // indirect
 	golang.org/x/time v0.16.0 // indirect
-	google.golang.org/genai v1.73.0 // indirect
+	google.golang.org/genai v1.75.0 // indirect
 	google.golang.org/genproto v0.0.0-20261005182115-fad411399dd8 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20261005182115-fad411399dd8 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20261005182115-fad411399dd8 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20261019180522-ce908d29299b // indirect
 	google.golang.org/grpc v1.84.0 // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
 )
