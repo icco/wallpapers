@@ -4,7 +4,7 @@ name: Update frontend CDNs
 # FRONTEND_UPDATE_TOKEN secret if you want the PR to trigger CI.
 on:
   schedule:
-    - cron: "0 6 * * 1"
+    - cron: 0 6 * * 1
   workflow_dispatch:
 permissions:
   contents: write
@@ -13,7 +13,7 @@ jobs:
   update:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           token: ${{ secrets.FRONTEND_UPDATE_TOKEN || secrets.GITHUB_TOKEN }}
       - name: Bump pinned CDN versions and open PR
