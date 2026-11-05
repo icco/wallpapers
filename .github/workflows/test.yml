@@ -10,7 +10,7 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            container: golang:1.26-alpine
+            container: golang:1.27-alpine
           - os: macos-latest
     runs-on: ${{ matrix.os }}
     container: ${{ matrix.container }}
