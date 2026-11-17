@@ -22,6 +22,7 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"gorm.io/gorm/logger"
+	gormtracing "gorm.io/plugin/opentelemetry/tracing"
 )
 
 // StringSlice is a custom type for storing []string as JSON in the database.
@@ -151,6 +152,10 @@ func Open(dbPath string) (*DB, error) {
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to open database: %w", err)
+	}
+
+	if err := conn.Use(gormtracing.NewPlugin(gormtracing.WithoutMetrics())); err != nil {
+		return nil, fmt.Errorf("failed to register otel plugin: %w", err)
 	}
 
 	db := &DB{conn: conn, path: dbPath}

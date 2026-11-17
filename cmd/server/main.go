@@ -21,6 +21,7 @@ import (
 	"github.com/unrolled/secure"
 	"go.icco.me/gutil/etag"
 	"go.icco.me/gutil/logging"
+	"go.icco.me/gutil/tracing"
 	"go.icco.me/wallpapers/cmd/server/static"
 	"go.icco.me/wallpapers/db"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
@@ -124,6 +125,18 @@ func loadTemplate(name string) (*template.Template, error) {
 }
 
 func main() {
+	shutdownTracer, err := tracing.Init(context.Background(), service)
+	if err != nil {
+		log.Fatalw("tracing init", zap.Error(err))
+	}
+	defer func() {
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if err := shutdownTracer(shutdownCtx); err != nil {
+			log.Warnw("tracing shutdown", zap.Error(err))
+		}
+	}()
+
 	port := "8080"
 	if fromEnv := os.Getenv("PORT"); fromEnv != "" {
 		port = fromEnv
@@ -402,7 +415,7 @@ func main() {
 
 	handler := otelhttp.NewHandler(r, service,
 		otelhttp.WithFilter(func(req *http.Request) bool {
-			return req.URL.Path != "/metrics"
+			return req.URL.Path != "/metrics" && req.URL.Path != "/healthz"
 		}),
 	)
 
