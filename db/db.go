@@ -2,6 +2,7 @@
 package db
 
 import (
+	"context"
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
@@ -22,6 +23,7 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"gorm.io/gorm/logger"
+	gormtracing "gorm.io/plugin/opentelemetry/tracing"
 )
 
 // StringSlice is a custom type for storing []string as JSON in the database.
@@ -124,6 +126,14 @@ type DB struct {
 	path string
 }
 
+// WithContext returns a copy of DB with the provided context attached to its connection.
+func (db *DB) WithContext(ctx context.Context) *DB {
+	return &DB{
+		conn: db.conn.WithContext(ctx),
+		path: db.path,
+	}
+}
+
 // DefaultDBPath returns the default path to the database file.
 func DefaultDBPath() string {
 	// Look for DB in current directory, then try to find it relative to executable
@@ -151,6 +161,13 @@ func Open(dbPath string) (*DB, error) {
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to open database: %w", err)
+	}
+
+	if err := conn.Use(gormtracing.NewPlugin(
+		gormtracing.WithoutMetrics(),
+		gormtracing.WithoutQueryVariables(),
+	)); err != nil {
+		return nil, fmt.Errorf("failed to register otel plugin: %w", err)
 	}
 
 	db := &DB{conn: conn, path: dbPath}
