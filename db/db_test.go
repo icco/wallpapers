@@ -1,6 +1,8 @@
 package db
 
 import (
+	"context"
+	"errors"
 	"testing"
 	"time"
 )
@@ -34,6 +36,23 @@ func seed(t *testing.T, db *DB, images ...*Image) {
 }
 
 func now() *time.Time { t := time.Now(); return &t }
+
+func TestWithContext(t *testing.T) {
+	db := newTestDB(t)
+	seed(t, db, &Image{Filename: "test.jpg", ProcessedAt: now()})
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	ctxDB := db.WithContext(ctx)
+	if _, err := ctxDB.GetAll(); !errors.Is(err, context.Canceled) {
+		t.Fatalf("expected context.Canceled from canceled context, got %v", err)
+	}
+
+	if imgs, err := db.GetAll(); err != nil || len(imgs) == 0 {
+		t.Fatalf("expected original db to work, got imgs=%v, err=%v", imgs, err)
+	}
+}
 
 // --- searchByColor ---
 
