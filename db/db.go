@@ -2,6 +2,7 @@
 package db
 
 import (
+	"context"
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
@@ -123,6 +124,14 @@ func (img *Image) MergeMetadata(other *Image) {
 type DB struct {
 	conn *gorm.DB
 	path string
+}
+
+// WithContext returns a copy of DB with the provided context attached to its connection.
+func (db *DB) WithContext(ctx context.Context) *DB {
+	return &DB{
+		conn: db.conn.WithContext(ctx),
+		path: db.path,
+	}
 }
 
 // DefaultDBPath returns the default path to the database file.

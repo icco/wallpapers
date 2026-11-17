@@ -248,9 +248,9 @@ func main() {
 		var err error
 
 		if query != "" {
-			images, err = database.Search(query)
+			images, err = database.WithContext(r.Context()).Search(query)
 		} else {
-			images, err = database.GetAll()
+			images, err = database.WithContext(r.Context()).GetAll()
 		}
 		if err != nil {
 			l.Errorw("error fetching images", "query", query, zap.Error(err))
@@ -279,7 +279,7 @@ func main() {
 			return
 		}
 
-		images, err := database.GetAll()
+		images, err := database.WithContext(r.Context()).GetAll()
 		if err != nil {
 			l.Errorw("error during get all", zap.Error(err))
 			if err := Renderer.JSON(w, 500, map[string]string{jsonErrorKey: "retrieval error"}); err != nil {
@@ -308,7 +308,7 @@ func main() {
 			return
 		}
 
-		img, err := database.GetByFilename(filename)
+		img, err := database.WithContext(r.Context()).GetByFilename(filename)
 		if err != nil {
 			l.Errorw("error fetching from database", "filename", filename, zap.Error(err))
 			http.Error(w, "Retrieval error", http.StatusInternalServerError)
@@ -337,7 +337,7 @@ func main() {
 			http.Error(w, "Service unavailable", http.StatusServiceUnavailable)
 			return
 		}
-		resolutions, err := database.GetResolutions()
+		resolutions, err := database.WithContext(r.Context()).GetResolutions()
 		if err != nil {
 			l.Errorw("error fetching resolutions", zap.Error(err))
 			http.Error(w, "Retrieval error", http.StatusInternalServerError)
@@ -356,7 +356,7 @@ func main() {
 			http.Error(w, "Service unavailable", http.StatusServiceUnavailable)
 			return
 		}
-		colors, err := database.GetColors()
+		colors, err := database.WithContext(r.Context()).GetColors()
 		if err != nil {
 			l.Errorw("error fetching colors", zap.Error(err))
 			http.Error(w, "Retrieval error", http.StatusInternalServerError)
@@ -375,7 +375,7 @@ func main() {
 			http.Error(w, "Service unavailable", http.StatusServiceUnavailable)
 			return
 		}
-		tags, err := database.GetTags()
+		tags, err := database.WithContext(r.Context()).GetTags()
 		if err != nil {
 			l.Errorw("error fetching tags", zap.Error(err))
 			http.Error(w, "Retrieval error", http.StatusInternalServerError)
@@ -399,7 +399,7 @@ func main() {
 			return
 		}
 
-		images, err := database.Search(query)
+		images, err := database.WithContext(r.Context()).Search(query)
 		if err != nil {
 			l.Errorw("error during search", "query", query, zap.Error(err))
 			if err := Renderer.JSON(w, 500, map[string]string{jsonErrorKey: "search error"}); err != nil {
