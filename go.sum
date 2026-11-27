@@ -16,8 +16,8 @@ cloud.google.com/go/longrunning v1.5.0 h1:aGonu6LHQl38DyozLs2jxGieI4Ixk+7GTnmHVc
 cloud.google.com/go/longrunning v1.5.0/go.mod h1:vjM1U85ZQuTv8lJoUBSA44HLWvM6BBFeaSJYGFF1Q00=
 cloud.google.com/go/monitoring v1.32.1 h1:DzNqsbCCyMJ+Oq+McBHaR5qqqxCvdNCIgfJug/YM0Ys=
 cloud.google.com/go/monitoring v1.32.1/go.mod h1:JkJhVXtTcGh6KQuvProJ9olvu2p37Ay29CinCDFKHHg=
-cloud.google.com/go/storage v1.70.0 h1:LQNHn0rRF94jVFfF3e416IzdQqIufa5GfF6HilQxb80=
-cloud.google.com/go/storage v1.70.0/go.mod h1:W84cNa070TZIegvTW67CBY+f5rxux8EJMb7YyiHdrls=
+cloud.google.com/go/storage v1.71.0 h1:vv4wBFygNlKtSmDMcCIz/ATVv9iIJMkZGjk17uzXMv4=
+cloud.google.com/go/storage v1.71.0/go.mod h1:axUlps/Uy9usUkUNd14db8SbV7s+dNV+BU/xkvPmzrU=
 cloud.google.com/go/trace v1.16.0 h1:GmQovzFc5F0CNfl0VLgL64aoTtu7xsM0YajW2GlG9+E=
 cloud.google.com/go/trace v1.16.0/go.mod h1:r+bdAn16dKLSV1G2D5v3e58IlQlizfxWrUfjx7kM7X0=
 github.com/EdlinOrg/prominentcolor v1.0.0 h1:sQNY8Dtsv3PK3J1LbmrDmtlZm9Y9U8Loi1iZIl4YN3Y=
@@ -180,8 +180,8 @@ go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.47.0 h1:aXZXs
 go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.47.0/go.mod h1:ziu1gUIJhAaxM3EV1e3Ralk5AAyL1UOYz3lJJ4VSI38=
 go.opentelemetry.io/otel/exporters/prometheus v0.69.0 h1:LQVBTGnHvzrfGJpDoCSVTY7eaLZArvaTSq5l84Skxew=
 go.opentelemetry.io/otel/exporters/prometheus v0.69.0/go.mod h1:moif0nlgj/M16NRT8lDZVt8MC52+EOAJfR8EKRJ8LyU=
-go.opentelemetry.io/otel/exporters/stdout/stdoutmetric v1.45.0 h1:dm9iyzn6tioYZtwqaiBSU0TSI8Yu/8dTIbfG0+B49DY=
-go.opentelemetry.io/otel/exporters/stdout/stdoutmetric v1.45.0/go.mod h1:xAvxYjYK28qvt+yu4BYZ/zMmAjwMXINXD6JiMyeB8iI=
+go.opentelemetry.io/otel/exporters/stdout/stdoutmetric v1.47.0 h1:ww5DYBpMKcqLdxjWrhGUIh6O+ZfvZUaMk4niVyNQPEQ=
+go.opentelemetry.io/otel/exporters/stdout/stdoutmetric v1.47.0/go.mod h1:Av5t+Ezx5S/Ks2dsEfWhny+GK+wrZ1K7NZ6aHSWnX3U=
 go.opentelemetry.io/otel/log v1.47.0 h1:cOTS1CcLbSQeZKanGJ+0JpF/+t4PELi3O3bbl2lqCcI=
 go.opentelemetry.io/otel/log v1.47.0/go.mod h1:9byitSQ5pLC6PpqwGXjqdMKya6ZTswHRZh2vvXT33nw=
 go.opentelemetry.io/otel/metric v1.47.0 h1:4PptaldXx3Eat1XjMZ68pPJEs5wrhlemctZE9a3UdWY=
@@ -254,8 +254,8 @@ golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543/go.mod h1:I/5z698sn9Ka8T
 golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1/go.mod h1:I/5z698sn9Ka8TeJc9MKroUUfqBBauWjQqLJ2OPfmY0=
 gonum.org/v1/gonum v0.17.0 h1:VbpOemQlsSMrYmn7T2OUvQ4dqxQXU+ouZFQsZOx50z4=
 gonum.org/v1/gonum v0.17.0/go.mod h1:El3tOrEuMpv2UdMrbNlKEh9vd86bmQ6vqIcDwxEOc1E=
-google.golang.org/api v0.315.0 h1:77nwD4sln0GQQqQKb4CY+DJhRwA0AeQ4w0gkbLwRPms=
-google.golang.org/api v0.315.0/go.mod h1:kn5kd1IMbs2x4hq99GcaTOumC0fnMYMwLNAfFxzpISU=
+google.golang.org/api v0.316.0 h1:nwaBinxtopJcOPwNYkvuRo7JA2nKppWzzk1sSORUWp4=
+google.golang.org/api v0.316.0/go.mod h1:kn5kd1IMbs2x4hq99GcaTOumC0fnMYMwLNAfFxzpISU=
 google.golang.org/genai v1.77.0 h1:/tWupb5vo4FRuktsgas4+Bfk5HhTGsfLoz2DS450aQA=
 google.golang.org/genai v1.77.0/go.mod h1:2j40fGpqPPIZNjaDKmjGGjYwCJi6Nm2ofmyP65GnqtY=
 google.golang.org/genproto v0.0.0-20261110000943-09e21b237f2c h1:4nfdocNgwiZ3kcGvgxucXk/gTqG6kCkbel7m0iP5oOc=

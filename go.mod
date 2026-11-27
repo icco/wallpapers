@@ -3,7 +3,7 @@ module go.icco.me/wallpapers
 go 1.27.3
 
 require (
-	cloud.google.com/go/storage v1.70.0
+	cloud.google.com/go/storage v1.71.0
 	github.com/EdlinOrg/prominentcolor v1.0.0
 	github.com/go-chi/chi/v5 v5.5.0
 	github.com/go-chi/cors v1.2.2
@@ -19,7 +19,7 @@ require (
 	go.opentelemetry.io/otel/sdk/metric v1.47.0
 	go.uber.org/zap v1.28.0
 	golang.org/x/image v0.48.0
-	google.golang.org/api v0.315.0
+	google.golang.org/api v0.316.0
 	gopkg.in/gographics/imagick.v3 v3.7.3
 	gorm.io/driver/sqlite v1.6.0
 	gorm.io/gorm v1.31.2
